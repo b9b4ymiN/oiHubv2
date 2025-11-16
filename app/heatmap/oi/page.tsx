@@ -43,24 +43,24 @@ export default function OIHeatmapPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6 lg:p-8">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-2 sm:p-4 md:p-6 lg:p-8">
+      <div className="max-w-[1800px] mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
-              <ArrowLeft className="h-6 w-6 text-gray-700 dark:text-gray-300" />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Link href="/dashboard" className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors flex-shrink-0">
+              <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700 dark:text-gray-300" />
             </Link>
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100 truncate">
                 OI Delta Heatmap
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
                 Open Interest Delta intensity across price levels and time
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 flex-wrap sm:gap-3 md:gap-4">
             <SymbolSelector symbol={symbol} onSymbolChange={setSymbol} />
             <IntervalSelector interval={interval} onIntervalChange={setInterval} />
             <PriceStepSelector priceStep={priceStep} onPriceStepChange={setPriceStep} />
@@ -71,34 +71,34 @@ export default function OIHeatmapPage() {
         {/* Legend */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Legend</CardTitle>
+            <CardTitle className="text-base sm:text-lg">Legend</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <p className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-green-600" />
                   OI Increase (Accumulation)
                 </p>
-                <div className="flex gap-2">
+                <div className="flex gap-1 sm:gap-2">
                   {[0.2, 0.4, 0.6, 0.8, 1.0].map((intensity) => (
                     <div key={intensity} className="flex flex-col items-center gap-1">
-                      <div className={`w-12 h-12 rounded ${getColorForIntensity(intensity * 100, 1)}`}></div>
-                      <span className="text-xs text-gray-600 dark:text-gray-400">{(intensity * 100).toFixed(0)}</span>
+                      <div className={`w-8 h-8 sm:w-12 sm:h-12 rounded ${getColorForIntensity(intensity * 100, 1)}`}></div>
+                      <span className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">{(intensity * 100).toFixed(0)}</span>
                     </div>
                   ))}
                 </div>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <p className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                   <TrendingDown className="h-4 w-4 text-red-600" />
                   OI Decrease (Distribution)
                 </p>
-                <div className="flex gap-2">
+                <div className="flex gap-1 sm:gap-2">
                   {[0.2, 0.4, 0.6, 0.8, 1.0].map((intensity) => (
                     <div key={intensity} className="flex flex-col items-center gap-1">
-                      <div className={`w-12 h-12 rounded ${getColorForIntensity(intensity * 100, -1)}`}></div>
-                      <span className="text-xs text-gray-600 dark:text-gray-400">{(intensity * 100).toFixed(0)}</span>
+                      <div className={`w-8 h-8 sm:w-12 sm:h-12 rounded ${getColorForIntensity(intensity * 100, -1)}`}></div>
+                      <span className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">{(intensity * 100).toFixed(0)}</span>
                     </div>
                   ))}
                 </div>
@@ -251,7 +251,7 @@ function SymbolSelector({ symbol, onSymbolChange }: { symbol: string; onSymbolCh
     <select
       value={symbol}
       onChange={(e) => onSymbolChange(e.target.value)}
-      className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
+      className="px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs sm:text-sm font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
     >
       {symbols.map(s => (
         <option key={s} value={s} className="bg-white dark:bg-gray-800">{s}</option>
@@ -267,7 +267,7 @@ function IntervalSelector({ interval, onIntervalChange }: { interval: string; on
     <select
       value={interval}
       onChange={(e) => onIntervalChange(e.target.value)}
-      className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
+      className="px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs sm:text-sm font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
     >
       {intervals.map(i => (
         <option key={i} value={i} className="bg-white dark:bg-gray-800">{i.toUpperCase()}</option>
@@ -283,7 +283,7 @@ function PriceStepSelector({ priceStep, onPriceStepChange }: { priceStep: number
     <select
       value={priceStep}
       onChange={(e) => onPriceStepChange(Number(e.target.value))}
-      className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
+      className="px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs sm:text-sm font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
     >
       {steps.map(s => (
         <option key={s} value={s} className="bg-white dark:bg-gray-800">${s} Step</option>

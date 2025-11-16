@@ -20,19 +20,19 @@ export default function OrderbookDepthPage() {
   const { data, isLoading, isError, error, refetch } = useOrderbookDepth(symbol, depthLevels)
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6 lg:p-8">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-2 sm:p-4 md:p-6 lg:p-8">
+      <div className="max-w-[1800px] mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
               Orderbook Depth Analysis
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
               Real-time liquidity analysis and orderbook visualization
             </p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 flex-wrap sm:gap-3 md:gap-4">
             <SymbolSelector symbol={symbol} onSymbolChange={setSymbol} />
             <DepthLevelSelector depthLevels={depthLevels} onDepthChange={setDepthLevels} />
             <Button
@@ -40,8 +40,9 @@ export default function OrderbookDepthPage() {
               size="icon"
               onClick={() => refetch()}
               disabled={isLoading}
+              className="flex-shrink-0"
             >
-              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 ${isLoading ? 'animate-spin' : ''}`} />
             </Button>
             <ThemeToggle />
           </div>
@@ -78,29 +79,29 @@ export default function OrderbookDepthPage() {
           <>
             {/* Quick Stats Banner */}
             <Card>
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <CardContent className="pt-4 sm:pt-6">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                   <div>
-                    <div className="text-xs text-muted-foreground mb-1">Best Bid</div>
-                    <div className="font-mono text-lg font-semibold text-green-500">
+                    <div className="text-[10px] sm:text-xs text-muted-foreground mb-1">Best Bid</div>
+                    <div className="font-mono text-sm sm:text-base md:text-lg font-semibold text-green-500">
                       ${data.bestBid.toFixed(2)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground mb-1">Best Ask</div>
-                    <div className="font-mono text-lg font-semibold text-red-500">
+                    <div className="text-[10px] sm:text-xs text-muted-foreground mb-1">Best Ask</div>
+                    <div className="font-mono text-sm sm:text-base md:text-lg font-semibold text-red-500">
                       ${data.bestAsk.toFixed(2)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground mb-1">Mid Price</div>
-                    <div className="font-mono text-lg font-semibold text-purple-500">
+                    <div className="text-[10px] sm:text-xs text-muted-foreground mb-1">Mid Price</div>
+                    <div className="font-mono text-sm sm:text-base md:text-lg font-semibold text-purple-500">
                       ${data.midPrice.toFixed(2)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground mb-1">Auto-Refresh</div>
-                    <Badge variant="outline" className="mt-1">
+                    <div className="text-[10px] sm:text-xs text-muted-foreground mb-1">Auto-Refresh</div>
+                    <Badge variant="outline" className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs">
                       Every 5s
                     </Badge>
                   </div>
@@ -109,7 +110,7 @@ export default function OrderbookDepthPage() {
             </Card>
 
             {/* Main Grid Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
               {/* Left Column: Charts */}
               <div className="lg:col-span-2 space-y-6">
                 {/* Orderbook Ladder */}
@@ -234,7 +235,7 @@ function SymbolSelector({ symbol, onSymbolChange }: { symbol: string; onSymbolCh
     <select
       value={symbol}
       onChange={(e) => onSymbolChange(e.target.value)}
-      className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
+      className="px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs sm:text-sm font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
     >
       {symbols.map(s => (
         <option key={s} value={s} className="bg-white dark:bg-gray-800">{s}</option>
@@ -250,7 +251,7 @@ function DepthLevelSelector({ depthLevels, onDepthChange }: { depthLevels: numbe
     <select
       value={depthLevels}
       onChange={(e) => onDepthChange(parseInt(e.target.value))}
-      className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
+      className="px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs sm:text-sm font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
     >
       {levels.map(l => (
         <option key={l} value={l} className="bg-white dark:bg-gray-800">{l} Levels</option>

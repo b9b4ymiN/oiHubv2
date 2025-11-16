@@ -33,19 +33,19 @@ export default function DashboardPage() {
   const isLoading = klinesLoading || oiLoading || fundingLoading || lsLoading
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6 lg:p-8">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-2 sm:p-4 md:p-6 lg:p-8">
+      <div className="max-w-[1800px] mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
               OI Trader Hub
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
               Professional Open Interest Analysis Dashboard
             </p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 flex-wrap sm:gap-3 md:gap-4">
             <SymbolSelector symbol={symbol} onSymbolChange={setSymbol} />
             <IntervalSelector interval={interval} onIntervalChange={setInterval} />
             <ThemeToggle />
@@ -219,7 +219,7 @@ function SymbolSelector({ symbol, onSymbolChange }: { symbol: string; onSymbolCh
     <select
       value={symbol}
       onChange={(e) => onSymbolChange(e.target.value)}
-      className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
+      className="px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs sm:text-sm font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
     >
       {symbols.map(s => (
         <option key={s} value={s} className="bg-white dark:bg-gray-800">{s}</option>
@@ -235,7 +235,7 @@ function IntervalSelector({ interval, onIntervalChange }: { interval: string; on
     <select
       value={interval}
       onChange={(e) => onIntervalChange(e.target.value)}
-      className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
+      className="px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs sm:text-sm font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
     >
       {intervals.map(i => (
         <option key={i} value={i} className="bg-white dark:bg-gray-800">{i.toUpperCase()}</option>
