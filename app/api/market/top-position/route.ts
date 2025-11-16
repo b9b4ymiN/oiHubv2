@@ -1,37 +1,15 @@
-// app/api/market/oi/route.ts
+// app/api/market/top-position/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { binanceClient } from '@/lib/api/binance-client'
-import { OIPoint } from '@/types/market'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const symbol = searchParams.get('symbol') || 'BTCUSDT'
   const period = searchParams.get('period') || '5m'
-  const limit = parseInt(searchParams.get('limit') || '500')
+  const limit = parseInt(searchParams.get('limit') || '100')
 
   try {
-    const rawData = await binanceClient.getOpenInterestHistory(symbol, period, limit)
-
-    // Calculate OI Change % and Delta for each point
-    const data: OIPoint[] = rawData.map((point, index) => {
-      if (index === 0) {
-        return {
-          ...point,
-          change: 0,
-          delta: 0
-        }
-      }
-
-      const prevPoint = rawData[index - 1]
-      const delta = point.value - prevPoint.value
-      const change = (delta / prevPoint.value) * 100
-
-      return {
-        ...point,
-        change,
-        delta
-      }
-    })
+    const data = await binanceClient.getTopTraderPosition(symbol, period, limit)
 
     return NextResponse.json({
       success: true,
@@ -39,7 +17,7 @@ export async function GET(request: NextRequest) {
       timestamp: Date.now()
     })
   } catch (error: any) {
-    console.error('API route error [/api/market/oi]:', {
+    console.error('API route error [/api/market/top-position]:', {
       error: error.message,
       stack: error.stack,
       params: { symbol, period, limit }

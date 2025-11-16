@@ -1,6 +1,6 @@
 // lib/api/binance-client.ts
 import crypto from 'crypto'
-import { OHLCV, OIPoint, FundingRate, LongShortRatio, TakerBuySellVolume } from '@/types/market'
+import { OHLCV, OIPoint, OISnapshot, FundingRate, LongShortRatio, TakerBuySellVolume, TopTraderPosition, Liquidation } from '@/types/market'
 
 export class BinanceClient {
   private apiKey: string | undefined
@@ -188,6 +188,82 @@ export class BinanceClient {
       buyVolume: parseFloat(item.buyVol),
       sellVolume: parseFloat(item.sellVol),
       timestamp: item.timestamp
+    }))
+  }
+
+  // Phase 1B: OI Snapshot (real-time)
+  async getOISnapshot(symbol: string): Promise<OISnapshot> {
+    const current = await this.getOpenInterest(symbol)
+    const history = await this.getOpenInterestHistory(symbol, '5m', 288) // 24h of 5m data
+
+    const change24h = current.value - history[history.length - 1].value
+    const changePct24h = (change24h / history[history.length - 1].value) * 100
+
+    return {
+      symbol,
+      openInterest: current.value,
+      timestamp: current.timestamp,
+      change24h,
+      changePct24h
+    }
+  }
+
+  // Phase 2D: Top Trader Position Ratio
+  async getTopTraderPosition(
+    symbol: string,
+    period: string = '5m',
+    limit: number = 100
+  ): Promise<TopTraderPosition[]> {
+    const data = await this.fetchPublic('/futures/data/topLongShortPositionRatio', {
+      symbol,
+      period,
+      limit: limit.toString()
+    })
+
+    return data.map((item: any) => {
+      const longPos = parseFloat(item.longPosition)
+      const shortPos = parseFloat(item.shortPosition)
+      const ratio = parseFloat(item.longShortRatio)
+
+      let bias: 'LONG' | 'SHORT' | 'NEUTRAL' = 'NEUTRAL'
+      if (ratio > 1.2) bias = 'LONG'
+      else if (ratio < 0.8) bias = 'SHORT'
+
+      return {
+        symbol,
+        longPosition: longPos,
+        shortPosition: shortPos,
+        longShortRatio: ratio,
+        timestamp: item.timestamp,
+        bias
+      }
+    })
+  }
+
+  // Phase 3F: Liquidation Orders (Historical)
+  async getLiquidations(
+    symbol: string,
+    startTime?: number,
+    endTime?: number,
+    limit: number = 100
+  ): Promise<Liquidation[]> {
+    const params: Record<string, any> = {
+      symbol,
+      limit: limit.toString()
+    }
+
+    if (startTime) params.startTime = startTime.toString()
+    if (endTime) params.endTime = endTime.toString()
+
+    const data = await this.fetchPublic('/fapi/v1/allForceOrders', params)
+
+    return data.map((item: any, index: number) => ({
+      id: `${item.orderId || index}`,
+      symbol: item.symbol,
+      side: item.side === 'BUY' ? 'SHORT' : 'LONG', // BUY = short liquidation
+      price: parseFloat(item.price),
+      quantity: parseFloat(item.origQty),
+      timestamp: item.time
     }))
   }
 }
