@@ -154,43 +154,98 @@ npm run test:e2e
 
 ## Deployment
 
-### Important: Geo-Restriction Fix
+### ⚠️ Important: Binance Geo-Restriction (Error 451)
 
-⚠️ **If you encounter Error 451 ("Service unavailable from restricted location")**
+Binance blocks access from certain regions including **US and Vercel servers**. Choose a deployment option below:
 
-Binance blocks access from certain regions (including Vercel servers). Solution:
+---
 
-**Quick Fix (5 minutes):**
-1. Deploy the included `cloudflare-worker.js` to Cloudflare Workers (free)
-2. Set environment variable in Vercel:
+### 🔥 Recommended: Oracle Cloud Free Tier (Best Option)
+
+**Why Oracle Cloud?**
+- ✅ **100% Free forever** (4 CPU cores, 24GB RAM, 200GB storage)
+- ✅ **Datacenters in allowed regions**: Tokyo, Singapore, Seoul, Sydney
+- ✅ **No geo-restrictions** - works perfectly with Binance
+- ✅ **Fixed public IP** included
+- ✅ **Runs 24/7** with Docker
+
+**Quick Deploy:**
+```bash
+# SSH into Oracle Cloud instance (in allowed region)
+git clone https://github.com/your-repo/oiHub.git
+cd oiHub
+docker-compose up -d
+```
+
+**📖 Full Guide**: [ORACLE_CLOUD_DEPLOYMENT.md](ORACLE_CLOUD_DEPLOYMENT.md)
+
+**Setup Time**: 15-20 minutes | **Cost**: $0 | **Difficulty**: Medium
+
+---
+
+### 🐳 Option 2: Docker (Local or VPS)
+
+**Test locally first** (might work if your IP is in allowed region):
+
+```bash
+# Clone the repo
+git clone https://github.com/your-repo/oiHub.git
+cd oiHub
+
+# Run with Docker Compose
+docker-compose up -d
+
+# Access at http://localhost:3000/dashboard
+```
+
+**If you get 451 error locally**, deploy to:
+- **DigitalOcean** (Singapore/Tokyo region) - $5/month
+- **Linode** (Tokyo/Singapore) - $5/month
+- **AWS EC2** (ap-southeast-1 Singapore) - Free tier
+- **Oracle Cloud** (Free tier, see above)
+
+**📖 Full Guide**: [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
+
+---
+
+### ☁️ Option 3: Vercel + Cloudflare Worker Proxy
+
+If you prefer Vercel, use Cloudflare Worker as proxy:
+
+1. Deploy `cloudflare-worker.js` to Cloudflare Workers (free)
+2. Add environment variable in Vercel:
    ```
    NEXT_PUBLIC_BINANCE_API_URL=https://your-worker.workers.dev
    ```
-3. Redeploy
+3. Deploy to Vercel:
+   ```bash
+   npm i -g vercel
+   vercel --prod
+   ```
 
-See [CLOUDFLARE_WORKER_SETUP.md](CLOUDFLARE_WORKER_SETUP.md) for detailed instructions.
+**📖 Full Guide**: [CLOUDFLARE_WORKER_SETUP.md](CLOUDFLARE_WORKER_SETUP.md)
 
-Alternative solutions in [DEPLOYMENT_FIXES.md](DEPLOYMENT_FIXES.md).
+**Setup Time**: 5-10 minutes | **Cost**: $0 | **Difficulty**: Easy
 
-### Vercel (Recommended)
+---
 
-```bash
-npm i -g vercel
-vercel --prod
-```
+### 📋 Deployment Comparison
 
-**Environment Variables Required:**
-```bash
-# Add in Vercel Dashboard → Settings → Environment Variables
-NEXT_PUBLIC_BINANCE_API_URL=https://your-cloudflare-worker.workers.dev
-```
+| Option | Cost | Setup Time | Geo-Restriction | Best For |
+|--------|------|------------|-----------------|----------|
+| **Oracle Cloud** | Free | 15-20 min | ✅ No issues | Production, 24/7 uptime |
+| **Docker (Local)** | Free | 2 min | ⚠️ Depends on IP | Development, testing |
+| **Docker (VPS)** | $5/mo | 10 min | ✅ No issues | Production, full control |
+| **Vercel + Proxy** | Free | 10 min | ✅ Via proxy | Quick deployment |
 
-### Docker
+---
 
-```bash
-docker build -t oi-trader-hub .
-docker run -p 3000:3000 oi-trader-hub
-```
+### 🔧 All Deployment Guides
+
+- [ORACLE_CLOUD_DEPLOYMENT.md](ORACLE_CLOUD_DEPLOYMENT.md) - Free tier hosting (recommended)
+- [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md) - Local and VPS deployment
+- [CLOUDFLARE_WORKER_SETUP.md](CLOUDFLARE_WORKER_SETUP.md) - Proxy solution
+- [DEPLOYMENT_FIXES.md](DEPLOYMENT_FIXES.md) - All alternative solutions
 
 ## API Endpoints
 
