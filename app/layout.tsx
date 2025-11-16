@@ -16,8 +16,21 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const theme = localStorage.getItem('theme') ||
+                  (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.classList.toggle('dark', theme === 'dark');
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
+      <body className={`${inter.className} bg-gray-50 dark:bg-gray-900 transition-colors duration-200`}>
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>

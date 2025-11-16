@@ -13,6 +13,10 @@ import { MarketRegimeCard } from '@/components/widgets/MarketRegimeCard'
 import { OIDivergenceCard } from '@/components/widgets/OIDivergenceCard'
 import { OIMetricsCard } from '@/components/widgets/OIMetricsCard'
 import { OpportunityFinderCard } from '@/components/widgets/OpportunityFinderCard'
+import { MarketRegimeIndicator } from '@/components/widgets/MarketRegimeIndicator'
+import { TakerFlowChart } from '@/components/widgets/TakerFlowChart'
+import { SummaryCards } from '@/components/widgets/SummaryCards'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 export default function DashboardPage() {
   const [symbol, setSymbol] = useState('BTCUSDT')
@@ -26,32 +30,32 @@ export default function DashboardPage() {
   const isLoading = klinesLoading || oiLoading || fundingLoading || lsLoading
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6 lg:p-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">OI Trader Hub</h1>
-            <p className="text-muted-foreground mt-1">
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+              OI Trader Hub
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
               Professional Open Interest Analysis Dashboard
             </p>
           </div>
           <div className="flex items-center gap-4">
             <SymbolSelector symbol={symbol} onSymbolChange={setSymbol} />
             <IntervalSelector interval={interval} onIntervalChange={setInterval} />
+            <ThemeToggle />
           </div>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <OIMetricsCard symbol={symbol} oiData={oiData} klines={klines} />
-          <FundingRateCard fundingData={fundingData} />
-          <LongShortRatioCard lsData={lsRatio} />
-          <MarketRegimeCard
-            fundingData={fundingData}
-            lsData={lsRatio}
-            oiData={oiData}
-          />
+        {/* Summary Cards - New Professional Design */}
+        <SummaryCards symbol={symbol} />
+
+        {/* Market Regime & Taker Flow - Side by Side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <MarketRegimeIndicator symbol={symbol} interval={interval} />
+          <TakerFlowChart symbol={symbol} period={interval} limit={50} />
         </div>
 
         {/* Main Chart */}
@@ -175,10 +179,10 @@ function SymbolSelector({ symbol, onSymbolChange }: { symbol: string; onSymbolCh
     <select
       value={symbol}
       onChange={(e) => onSymbolChange(e.target.value)}
-      className="px-4 py-2 rounded-md border bg-background"
+      className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
     >
       {symbols.map(s => (
-        <option key={s} value={s}>{s}</option>
+        <option key={s} value={s} className="bg-white dark:bg-gray-800">{s}</option>
       ))}
     </select>
   )
@@ -191,10 +195,10 @@ function IntervalSelector({ interval, onIntervalChange }: { interval: string; on
     <select
       value={interval}
       onChange={(e) => onIntervalChange(e.target.value)}
-      className="px-4 py-2 rounded-md border bg-background"
+      className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
     >
       {intervals.map(i => (
-        <option key={i} value={i}>{i}</option>
+        <option key={i} value={i} className="bg-white dark:bg-gray-800">{i.toUpperCase()}</option>
       ))}
     </select>
   )
