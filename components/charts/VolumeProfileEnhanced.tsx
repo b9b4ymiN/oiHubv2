@@ -98,15 +98,15 @@ export function VolumeProfileEnhanced({ klines, currentPrice, height = 500 }: Vo
           margin={{ top: 20, right: 80, left: 20, bottom: 20 }}
         >
           <defs>
-            {/* Gradient for 1σ area */}
+            {/* Gradient for bell curve area - shaded like example.jpg */}
             <linearGradient id="sigma1Area" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
-              <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1}/>
+              <stop offset="0%" stopColor="#93C5FD" stopOpacity={0.4}/>
+              <stop offset="100%" stopColor="#3B82F6" stopOpacity={0.15}/>
             </linearGradient>
-            {/* Gradient for bell curve */}
+            {/* Gradient for bell curve line */}
             <linearGradient id="bellGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.8}/>
-              <stop offset="95%" stopColor="#EF4444" stopOpacity={0.6}/>
+              <stop offset="0%" stopColor="#F97316" stopOpacity={1}/>
+              <stop offset="100%" stopColor="#EF4444" stopOpacity={0.9}/>
             </linearGradient>
           </defs>
 
@@ -122,6 +122,13 @@ export function VolumeProfileEnhanced({ klines, currentPrice, height = 500 }: Vo
             height={60}
           />
 
+          {/* Default YAxis for ReferenceLines */}
+          <YAxis
+            yAxisId={0}
+            hide
+            domain={[0, 1]}
+          />
+
           <YAxis
             yAxisId="volume"
             orientation="left"
@@ -129,6 +136,7 @@ export function VolumeProfileEnhanced({ klines, currentPrice, height = 500 }: Vo
             stroke="#3B82F6"
             fontSize={12}
             label={{ value: 'Volume', angle: -90, position: 'insideLeft', style: { fill: '#3B82F6' } }}
+            allowDataOverflow={false}
           />
 
           <YAxis
@@ -138,6 +146,7 @@ export function VolumeProfileEnhanced({ klines, currentPrice, height = 500 }: Vo
             stroke="#F59E0B"
             fontSize={12}
             label={{ value: 'Distribution', angle: 90, position: 'insideRight', style: { fill: '#F59E0B' } }}
+            allowDataOverflow={false}
           />
 
           <Tooltip content={<EnhancedTooltip currentPrice={currentPriceData} profile={profile} />} />
@@ -185,21 +194,16 @@ export function VolumeProfileEnhanced({ klines, currentPrice, height = 500 }: Vo
             name="Expected Distribution"
           />
 
-          {/* Current Price Line */}
-          <ReferenceLine
-            x={currentPriceData}
-            stroke="#EF4444"
-            strokeWidth={3}
-            strokeDasharray="5 5"
-            yAxisId="volume"
-            label={{
-              value: `Current: $${formatPrice(currentPriceData, 0)}`,
-              fill: '#EF4444',
-              fontSize: 12,
-              fontWeight: 'bold',
-              position: 'top'
-            }}
-          />
+          {/* Current Price Line - Vertical */}
+          {currentPriceData && (
+            <ReferenceLine
+              x={currentPriceData}
+              stroke="#EF4444"
+              strokeWidth={2}
+              strokeDasharray="8 4"
+              ifOverflow="extendDomain"
+            />
+          )}
 
           {/* POC Line */}
           <ReferenceLine
@@ -207,13 +211,7 @@ export function VolumeProfileEnhanced({ klines, currentPrice, height = 500 }: Vo
             stroke="#A855F7"
             strokeWidth={2}
             strokeDasharray="3 3"
-            yAxisId="volume"
-            label={{
-              value: `POC: $${formatPrice(profile.poc, 0)}`,
-              fill: '#A855F7',
-              fontSize: 11,
-              position: 'top'
-            }}
+            ifOverflow="extendDomain"
           />
 
           {/* Mean Line */}
@@ -221,13 +219,7 @@ export function VolumeProfileEnhanced({ klines, currentPrice, height = 500 }: Vo
             x={profile.mean}
             stroke="#10B981"
             strokeWidth={2}
-            yAxisId="volume"
-            label={{
-              value: 'μ (Mean)',
-              fill: '#10B981',
-              fontSize: 10,
-              position: 'insideTopRight'
-            }}
+            ifOverflow="extendDomain"
           />
 
           {/* ±1σ Lines */}
@@ -237,8 +229,7 @@ export function VolumeProfileEnhanced({ klines, currentPrice, height = 500 }: Vo
             strokeWidth={1}
             strokeDasharray="2 2"
             opacity={0.6}
-            yAxisId="volume"
-            label={{ value: '+1σ', fill: '#3B82F6', fontSize: 9 }}
+            ifOverflow="extendDomain"
           />
           <ReferenceLine
             x={profile.sigma1Low}
@@ -246,8 +237,7 @@ export function VolumeProfileEnhanced({ klines, currentPrice, height = 500 }: Vo
             strokeWidth={1}
             strokeDasharray="2 2"
             opacity={0.6}
-            yAxisId="volume"
-            label={{ value: '-1σ', fill: '#3B82F6', fontSize: 9 }}
+            ifOverflow="extendDomain"
           />
 
           {/* ±2σ Lines */}
@@ -257,8 +247,7 @@ export function VolumeProfileEnhanced({ klines, currentPrice, height = 500 }: Vo
             strokeWidth={1}
             strokeDasharray="2 2"
             opacity={0.5}
-            yAxisId="volume"
-            label={{ value: '+2σ', fill: '#F59E0B', fontSize: 9 }}
+            ifOverflow="extendDomain"
           />
           <ReferenceLine
             x={profile.sigma2Low}
@@ -266,8 +255,7 @@ export function VolumeProfileEnhanced({ klines, currentPrice, height = 500 }: Vo
             strokeWidth={1}
             strokeDasharray="2 2"
             opacity={0.5}
-            yAxisId="volume"
-            label={{ value: '-2σ', fill: '#F59E0B', fontSize: 9 }}
+            ifOverflow="extendDomain"
           />
 
           {/* ±3σ Lines */}
@@ -277,8 +265,7 @@ export function VolumeProfileEnhanced({ klines, currentPrice, height = 500 }: Vo
             strokeWidth={1}
             strokeDasharray="2 2"
             opacity={0.4}
-            yAxisId="volume"
-            label={{ value: '+3σ', fill: '#DC2626', fontSize: 9 }}
+            ifOverflow="extendDomain"
           />
           <ReferenceLine
             x={profile.sigma3Low}
@@ -286,8 +273,7 @@ export function VolumeProfileEnhanced({ klines, currentPrice, height = 500 }: Vo
             strokeWidth={1}
             strokeDasharray="2 2"
             opacity={0.4}
-            yAxisId="volume"
-            label={{ value: '-3σ', fill: '#DC2626', fontSize: 9 }}
+            ifOverflow="extendDomain"
           />
         </ComposedChart>
       </ResponsiveContainer>
@@ -337,6 +323,117 @@ export function VolumeProfileEnhanced({ klines, currentPrice, height = 500 }: Vo
           <div>
             <span className="text-muted-foreground">99.7% of price action within:</span>
             <div className="font-mono font-semibold">±3σ range</div>
+          </div>
+        </div>
+      </div>
+
+      {/* What This Chart Tells You - Comprehensive Guide */}
+      <div className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/30">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="text-sm font-bold text-purple-500">💡 What This Chart Tells You</div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+          {/* Column 1 */}
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <span className="text-green-500 font-bold">✓</span>
+              <div>
+                <div className="font-semibold text-foreground">1. Fair Value Pricing</div>
+                <div className="text-muted-foreground">μ (Mean) & POC show current market's fair value consensus</div>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <span className="text-green-500 font-bold">✓</span>
+              <div>
+                <div className="font-semibold text-foreground">2. Market State</div>
+                <div className="text-muted-foreground">
+                  • Within ±1σ = Normal range
+                  <br />• At ±2σ = Overextended (mean reversion likely)
+                  <br />• Beyond ±3σ = Extreme undervalued/overvalued
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <span className="text-green-500 font-bold">✓</span>
+              <div>
+                <div className="font-semibold text-foreground">3. Mean Reversion Targets</div>
+                <div className="text-muted-foreground">Price tends to return to μ or POC from extremes</div>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <span className="text-green-500 font-bold">✓</span>
+              <div>
+                <div className="font-semibold text-foreground">4. Volume Clusters = Support/Resistance</div>
+                <div className="text-muted-foreground">Thick volume zones show strong buy/sell pressure areas</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Column 2 */}
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <span className="text-green-500 font-bold">✓</span>
+              <div>
+                <div className="font-semibold text-foreground">5. Low Volume Nodes (LVN)</div>
+                <div className="text-muted-foreground">Thin volume = fast price swings, easy breakout zones</div>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <span className="text-green-500 font-bold">✓</span>
+              <div>
+                <div className="font-semibold text-foreground">6. Statistical Stop Loss/Take Profit</div>
+                <div className="text-muted-foreground">
+                  • Stop: Beyond ±3σ
+                  <br />• TP: At ±1σ, POC, or opposite ±2σ
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <span className="text-green-500 font-bold">✓</span>
+              <div>
+                <div className="font-semibold text-foreground">7. Entry Points</div>
+                <div className="text-muted-foreground">
+                  • Best: Near μ or LVN when trend confirms
+                  <br />• Aggressive: At ±2σ/±3σ for reversals
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <span className="text-green-500 font-bold">✓</span>
+              <div>
+                <div className="font-semibold text-foreground">8. Exit Points</div>
+                <div className="text-muted-foreground">
+                  • Take profit near ±1σ/±2σ edges
+                  <br />• Or when price reaches POC from extremes
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Action Guide */}
+        <div className="mt-4 pt-3 border-t border-purple-500/20">
+          <div className="font-semibold text-xs mb-2 text-purple-400">⚡ Quick Action Guide:</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
+            <div className="p-2 rounded bg-green-500/10 border border-green-500/30">
+              <div className="font-semibold text-green-400">Price at -2σ or lower:</div>
+              <div className="text-muted-foreground">→ LONG toward POC/μ (75-85% win rate)</div>
+            </div>
+            <div className="p-2 rounded bg-red-500/10 border border-red-500/30">
+              <div className="font-semibold text-red-400">Price at +2σ or higher:</div>
+              <div className="text-muted-foreground">→ SHORT toward POC/μ (75-85% win rate)</div>
+            </div>
+            <div className="p-2 rounded bg-blue-500/10 border border-blue-500/30">
+              <div className="font-semibold text-blue-400">Price at POC/μ:</div>
+              <div className="text-muted-foreground">→ Wait for breakout confirmation</div>
+            </div>
           </div>
         </div>
       </div>

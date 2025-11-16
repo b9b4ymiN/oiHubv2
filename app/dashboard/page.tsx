@@ -14,9 +14,11 @@ import { OIDivergenceCard } from '@/components/widgets/OIDivergenceCard'
 import { OIMetricsCard } from '@/components/widgets/OIMetricsCard'
 import { OpportunityFinderCard } from '@/components/widgets/OpportunityFinderCard'
 import { MarketRegimeIndicator } from '@/components/widgets/MarketRegimeIndicator'
-import { TakerFlowChart } from '@/components/widgets/TakerFlowChart'
 import { SummaryCards } from '@/components/widgets/SummaryCards'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { OIDeltaOverlay } from '@/components/widgets/OIDeltaOverlay'
+import { TakerFlowOverlay } from '@/components/widgets/TakerFlowOverlay'
+import { useTakerFlow } from '@/lib/hooks/useMarketData'
 
 export default function DashboardPage() {
   const [symbol, setSymbol] = useState('BTCUSDT')
@@ -26,6 +28,7 @@ export default function DashboardPage() {
   const { data: oiData, isLoading: oiLoading } = useOpenInterest(symbol, interval, 500)
   const { data: fundingData, isLoading: fundingLoading } = useFundingRate(symbol, 100)
   const { data: lsRatio, isLoading: lsLoading } = useLongShortRatio(symbol, interval, 100)
+  const { data: takerFlowData } = useTakerFlow(symbol, interval, 100)
 
   const isLoading = klinesLoading || oiLoading || fundingLoading || lsLoading
 
@@ -52,11 +55,8 @@ export default function DashboardPage() {
         {/* Summary Cards - New Professional Design */}
         <SummaryCards symbol={symbol} />
 
-        {/* Market Regime & Taker Flow - Side by Side */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <MarketRegimeIndicator symbol={symbol} interval={interval} />
-          <TakerFlowChart symbol={symbol} period={interval} limit={50} />
-        </div>
+        {/* Market Regime Indicator */}
+        <MarketRegimeIndicator symbol={symbol} interval={interval} />
 
         {/* Main Chart */}
         <Card>
@@ -91,9 +91,9 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Volume Profile + Bell Curve (Enhanced)</CardTitle>
+              <CardTitle>Volume Profile + Bell Curve</CardTitle>
               <CardDescription>
-                Professional volume distribution with statistical bell curve overlay - Statistical trading zones
+                Volume distribution with statistical bell curve overlay - Statistical trading zones
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -116,6 +116,46 @@ export default function DashboardPage() {
             currentPrice={klines?.[klines.length - 1]?.close}
           />
         </div>
+
+        {/* Volume Profile Companion Analysis - 2 Critical Overlays */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Volume Profile Companion Analysis</CardTitle>
+            <CardDescription>
+              Essential features working with Volume Profile + Bell Curve for professional trading decisions
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* 1. OI Delta Overlay */}
+              <div>
+                {!isLoading && klines && oiData ? (
+                  <OIDeltaOverlay
+                    klines={klines}
+                    oiData={oiData}
+                    bucketSize={10}
+                  />
+                ) : (
+                  <div className="text-center text-sm text-muted-foreground">Loading OI Delta...</div>
+                )}
+              </div>
+
+              {/* 2. Taker Flow */}
+              <div>
+                {!isLoading && takerFlowData ? (
+                  <TakerFlowOverlay
+                    takerData={takerFlowData}
+                    isLVN={false}
+                    isHVN={false}
+                    priceZone="AT_POC"
+                  />
+                ) : (
+                  <div className="text-center text-sm text-muted-foreground">Loading Taker Flow...</div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Advanced Analysis */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

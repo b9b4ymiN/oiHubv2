@@ -266,6 +266,27 @@ export class BinanceClient {
       timestamp: item.time
     }))
   }
+
+  // Orderbook Depth
+  async getOrderbookDepth(symbol: string, limit: number = 20) {
+    const data = await this.fetchPublic('/fapi/v1/depth', {
+      symbol,
+      limit: limit.toString()
+    })
+
+    return {
+      bids: data.bids.map((b: any[]) => ({
+        price: parseFloat(b[0]),
+        quantity: parseFloat(b[1])
+      })),
+      asks: data.asks.map((a: any[]) => ({
+        price: parseFloat(a[0]),
+        quantity: parseFloat(a[1])
+      })),
+      lastUpdateId: data.lastUpdateId,
+      timestamp: Date.now()
+    }
+  }
 }
 
 export const binanceClient = new BinanceClient()

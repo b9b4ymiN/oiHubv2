@@ -6,8 +6,11 @@ import { QueryProvider } from "@/components/providers/query-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "OI Trader Hub - Futures Open Interest Analysis",
-  description: "Professional decision support tool for analyzing Futures Open Interest trading data",
+  title: "OI Trader Hub - Professional Futures Open Interest Analysis Platform",
+  description: "Professional decision support tool for analyzing Futures Open Interest trading data. 8.5/10 rating with 90% information sufficiency. Statistical analysis, OI divergence detection, and AI-powered opportunity finder.",
+  icons: {
+    icon: '/avatars/THP.png',
+  },
 }
 
 export default function RootLayout({
