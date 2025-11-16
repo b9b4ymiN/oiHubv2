@@ -27,10 +27,13 @@ export function OpportunityFinderCard({ klines, currentPrice }: OpportunityFinde
 
   if (opportunities.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Trading Opportunities</CardTitle>
-          <CardDescription>
+      <Card className="border-2 border-gray-200 dark:border-gray-800 hover:border-purple-500 dark:hover:border-purple-500 transition-colors">
+        <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30">
+          <CardTitle className="flex items-center gap-2">
+            <div className="h-8 w-1 bg-gradient-to-b from-purple-600 to-pink-600 rounded"></div>
+            Trading Opportunities
+          </CardTitle>
+          <CardDescription className="text-gray-700 dark:text-gray-300">
             AI-powered entry/target suggestions based on Volume Profile + Bell Curve
           </CardDescription>
         </CardHeader>
@@ -46,15 +49,18 @@ export function OpportunityFinderCard({ klines, currentPrice }: OpportunityFinde
   const topOpportunity = opportunities[0]
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-2 border-gray-200 dark:border-gray-800 hover:border-purple-500 dark:hover:border-purple-500 transition-colors">
+      <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30">
         <CardTitle className="flex items-center justify-between">
-          <span>Trading Opportunities</span>
-          <Badge variant={zone.color === 'red' ? 'danger' : zone.color === 'orange' ? 'warning' : zone.color === 'green' ? 'success' : 'outline'}>
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-1 bg-gradient-to-b from-purple-600 to-pink-600 rounded"></div>
+            <span>Trading Opportunities</span>
+          </div>
+          <Badge variant={zone.color === 'red' ? 'destructive' : zone.color === 'orange' ? 'secondary' : zone.color === 'green' ? 'default' : 'outline'}>
             {zone.zone}
           </Badge>
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-gray-700 dark:text-gray-300">
           AI-powered entry/target suggestions based on Volume Profile + Bell Curve
         </CardDescription>
       </CardHeader>

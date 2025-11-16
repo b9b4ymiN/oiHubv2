@@ -41,9 +41,10 @@ export function LongShortRatioCard({ lsData }: LongShortRatioCardProps) {
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+    <Card className="border-2 border-gray-200 dark:border-gray-800 hover:border-orange-500 dark:hover:border-orange-500 transition-all hover:shadow-lg">
+      <CardHeader className="pb-2 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20">
+        <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div className="h-6 w-0.5 bg-gradient-to-b from-orange-600 to-amber-600 rounded"></div>
           Long/Short Ratio
         </CardTitle>
       </CardHeader>

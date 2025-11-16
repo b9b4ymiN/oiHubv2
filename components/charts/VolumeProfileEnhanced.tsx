@@ -66,7 +66,7 @@ export function VolumeProfileEnhanced({ klines, currentPrice, height = 500 }: Vo
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mt-5">
       {/* Legend */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
         <div className="flex items-center gap-2">
@@ -307,136 +307,10 @@ export function VolumeProfileEnhanced({ klines, currentPrice, height = 500 }: Vo
       </div>
 
       {/* Expected Range Info */}
-      <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="text-sm font-semibold text-blue-500">📊 Expected Range Analysis</div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
-          <div>
-            <span className="text-muted-foreground">68% of price action within:</span>
-            <div className="font-mono font-semibold">±1σ range</div>
-          </div>
-          <div>
-            <span className="text-muted-foreground">95% of price action within:</span>
-            <div className="font-mono font-semibold">±2σ range</div>
-          </div>
-          <div>
-            <span className="text-muted-foreground">99.7% of price action within:</span>
-            <div className="font-mono font-semibold">±3σ range</div>
-          </div>
-        </div>
-      </div>
+      
 
       {/* What This Chart Tells You - Comprehensive Guide */}
-      <div className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/30">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="text-sm font-bold text-purple-500">💡 What This Chart Tells You</div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-          {/* Column 1 */}
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <span className="text-green-500 font-bold">✓</span>
-              <div>
-                <div className="font-semibold text-foreground">1. Fair Value Pricing</div>
-                <div className="text-muted-foreground">μ (Mean) & POC show current market's fair value consensus</div>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <span className="text-green-500 font-bold">✓</span>
-              <div>
-                <div className="font-semibold text-foreground">2. Market State</div>
-                <div className="text-muted-foreground">
-                  • Within ±1σ = Normal range
-                  <br />• At ±2σ = Overextended (mean reversion likely)
-                  <br />• Beyond ±3σ = Extreme undervalued/overvalued
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <span className="text-green-500 font-bold">✓</span>
-              <div>
-                <div className="font-semibold text-foreground">3. Mean Reversion Targets</div>
-                <div className="text-muted-foreground">Price tends to return to μ or POC from extremes</div>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <span className="text-green-500 font-bold">✓</span>
-              <div>
-                <div className="font-semibold text-foreground">4. Volume Clusters = Support/Resistance</div>
-                <div className="text-muted-foreground">Thick volume zones show strong buy/sell pressure areas</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Column 2 */}
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <span className="text-green-500 font-bold">✓</span>
-              <div>
-                <div className="font-semibold text-foreground">5. Low Volume Nodes (LVN)</div>
-                <div className="text-muted-foreground">Thin volume = fast price swings, easy breakout zones</div>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <span className="text-green-500 font-bold">✓</span>
-              <div>
-                <div className="font-semibold text-foreground">6. Statistical Stop Loss/Take Profit</div>
-                <div className="text-muted-foreground">
-                  • Stop: Beyond ±3σ
-                  <br />• TP: At ±1σ, POC, or opposite ±2σ
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <span className="text-green-500 font-bold">✓</span>
-              <div>
-                <div className="font-semibold text-foreground">7. Entry Points</div>
-                <div className="text-muted-foreground">
-                  • Best: Near μ or LVN when trend confirms
-                  <br />• Aggressive: At ±2σ/±3σ for reversals
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <span className="text-green-500 font-bold">✓</span>
-              <div>
-                <div className="font-semibold text-foreground">8. Exit Points</div>
-                <div className="text-muted-foreground">
-                  • Take profit near ±1σ/±2σ edges
-                  <br />• Or when price reaches POC from extremes
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Action Guide */}
-        <div className="mt-4 pt-3 border-t border-purple-500/20">
-          <div className="font-semibold text-xs mb-2 text-purple-400">⚡ Quick Action Guide:</div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
-            <div className="p-2 rounded bg-green-500/10 border border-green-500/30">
-              <div className="font-semibold text-green-400">Price at -2σ or lower:</div>
-              <div className="text-muted-foreground">→ LONG toward POC/μ (75-85% win rate)</div>
-            </div>
-            <div className="p-2 rounded bg-red-500/10 border border-red-500/30">
-              <div className="font-semibold text-red-400">Price at +2σ or higher:</div>
-              <div className="text-muted-foreground">→ SHORT toward POC/μ (75-85% win rate)</div>
-            </div>
-            <div className="p-2 rounded bg-blue-500/10 border border-blue-500/30">
-              <div className="font-semibold text-blue-400">Price at POC/μ:</div>
-              <div className="text-muted-foreground">→ Wait for breakout confirmation</div>
-            </div>
-          </div>
-        </div>
-      </div>
+       
     </div>
   )
 }

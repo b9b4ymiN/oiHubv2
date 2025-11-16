@@ -34,9 +34,10 @@ export function OIMetricsCard({ symbol, oiData, klines }: OIMetricsCardProps) {
   const isPositive = metrics.change >= 0
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+    <Card className="border-2 border-gray-200 dark:border-gray-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all hover:shadow-lg">
+      <CardHeader className="pb-2 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20">
+        <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div className="h-6 w-0.5 bg-gradient-to-b from-blue-600 to-cyan-600 rounded"></div>
           Open Interest
         </CardTitle>
       </CardHeader>

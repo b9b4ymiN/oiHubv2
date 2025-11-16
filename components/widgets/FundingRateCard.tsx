@@ -39,9 +39,10 @@ export function FundingRateCard({ fundingData }: FundingRateCardProps) {
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+    <Card className="border-2 border-gray-200 dark:border-gray-800 hover:border-purple-500 dark:hover:border-purple-500 transition-all hover:shadow-lg">
+      <CardHeader className="pb-2 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20">
+        <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div className="h-6 w-0.5 bg-gradient-to-b from-purple-600 to-indigo-600 rounded"></div>
           Funding Rate
         </CardTitle>
       </CardHeader>

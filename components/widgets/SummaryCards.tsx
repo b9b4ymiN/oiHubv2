@@ -24,7 +24,7 @@ export function SummaryCards({ symbol }: SummaryCardsProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* OI 24h Change */}
-      <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-800 shadow-lg hover:shadow-xl transition-shadow">
+      <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-2 border-blue-200 dark:border-blue-800 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -58,7 +58,7 @@ export function SummaryCards({ symbol }: SummaryCardsProps) {
       </Card>
 
       {/* Funding Bias */}
-      <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-800 shadow-lg hover:shadow-xl transition-shadow">
+      <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-2 border-purple-200 dark:border-purple-800 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -88,7 +88,7 @@ export function SummaryCards({ symbol }: SummaryCardsProps) {
       </Card>
 
       {/* Taker Flow Bias */}
-      <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-800 shadow-lg hover:shadow-xl transition-shadow">
+      <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-2 border-green-200 dark:border-green-800 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -122,7 +122,7 @@ export function SummaryCards({ symbol }: SummaryCardsProps) {
       </Card>
 
       {/* Top Trader Bias */}
-      <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-800 shadow-lg hover:shadow-xl transition-shadow">
+      <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-2 border-orange-200 dark:border-orange-800 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>

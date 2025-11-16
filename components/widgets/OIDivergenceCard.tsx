@@ -72,10 +72,13 @@ export function OIDivergenceCard({ klines, oiData }: OIDivergenceCardProps) {
 
   if (!latest) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>OI Divergence Signals</CardTitle>
-          <CardDescription>
+      <Card className="border-2 border-gray-200 dark:border-gray-800 hover:border-orange-500 dark:hover:border-orange-500 transition-colors">
+        <CardHeader className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/30 dark:to-red-950/30">
+          <CardTitle className="flex items-center gap-2">
+            <div className="h-8 w-1 bg-gradient-to-b from-orange-600 to-red-600 rounded"></div>
+            OI Divergence Signals
+          </CardTitle>
+          <CardDescription className="text-gray-700 dark:text-gray-300">
             Price/OI correlation analysis - Critical for trade timing
           </CardDescription>
         </CardHeader>
@@ -91,10 +94,13 @@ export function OIDivergenceCard({ klines, oiData }: OIDivergenceCardProps) {
   const signalInfo = getSignalInfo(latest.type)
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>OI Divergence Signals</CardTitle>
-        <CardDescription>
+    <Card className="border-2 border-gray-200 dark:border-gray-800 hover:border-orange-500 dark:hover:border-orange-500 transition-colors">
+      <CardHeader className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/30 dark:to-red-950/30">
+        <CardTitle className="flex items-center gap-2">
+          <div className="h-8 w-1 bg-gradient-to-b from-orange-600 to-red-600 rounded"></div>
+          OI Divergence Signals
+        </CardTitle>
+        <CardDescription className="text-gray-700 dark:text-gray-300">
           Price/OI correlation analysis - Critical for trade timing
         </CardDescription>
       </CardHeader>

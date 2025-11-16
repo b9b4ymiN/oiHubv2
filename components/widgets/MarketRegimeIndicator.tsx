@@ -22,9 +22,12 @@ export function MarketRegimeIndicator({ symbol, interval = '15m' }: MarketRegime
 
   if (isLoading) {
     return (
-      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-gray-900 dark:text-gray-100">Market Regime</CardTitle>
+      <Card className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
+          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+            <div className="h-8 w-1 bg-gradient-to-b from-blue-600 to-indigo-600 rounded"></div>
+            Market Regime
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="animate-pulse space-y-3">
@@ -38,9 +41,12 @@ export function MarketRegimeIndicator({ symbol, interval = '15m' }: MarketRegime
 
   if (!priceData || !oiData || priceData.length === 0 || oiData.length === 0) {
     return (
-      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-gray-900 dark:text-gray-100">Market Regime</CardTitle>
+      <Card className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
+          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+            <div className="h-8 w-1 bg-gradient-to-b from-blue-600 to-indigo-600 rounded"></div>
+            Market Regime
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-gray-500 dark:text-gray-400">No data available</p>
@@ -91,12 +97,13 @@ export function MarketRegimeIndicator({ symbol, interval = '15m' }: MarketRegime
   const regimeName = regime.regime.replace(/_/g, ' ')
 
   return (
-    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+    <Card className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-200">
+      <CardHeader className="pb-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
+        <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <div className="h-8 w-1 bg-gradient-to-b from-blue-600 to-indigo-600 rounded"></div>
           Market Regime
         </CardTitle>
-        <CardDescription className="text-gray-600 dark:text-gray-400">
+        <CardDescription className="text-gray-700 dark:text-gray-300">
           Current market condition analysis
         </CardDescription>
       </CardHeader>
