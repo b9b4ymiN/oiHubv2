@@ -1,14 +1,13 @@
-// app/api/market/funding/route.ts
+// app/api/market/oi-snapshot/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { binanceClient } from '@/lib/api/binance-client'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const symbol = searchParams.get('symbol') || 'BTCUSDT'
-  const limit = parseInt(searchParams.get('limit') || '100')
 
   try {
-    const data = await binanceClient.getFundingRate(symbol, limit)
+    const data = await binanceClient.getOISnapshot(symbol)
 
     return NextResponse.json({
       success: true,
@@ -16,10 +15,10 @@ export async function GET(request: NextRequest) {
       timestamp: Date.now()
     })
   } catch (error: any) {
-    console.error('API route error [/api/market/funding]:', {
+    console.error('API route error [/api/market/oi-snapshot]:', {
       error: error.message,
       stack: error.stack,
-      params: { symbol, limit }
+      params: { symbol }
     })
 
     return NextResponse.json(

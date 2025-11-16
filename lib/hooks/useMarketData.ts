@@ -1,6 +1,20 @@
 // lib/hooks/useMarketData.ts
 import { useQuery } from '@tanstack/react-query'
-import { OHLCV, OIPoint, FundingRate, LongShortRatio, APIResponse } from '@/types/market'
+import {
+  OHLCV,
+  OIPoint,
+  OISnapshot,
+  FundingRate,
+  LongShortRatio,
+  TakerFlow,
+  TopTraderPosition,
+  GlobalSentiment,
+  Liquidation,
+  OIHeatmap,
+  LiquidationHeatmap,
+  CombinedHeatmap,
+  APIResponse
+} from '@/types/market'
 
 export function useKlines(symbol: string, interval: string = '5m', limit: number = 500) {
   return useQuery({
@@ -65,3 +79,147 @@ export function useLongShortRatio(symbol: string, period: string = '5m', limit: 
     staleTime: 15000,
   })
 }
+
+// New hooks for Phase 2-4 APIs
+
+export function useOISnapshot(symbol: string) {
+  return useQuery({
+    queryKey: ['oiSnapshot', symbol],
+    queryFn: async () => {
+      const response = await fetch(`/api/market/oi-snapshot?symbol=${symbol}`)
+      const data: APIResponse<OISnapshot> = await response.json()
+      if (!data.success) throw new Error(data.error)
+      return data.data
+    },
+    refetchInterval: 30000,
+    staleTime: 15000,
+  })
+}
+
+export function useTakerFlow(symbol: string, period: string = '5m', limit: number = 100) {
+  return useQuery({
+    queryKey: ['takerFlow', symbol, period, limit],
+    queryFn: async () => {
+      const response = await fetch(
+        `/api/market/taker-flow?symbol=${symbol}&period=${period}&limit=${limit}`
+      )
+      const data: APIResponse<TakerFlow[]> = await response.json()
+      if (!data.success) throw new Error(data.error)
+      return data.data || []
+    },
+    refetchInterval: 30000,
+    staleTime: 15000,
+  })
+}
+
+export function useTopPosition(symbol: string, period: string = '5m', limit: number = 100) {
+  return useQuery({
+    queryKey: ['topPosition', symbol, period, limit],
+    queryFn: async () => {
+      const response = await fetch(
+        `/api/market/top-position?symbol=${symbol}&period=${period}&limit=${limit}`
+      )
+      const data: APIResponse<TopTraderPosition[]> = await response.json()
+      if (!data.success) throw new Error(data.error)
+      return data.data || []
+    },
+    refetchInterval: 30000,
+    staleTime: 15000,
+  })
+}
+
+export function useGlobalSentiment(symbol: string, period: string = '5m', limit: number = 100) {
+  return useQuery({
+    queryKey: ['globalSentiment', symbol, period, limit],
+    queryFn: async () => {
+      const response = await fetch(
+        `/api/market/global-sentiment?symbol=${symbol}&period=${period}&limit=${limit}`
+      )
+      const data: APIResponse<GlobalSentiment[]> = await response.json()
+      if (!data.success) throw new Error(data.error)
+      return data.data || []
+    },
+    refetchInterval: 30000,
+    staleTime: 15000,
+  })
+}
+
+export function useLiquidations(symbol: string, limit: number = 100) {
+  return useQuery({
+    queryKey: ['liquidations', symbol, limit],
+    queryFn: async () => {
+      const response = await fetch(
+        `/api/market/liquidations?symbol=${symbol}&limit=${limit}`
+      )
+      const data: APIResponse<Liquidation[]> = await response.json()
+      if (!data.success) throw new Error(data.error)
+      return data.data || []
+    },
+    refetchInterval: 15000, // 15 seconds
+    staleTime: 10000,
+  })
+}
+
+export function useOIHeatmap(
+  symbol: string,
+  interval: string = '5m',
+  limit: number = 288,
+  priceStep: number = 10
+) {
+  return useQuery({
+    queryKey: ['oiHeatmap', symbol, interval, limit, priceStep],
+    queryFn: async () => {
+      const response = await fetch(
+        `/api/heatmap/oi?symbol=${symbol}&interval=${interval}&limit=${limit}&priceStep=${priceStep}`
+      )
+      const data: APIResponse<OIHeatmap> = await response.json()
+      if (!data.success) throw new Error(data.error)
+      return data.data
+    },
+    refetchInterval: 60000, // 1 minute
+    staleTime: 30000,
+  })
+}
+
+export function useLiquidationHeatmap(
+  symbol: string,
+  interval: string = '5m',
+  limit: number = 100,
+  priceStep: number = 10
+) {
+  return useQuery({
+    queryKey: ['liquidationHeatmap', symbol, interval, limit, priceStep],
+    queryFn: async () => {
+      const response = await fetch(
+        `/api/heatmap/liquidation?symbol=${symbol}&interval=${interval}&limit=${limit}&priceStep=${priceStep}`
+      )
+      const data: APIResponse<LiquidationHeatmap> = await response.json()
+      if (!data.success) throw new Error(data.error)
+      return data.data
+    },
+    refetchInterval: 60000,
+    staleTime: 30000,
+  })
+}
+
+export function useCombinedHeatmap(
+  symbol: string,
+  interval: string = '5m',
+  limit: number = 288,
+  priceStep: number = 10
+) {
+  return useQuery({
+    queryKey: ['combinedHeatmap', symbol, interval, limit, priceStep],
+    queryFn: async () => {
+      const response = await fetch(
+        `/api/heatmap/combined?symbol=${symbol}&interval=${interval}&limit=${limit}&priceStep=${priceStep}`
+      )
+      const data: APIResponse<CombinedHeatmap> = await response.json()
+      if (!data.success) throw new Error(data.error)
+      return data.data
+    },
+    refetchInterval: 60000,
+    staleTime: 30000,
+  })
+}
+

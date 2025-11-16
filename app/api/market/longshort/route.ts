@@ -17,8 +17,18 @@ export async function GET(request: NextRequest) {
       timestamp: Date.now()
     })
   } catch (error: any) {
+    console.error('API route error [/api/market/longshort]:', {
+      error: error.message,
+      stack: error.stack,
+      params: { symbol, period, limit }
+    })
+
     return NextResponse.json(
-      { success: false, error: error.message },
+      {
+        success: false,
+        error: error.message,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
       { status: 500 }
     )
   }
