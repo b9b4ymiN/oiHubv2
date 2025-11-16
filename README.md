@@ -154,11 +154,35 @@ npm run test:e2e
 
 ## Deployment
 
+### Important: Geo-Restriction Fix
+
+⚠️ **If you encounter Error 451 ("Service unavailable from restricted location")**
+
+Binance blocks access from certain regions (including Vercel servers). Solution:
+
+**Quick Fix (5 minutes):**
+1. Deploy the included `cloudflare-worker.js` to Cloudflare Workers (free)
+2. Set environment variable in Vercel:
+   ```
+   NEXT_PUBLIC_BINANCE_API_URL=https://your-worker.workers.dev
+   ```
+3. Redeploy
+
+See [CLOUDFLARE_WORKER_SETUP.md](CLOUDFLARE_WORKER_SETUP.md) for detailed instructions.
+
+Alternative solutions in [DEPLOYMENT_FIXES.md](DEPLOYMENT_FIXES.md).
+
 ### Vercel (Recommended)
 
 ```bash
 npm i -g vercel
 vercel --prod
+```
+
+**Environment Variables Required:**
+```bash
+# Add in Vercel Dashboard → Settings → Environment Variables
+NEXT_PUBLIC_BINANCE_API_URL=https://your-cloudflare-worker.workers.dev
 ```
 
 ### Docker
