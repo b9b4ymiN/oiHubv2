@@ -19,7 +19,13 @@ export class BinanceClient {
   private signRequest(params: Record<string, any>): string {
     if (!this.apiSecret) return ''
 
-    const queryString = new URLSearchParams(params).toString()
+    // Convert all values to strings for URLSearchParams
+    const stringParams = Object.entries(params).reduce((acc, [key, value]) => {
+      acc[key] = String(value)
+      return acc
+    }, {} as Record<string, string>)
+
+    const queryString = new URLSearchParams(stringParams).toString()
     return crypto
       .createHmac('sha256', this.apiSecret)
       .update(queryString)
@@ -35,7 +41,13 @@ export class BinanceClient {
       signature: this.signRequest({ ...params, timestamp })
     }
 
-    const response = await fetch(`${this.baseUrl}${endpoint}?${new URLSearchParams(signedParams)}`, {
+    // Convert all values to strings for URLSearchParams
+    const stringParams = Object.entries(signedParams).reduce((acc, [key, value]) => {
+      acc[key] = String(value)
+      return acc
+    }, {} as Record<string, string>)
+
+    const response = await fetch(`${this.baseUrl}${endpoint}?${new URLSearchParams(stringParams)}`, {
       headers: this.apiKey ? { 'X-MBX-APIKEY': this.apiKey } : {}
     })
 
@@ -47,7 +59,13 @@ export class BinanceClient {
   }
 
   async fetchPublic(endpoint: string, params: Record<string, any> = {}) {
-    const queryString = new URLSearchParams(params).toString()
+    // Convert all values to strings for URLSearchParams
+    const stringParams = Object.entries(params).reduce((acc, [key, value]) => {
+      acc[key] = String(value)
+      return acc
+    }, {} as Record<string, string>)
+
+    const queryString = new URLSearchParams(stringParams).toString()
     const url = `${this.baseUrl}${endpoint}${queryString ? `?${queryString}` : ''}`
 
     const response = await fetch(url)
