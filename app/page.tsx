@@ -404,11 +404,11 @@ export default function Home() {
       </div>
 
       {/* Language Toggle */}
-      <div className="fixed top-6 right-6 z-50 animate-fade-in">
-        <div className="flex gap-2 p-1 rounded-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl border-2 border-gray-200 dark:border-gray-700">
+      <div className="fixed top-3 right-3 sm:top-4 sm:right-4 md:top-6 md:right-6 z-50 animate-fade-in">
+        <div className="flex gap-1 sm:gap-2 p-0.5 sm:p-1 rounded-lg sm:rounded-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl border border-gray-200 dark:border-gray-700 sm:border-2">
           <button
             onClick={() => setLang('en')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${
+            className={`px-2 py-1 sm:px-3 sm:py-1.5 md:px-4 md:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 ${
               lang === 'en'
                 ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg scale-105'
                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -418,7 +418,7 @@ export default function Home() {
           </button>
           <button
             onClick={() => setLang('th')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${
+            className={`px-2 py-1 sm:px-3 sm:py-1.5 md:px-4 md:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 ${
               lang === 'th'
                 ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg scale-105'
                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -429,12 +429,12 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-16 max-w-7xl relative z-10">
+      <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-12 md:py-16 max-w-7xl relative z-10">
         {/* Hero Section */}
-        <div className="text-center mb-20 animate-fade-in-up">
+        <div className="text-center mb-12 sm:mb-16 md:mb-20 animate-fade-in-up">
           {/* Logo */}
-          <div className="flex justify-center mb-6">
-            <div className="relative w-32 h-32 animate-float">
+          <div className="flex justify-center mb-4 sm:mb-6">
+            <div className="relative w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 animate-float">
               <Image
                 src="/avatars/THP.png"
                 alt="THP Stock Logo"
@@ -447,28 +447,29 @@ export default function Home() {
             </div>
           </div>
 
-          <h1 className="text-7xl font-extrabold mb-6 bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent animate-gradient">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold mb-4 sm:mb-6 bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent animate-gradient px-2">
             {t.title}
           </h1>
-          <p className="text-3xl text-gray-700 dark:text-gray-300 mb-8 font-light">
+          <p className="text-base sm:text-xl md:text-2xl lg:text-3xl text-gray-700 dark:text-gray-300 mb-6 sm:mb-8 font-light px-4">
             {t.subtitle}
           </p>
-          <div className="inline-block animate-bounce-slow">
-            <Badge variant="default" className="text-lg px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg text-white border-0">
-              <CheckCircle2 className="h-5 w-5 mr-2" />
-              {t.rating}
+          <div className="inline-block animate-bounce-slow px-2">
+            <Badge variant="default" className="text-xs sm:text-sm md:text-base lg:text-lg px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg text-white border-0">
+              <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">{t.rating}</span>
+              <span className="sm:hidden">8.5/10</span>
             </Badge>
           </div>
 
-          <div className="mt-10 flex gap-4 justify-center items-center flex-wrap">
+          <div className="mt-6 sm:mt-8 md:mt-10 flex gap-3 sm:gap-4 justify-center items-center flex-wrap px-4">
             <Link
               href="/dashboard"
-              className="group inline-flex items-center justify-center px-12 py-5 text-xl font-bold text-white bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-300 shadow-xl relative overflow-hidden"
+              className="group inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 md:px-12 md:py-5 text-sm sm:text-base md:text-lg lg:text-xl font-bold text-white bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 rounded-xl sm:rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-300 shadow-xl relative overflow-hidden"
             >
-              <span className="relative z-10 flex items-center gap-3">
-                <Zap className="h-6 w-6" />
-                {t.cta}
-                <ChevronRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
+              <span className="relative z-10 flex items-center gap-2 sm:gap-3">
+                <Zap className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
+                <span className="whitespace-nowrap">{t.cta}</span>
+                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 group-hover:translate-x-1 transition-transform" />
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-purple-700 via-blue-700 to-cyan-700 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </Link>
@@ -476,7 +477,7 @@ export default function Home() {
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-12 sm:mb-16 md:mb-20">
           {t.features.items.map((feature, idx) => (
             <Card 
               key={idx} 
@@ -585,47 +586,47 @@ export default function Home() {
          
 
         {/* Final CTA */}
-        <div className="relative text-center p-12 rounded-3xl bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 text-white shadow-2xl overflow-hidden animate-fade-in-up">
+        <div className="relative text-center p-6 sm:p-8 md:p-12 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 text-white shadow-2xl overflow-hidden animate-fade-in-up">
           <div className="absolute inset-0 bg-gradient-to-r from-purple-700 via-blue-700 to-cyan-700 animate-gradient-slow"></div>
           <div className="relative z-10">
-            <h2 className="text-4xl md:text-5xl font-extrabold mb-6 animate-pulse-slow">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold mb-4 sm:mb-6 animate-pulse-slow px-2">
               {lang === 'en' ? 'Ready to Trade Smarter?' : 'พร้อมเทรดอย่างชาญฉลาดแล้วหรือยัง?'}
             </h2>
-            <p className="text-2xl mb-8 text-white/95 font-light">
-              {lang === 'en' 
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl mb-6 sm:mb-8 text-white/95 font-light px-4">
+              {lang === 'en'
                 ? '65-70% win rate on high-confidence setups with proper risk management'
                 : 'อัตราชนะ 65-70% ในสัญญาณความมั่นใจสูงพร้อมการจัดการความเสี่ยงที่เหมาะสม'}
             </p>
             <Link
               href="/dashboard"
-              className="group inline-flex items-center justify-center px-12 py-5 text-2xl font-bold bg-white text-purple-600 rounded-2xl hover:bg-gray-50 hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-3xl relative overflow-hidden"
+              className="group inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 md:px-12 md:py-5 text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-white text-purple-600 rounded-xl sm:rounded-2xl hover:bg-gray-50 hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-3xl relative overflow-hidden"
             >
-              <span className="relative z-10 flex items-center gap-3">
-                <Target className="h-7 w-7" />
-                {lang === 'en' ? 'Start Analyzing Now' : 'เริ่มวิเคราะห์ตอนนี้'}
-                <ChevronRight className="h-7 w-7 group-hover:translate-x-2 transition-transform" />
+              <span className="relative z-10 flex items-center gap-2 sm:gap-3">
+                <Target className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-7 lg:w-7" />
+                <span className="whitespace-nowrap">{lang === 'en' ? 'Start Analyzing Now' : 'เริ่มวิเคราะห์ตอนนี้'}</span>
+                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-7 lg:w-7 group-hover:translate-x-2 transition-transform" />
               </span>
             </Link>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="mt-20 text-center space-y-4 animate-fade-in">
-          <div className="flex items-center justify-center gap-6 text-sm text-gray-600 dark:text-gray-400">
-            <span className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-              {lang === 'en' ? 'Open Source' : 'โอเพนซอร์ส'}
+        <div className="mt-12 sm:mt-16 md:mt-20 text-center space-y-3 sm:space-y-4 animate-fade-in px-4">
+          <div className="flex items-center justify-center gap-3 sm:gap-4 md:gap-6 text-xs sm:text-sm text-gray-600 dark:text-gray-400 flex-wrap">
+            <span className="flex items-center gap-1 sm:gap-2">
+              <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 flex-shrink-0" />
+              <span className="whitespace-nowrap">{lang === 'en' ? 'Open Source' : 'โอเพนซอร์ส'}</span>
             </span>
-            <span className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-              {lang === 'en' ? 'Free Forever' : 'ฟรีตลอดกาล'}
+            <span className="flex items-center gap-1 sm:gap-2">
+              <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 flex-shrink-0" />
+              <span className="whitespace-nowrap">{lang === 'en' ? 'Free Forever' : 'ฟรีตลอดกาล'}</span>
             </span>
-            <span className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-              {lang === 'en' ? 'No Registration' : 'ไม่ต้องสมัคร'}
+            <span className="flex items-center gap-1 sm:gap-2">
+              <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 flex-shrink-0" />
+              <span className="whitespace-nowrap">{lang === 'en' ? 'No Registration' : 'ไม่ต้องสมัคร'}</span>
             </span>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-500 font-semibold">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-500 font-semibold">
             THP Stock : OI-Hub Platform Copyright © 2025
           </p>
         </div>
