@@ -47,12 +47,20 @@ export class BinanceClient {
       return acc
     }, {} as Record<string, string>)
 
-    const response = await fetch(`${this.baseUrl}${endpoint}?${new URLSearchParams(stringParams)}`, {
+    const url = `${this.baseUrl}${endpoint}?${new URLSearchParams(stringParams)}`
+    const response = await fetch(url, {
       headers: this.apiKey ? { 'X-MBX-APIKEY': this.apiKey } : {}
     })
 
     if (!response.ok) {
-      throw new Error(`Binance API error: ${response.statusText}`)
+      const errorBody = await response.text()
+      console.error(`Binance API error [${endpoint}]:`, {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorBody,
+        url: url.replace(/signature=[^&]+/, 'signature=***')
+      })
+      throw new Error(`Binance API error (${response.status}): ${errorBody || response.statusText}`)
     }
 
     return response.json()
@@ -71,7 +79,14 @@ export class BinanceClient {
     const response = await fetch(url)
 
     if (!response.ok) {
-      throw new Error(`Binance API error: ${response.statusText}`)
+      const errorBody = await response.text()
+      console.error(`Binance API error [${endpoint}]:`, {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorBody,
+        url
+      })
+      throw new Error(`Binance API error (${response.status}): ${errorBody || response.statusText}`)
     }
 
     return response.json()
