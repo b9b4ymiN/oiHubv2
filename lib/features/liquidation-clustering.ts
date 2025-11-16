@@ -19,6 +19,7 @@ export function aggregateLiquidations(
         longLiquidations: 0,
         shortLiquidations: 0,
         totalValue: 0,
+        count: 0,
       })
     }
 
@@ -29,6 +30,7 @@ export function aggregateLiquidations(
       cluster.shortLiquidations += liq.quantity
     }
     cluster.totalValue += liq.quantity * liq.price
+    cluster.count += 1
   })
 
   return Array.from(clusters.values())

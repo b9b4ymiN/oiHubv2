@@ -30,7 +30,8 @@ export function calculateOIDivergence(
         type: 'BEARISH_TRAP',
         strength: Math.abs(priceChange) + oiChange,
         priceChange,
-        oiChange
+        oiChange,
+        description: 'OI increasing while price falling - Potential short squeeze'
       })
     }
 
@@ -42,7 +43,8 @@ export function calculateOIDivergence(
         type: 'BULLISH_TRAP',
         strength: priceChange + oiChange,
         priceChange,
-        oiChange
+        oiChange,
+        description: 'OI increasing while price rising - Potential long squeeze'
       })
     }
 
@@ -54,7 +56,8 @@ export function calculateOIDivergence(
         type: 'BULLISH_CONTINUATION',
         strength: priceChange + Math.abs(oiChange),
         priceChange,
-        oiChange
+        oiChange,
+        description: 'OI decreasing while price rising - Strong bullish momentum'
       })
     }
 
@@ -66,7 +69,8 @@ export function calculateOIDivergence(
         type: 'BEARISH_CONTINUATION',
         strength: Math.abs(priceChange) + Math.abs(oiChange),
         priceChange,
-        oiChange
+        oiChange,
+        description: 'OI decreasing while price falling - Strong bearish momentum'
       })
     }
   }
