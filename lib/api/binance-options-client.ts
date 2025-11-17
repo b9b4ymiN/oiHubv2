@@ -11,11 +11,13 @@ import {
 /**
  * Binance Options API Client
  *
- * API Documentation: https://vapi.binance.com/
+ * ⚠️ UPDATED: Now uses European Options API (eapi.binance.com)
+ * API Documentation: https://developers.binance.com/docs/derivatives/option
  *
  * Endpoints:
- * - European Options API (vapi.binance.com)
- * - Get option chain, ticker, mark price, IV, Greeks
+ * - European Options API (eapi.binance.com)
+ * - Base path: /eapi/v1/
+ * - Provides: option chain, mark price, IV, Greeks (delta, gamma, theta, vega)
  */
 export class BinanceOptionsClient {
   private apiKey: string | undefined
@@ -28,7 +30,8 @@ export class BinanceOptionsClient {
       this.apiKey = process.env.BINANCE_API_KEY
       this.apiSecret = process.env.BINANCE_API_SECRET
     }
-    this.baseUrl = process.env.NEXT_PUBLIC_BINANCE_VAPI_URL || 'https://vapi.binance.com'
+    // ✅ FIXED: Use eapi instead of vapi
+    this.baseUrl = process.env.NEXT_PUBLIC_BINANCE_EAPI_URL || 'https://eapi.binance.com'
   }
 
   private signRequest(params: Record<string, any>): string {
@@ -82,27 +85,28 @@ export class BinanceOptionsClient {
    * Returns all available option symbols and their properties
    */
   async getExchangeInfo() {
-    return this.fetchPublic('/vapi/v1/exchangeInfo')
+    return this.fetchPublic('/eapi/v1/exchangeInfo')
   }
 
   /**
    * Get underlying asset index price (e.g., BTC, ETH spot price)
    */
   async getIndexPrice(underlying: string = 'BTCUSDT') {
-    const data = await this.fetchPublic('/vapi/v1/index', { underlying })
+    const data = await this.fetchPublic('/eapi/v1/index', { underlying })
     return {
       underlying,
       indexPrice: parseFloat(data.indexPrice),
-      timestamp: data.time,
+      timestamp: data.time || Date.now(),
     }
   }
 
   /**
    * Get mark price for all options or specific symbol
+   * ✅ INCLUDES: delta, gamma, theta, vega, markIV, bidIV, askIV
    */
   async getMarkPrice(symbol?: string) {
     const params = symbol ? { symbol } : {}
-    return this.fetchPublic('/vapi/v1/mark', params)
+    return this.fetchPublic('/eapi/v1/mark', params)
   }
 
   /**
@@ -111,7 +115,7 @@ export class BinanceOptionsClient {
    */
   async get24hrTicker(symbol?: string) {
     const params = symbol ? { symbol } : {}
-    return this.fetchPublic('/vapi/v1/ticker', params)
+    return this.fetchPublic('/eapi/v1/ticker', params)
   }
 
   /**
@@ -339,6 +343,100 @@ export class BinanceOptionsClient {
       ivBasedMove,
       timestamp: Date.now(),
     }
+  }
+
+  /**
+   * 🔥 NEW: Get Greeks data directly from /eapi/v1/mark
+   *
+   * Returns: delta, gamma, theta, vega, markIV, bidIV, askIV
+   * Use this for real-time Greeks updates
+   */
+  async getGreeks(symbol: string): Promise<{
+    symbol: string
+    markPrice: number
+    markIV: number
+    bidIV: number
+    askIV: number
+    delta: number
+    gamma: number
+    theta: number
+    vega: number
+    timestamp: number
+  }> {
+    const data = await this.getMarkPrice(symbol)
+
+    // Handle array response (all symbols) or single object
+    const markData = Array.isArray(data) ? data.find((d: any) => d.symbol === symbol) : data
+
+    if (!markData) {
+      throw new Error(`No mark price data found for symbol: ${symbol}`)
+    }
+
+    return {
+      symbol: markData.symbol,
+      markPrice: parseFloat(markData.markPrice || '0'),
+      markIV: parseFloat(markData.markIV || '0'),
+      bidIV: parseFloat(markData.bidIV || '0'),
+      askIV: parseFloat(markData.askIV || '0'),
+      delta: parseFloat(markData.delta || '0'),
+      gamma: parseFloat(markData.gamma || '0'),
+      theta: parseFloat(markData.theta || '0'),
+      vega: parseFloat(markData.vega || '0'),
+      timestamp: Date.now(),
+    }
+  }
+
+  /**
+   * 🔥 NEW: Get Greeks for entire options chain (all strikes)
+   *
+   * Useful for calculating:
+   * - Delta distribution by strike
+   * - Gamma Exposure (GEX)
+   * - Dealer positioning
+   */
+  async getGreeksForChain(underlying: string, expiryDate: number): Promise<{
+    symbol: string
+    strike: number
+    type: 'CALL' | 'PUT'
+    delta: number
+    gamma: number
+    theta: number
+    vega: number
+    markIV: number
+  }[]> {
+    // Get all mark prices
+    const allMarks = await this.getMarkPrice()
+
+    // Filter by underlying and expiry
+    const baseAsset = underlying.replace('USDT', '')
+    const greeksData: any[] = []
+
+    for (const mark of allMarks) {
+      const parts = mark.symbol.split('-')
+      if (parts.length !== 4) continue
+
+      const [asset, expiry, strikeStr, typeStr] = parts
+
+      if (asset !== baseAsset) continue
+
+      const expiryTimestamp = this.parseExpiryDate(expiry)
+      const targetDate = new Date(expiryDate).setHours(8, 0, 0, 0)
+
+      if (Math.abs(expiryTimestamp - targetDate) > 86400000) continue
+
+      greeksData.push({
+        symbol: mark.symbol,
+        strike: parseFloat(strikeStr),
+        type: typeStr === 'C' ? 'CALL' : 'PUT',
+        delta: parseFloat(mark.delta || '0'),
+        gamma: parseFloat(mark.gamma || '0'),
+        theta: parseFloat(mark.theta || '0'),
+        vega: parseFloat(mark.vega || '0'),
+        markIV: parseFloat(mark.markIV || '0'),
+      })
+    }
+
+    return greeksData
   }
 
   /**
