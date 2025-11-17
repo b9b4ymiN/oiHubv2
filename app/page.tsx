@@ -525,6 +525,131 @@ export default function Home() {
           </CardContent>
         </Card>
 
+        {/* 🎓 Interactive Tutorial Features */}
+        <Card className="mb-20 border-2 border-indigo-500/50 dark:border-indigo-600/50 shadow-2xl backdrop-blur-sm bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-950/30 dark:via-purple-950/30 dark:to-pink-950/30 animate-fade-in-up overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl"></div>
+          <CardHeader className="relative z-10">
+            <div className="text-center mb-6">
+              <div className="text-6xl mb-4 animate-bounce-slow">🎓</div>
+              <CardTitle className="text-5xl mb-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent font-extrabold">
+                {lang === 'en' ? 'Interactive Learning Mode' : 'โหมดเรียนรู้แบบโต้ตอบ'}
+              </CardTitle>
+              <CardDescription className="text-xl text-gray-700 dark:text-gray-300">
+                {lang === 'en'
+                  ? 'Master professional options analysis in just 9 steps - Learn by doing!'
+                  : 'เรียนรู้การวิเคราะห์ออปชั่นระดับมืออาชีพใน 9 ขั้นตอน - เรียนจากการปฏิบัติ!'}
+              </CardDescription>
+            </div>
+
+            <div className="flex gap-4 justify-center items-center flex-wrap mb-8">
+              <Badge variant="secondary" className="text-base px-4 py-2 bg-white/60 dark:bg-gray-800/60 backdrop-blur border-2 border-indigo-300 dark:border-indigo-700">
+                ⏱️ {lang === 'en' ? '3-5 minutes' : '3-5 นาที'}
+              </Badge>
+              <Badge variant="secondary" className="text-base px-4 py-2 bg-white/60 dark:bg-gray-800/60 backdrop-blur border-2 border-purple-300 dark:border-purple-700">
+                🎯 {lang === 'en' ? 'Beginner Friendly' : 'เหมาะสำหรับมือใหม่'}
+              </Badge>
+              <Badge variant="secondary" className="text-base px-4 py-2 bg-white/60 dark:bg-gray-800/60 backdrop-blur border-2 border-pink-300 dark:border-pink-700">
+                💡 {lang === 'en' ? 'Step-by-Step' : 'ทีละขั้นตอน'}
+              </Badge>
+            </div>
+          </CardHeader>
+
+          <CardContent className="relative z-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {/* Feature 1: Visual Highlighting */}
+              <div className="p-6 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur border-2 border-indigo-200 dark:border-indigo-800 hover:border-indigo-500 dark:hover:border-indigo-500 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1">
+                <div className="text-4xl mb-3">🎨</div>
+                <h4 className="text-lg font-bold mb-2 text-indigo-600 dark:text-indigo-400">
+                  {lang === 'en' ? 'Visual Highlighting' : 'เน้นส่วนที่เรียน'}
+                </h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {lang === 'en'
+                    ? 'Each step highlights the relevant chart element while dimming others - Focus on what matters!'
+                    : 'แต่ละขั้นจะเน้นส่วนที่สำคัญของกราฟและทำให้ส่วนอื่นจางลง - โฟกัสในสิ่งที่สำคัญ!'}
+                </p>
+              </div>
+
+              {/* Feature 2: Progress Tracking */}
+              <div className="p-6 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur border-2 border-purple-200 dark:border-purple-800 hover:border-purple-500 dark:hover:border-purple-500 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1">
+                <div className="text-4xl mb-3">📊</div>
+                <h4 className="text-lg font-bold mb-2 text-purple-600 dark:text-purple-400">
+                  {lang === 'en' ? 'Progress Tracking' : 'ติดตามความคืบหน้า'}
+                </h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {lang === 'en'
+                    ? 'Visual progress dots and step counter show you exactly where you are in the journey'
+                    : 'จุดแสดงความคืบหน้าและตัวนับขั้นตอนบอกคุณว่าคุณอยู่ตรงไหนในการเรียนรู้'}
+                </p>
+              </div>
+
+              {/* Feature 3: Interactive Controls */}
+              <div className="p-6 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur border-2 border-pink-200 dark:border-pink-800 hover:border-pink-500 dark:hover:border-pink-500 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1">
+                <div className="text-4xl mb-3">🎮</div>
+                <h4 className="text-lg font-bold mb-2 text-pink-600 dark:text-pink-400">
+                  {lang === 'en' ? 'Your Own Pace' : 'เรียนตามจังหวะของคุณ'}
+                </h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {lang === 'en'
+                    ? 'Previous/Next buttons let you learn at your speed. Skip or restart anytime!'
+                    : 'ปุ่มย้อนกลับ/ถัดไปให้คุณเรียนด้วยความเร็วของคุณเอง ข้ามหรือเริ่มใหม่ได้ทุกเมื่อ!'}
+                </p>
+              </div>
+            </div>
+
+            {/* Tutorial Steps Preview */}
+            <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur rounded-xl p-6 border-2 border-gray-200 dark:border-gray-700">
+              <h4 className="text-xl font-bold mb-4 text-center bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                {lang === 'en' ? '9-Step Learning Path' : 'เส้นทางการเรียนรู้ 9 ขั้นตอน'}
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {[
+                  { step: 1, icon: '👋', title: lang === 'en' ? 'Welcome' : 'ยินดีต้อนรับ' },
+                  { step: 2, icon: '📊', title: lang === 'en' ? 'Chart Basics' : 'พื้นฐานกราฟ' },
+                  { step: 3, icon: '🟠', title: lang === 'en' ? 'Put Volume' : 'ปริมาณ Put' },
+                  { step: 4, icon: '🔵', title: lang === 'en' ? 'Call Volume' : 'ปริมาณ Call' },
+                  { step: 5, icon: '📈', title: lang === 'en' ? 'IV Smile' : 'เส้น IV' },
+                  { step: 6, icon: '🎯', title: lang === 'en' ? 'Spot Price' : 'ราคาปัจจุบัน' },
+                  { step: 7, icon: '🟢', title: lang === 'en' ? 'Expected Range' : 'ช่วงคาดการณ์' },
+                  { step: 8, icon: '🛡️', title: lang === 'en' ? 'Support Zones' : 'โซนซัพพอร์ต' },
+                  { step: 9, icon: '⚔️', title: lang === 'en' ? 'Resistance' : 'เรซิสแตนซ์' },
+                ].map((item) => (
+                  <div
+                    key={item.step}
+                    className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50 border border-indigo-200 dark:border-indigo-800 hover:scale-105 transition-transform duration-200"
+                  >
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white flex items-center justify-center text-sm font-bold">
+                      {item.step}
+                    </div>
+                    <div className="text-2xl">{item.icon}</div>
+                    <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      {item.title}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* CTA to Learn Page */}
+            <div className="mt-8 text-center">
+              <Link
+                href="/learn"
+                className="group inline-flex items-center justify-center px-10 py-5 text-lg font-bold text-white bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-300 shadow-xl gap-3"
+              >
+                <span className="text-2xl">🚀</span>
+                <span>
+                  {lang === 'en' ? 'Start Interactive Tutorial' : 'เริ่มบทเรียนแบบโต้ตอบ'}
+                </span>
+                <ChevronRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
+                {lang === 'en'
+                  ? '✨ Dedicated learning page with step-by-step guidance'
+                  : '✨ หน้าเรียนรู้เฉพาะพร้อมคำแนะนำทีละขั้นตอน'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Chart Guides */}
         <Card className="mb-20 border-2 border-purple-500/30 dark:border-purple-600/30 shadow-xl backdrop-blur-sm bg-white/80 dark:bg-gray-800/80 animate-fade-in-up">
           <CardHeader className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 border-b-2 border-purple-200 dark:border-purple-800">

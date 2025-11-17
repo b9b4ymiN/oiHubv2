@@ -96,6 +96,23 @@ export function useOISnapshot(symbol: string) {
   })
 }
 
+export function useOptionsIVAnalysis(underlying: string, expiryDate?: number) {
+  return useQuery({
+    queryKey: ['optionsIV', underlying, expiryDate],
+    queryFn: async () => {
+      const params = new URLSearchParams({ underlying })
+      if (expiryDate) params.append('expiryDate', expiryDate.toString())
+      
+      const response = await fetch(`/api/options/iv-analysis?${params}`)
+      const data = await response.json()
+      if (!data.success) throw new Error(data.error)
+      return data.data
+    },
+    refetchInterval: 60000, // 1 minute (options data updates slower)
+    staleTime: 30000,
+  })
+}
+
 export function useTakerFlow(symbol: string, period: string = '5m', limit: number = 100) {
   return useQuery({
     queryKey: ['takerFlow', symbol, period, limit],

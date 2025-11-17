@@ -103,21 +103,29 @@ export function findDefensiveStrikes(
   const supportLevels: Array<{ strike: number; strength: number; reason: string }> = []
   const resistanceLevels: Array<{ strike: number; strength: number; reason: string }> = []
 
+  // ✅ Check if OI data exists, fallback to Volume if not
+  const hasOIData = volumeByStrike.some(v => v.putOI > 0 || v.callOI > 0)
+
   for (const level of volumeByStrike) {
     const { strike, putOI, callOI, putVolume, callVolume } = level
 
     // Support detection (put buyers defending downside)
     if (strike < spotPrice) {
-      const putOIDominance = putOI / (callOI + 1) // Avoid div by 0
-      const putVolDominance = putVolume / (callVolume + 1)
+      // ✅ Use OI if available, else fallback to Volume
+      const usePutMetric = hasOIData ? putOI : putVolume
+      const useCallMetric = hasOIData ? callOI : callVolume
+      const metricThreshold = hasOIData ? 100 : 10 // Lower threshold for volume
 
-      if (putOIDominance > 1.5 && putOI > 1000) {
-        // Threshold: 1000 contracts
-        const strength = Math.min(putOIDominance * 20, 100)
+      const putDominance = usePutMetric / (useCallMetric + 1) // Avoid div by 0
+
+      // ✅ LOWERED THRESHOLD: 100 contracts for OI, 10 for Volume
+      if (putDominance > 1.5 && usePutMetric > metricThreshold) {
+        const strength = Math.min(putDominance * 20, 100)
+        const metricLabel = hasOIData ? 'OI' : 'Volume'
         supportLevels.push({
           strike,
           strength,
-          reason: `Heavy put OI (${putOI.toFixed(0)}) vs calls (${callOI.toFixed(
+          reason: `Heavy put ${metricLabel} (${usePutMetric.toFixed(0)}) vs calls (${useCallMetric.toFixed(
             0
           )}). Put buyers defending $${strike.toFixed(0)}.`,
         })
@@ -126,15 +134,21 @@ export function findDefensiveStrikes(
 
     // Resistance detection (call writers capping upside)
     if (strike > spotPrice) {
-      const callOIDominance = callOI / (putOI + 1)
-      const callVolDominance = callVolume / (putVolume + 1)
+      // ✅ Use OI if available, else fallback to Volume
+      const useCallMetric = hasOIData ? callOI : callVolume
+      const usePutMetric = hasOIData ? putOI : putVolume
+      const metricThreshold = hasOIData ? 100 : 10 // Lower threshold for volume
 
-      if (callOIDominance > 1.5 && callOI > 1000) {
-        const strength = Math.min(callOIDominance * 20, 100)
+      const callDominance = useCallMetric / (usePutMetric + 1)
+
+      // ✅ LOWERED THRESHOLD: 100 contracts for OI, 10 for Volume
+      if (callDominance > 1.5 && useCallMetric > metricThreshold) {
+        const strength = Math.min(callDominance * 20, 100)
+        const metricLabel = hasOIData ? 'OI' : 'Volume'
         resistanceLevels.push({
           strike,
           strength,
-          reason: `Heavy call OI (${callOI.toFixed(0)}) vs puts (${putOI.toFixed(
+          reason: `Heavy call ${metricLabel} (${useCallMetric.toFixed(0)}) vs puts (${usePutMetric.toFixed(
             0
           )}). Call writers capping $${strike.toFixed(0)}.`,
         })

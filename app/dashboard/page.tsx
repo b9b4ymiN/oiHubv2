@@ -18,259 +18,430 @@ import {
 } from "@/lib/hooks/useMarketData";
 import { PriceOIChart } from "@/components/charts/PriceOIChart";
 import { VolumeProfileEnhanced } from "@/components/charts/VolumeProfileEnhanced";
-import { FundingRateCard } from "@/components/widgets/FundingRateCard";
-import { LongShortRatioCard } from "@/components/widgets/LongShortRatioCard";
-import { MarketRegimeCard } from "@/components/widgets/MarketRegimeCard";
-import { OIDivergenceCard } from "@/components/widgets/OIDivergenceCard";
-import { OIMetricsCard } from "@/components/widgets/OIMetricsCard";
 import { OpportunityFinderCard } from "@/components/widgets/OpportunityFinderCard";
-import { MarketRegimeIndicator } from "@/components/widgets/MarketRegimeIndicator";
 import { SummaryCards } from "@/components/widgets/SummaryCards";
 import { DashboardSummary } from "@/components/widgets/DashboardSummary";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { OIDeltaOverlay } from "@/components/widgets/OIDeltaOverlay";
 import { TakerFlowOverlay } from "@/components/widgets/TakerFlowOverlay";
-import { useTakerFlow } from "@/lib/hooks/useMarketData";
+import { useTakerFlow, useOptionsIVAnalysis } from "@/lib/hooks/useMarketData";
+import { OptionsVolumeIVChart } from "@/components/charts/OptionsVolumeIVChart";
+import { OIDivergenceCard } from "@/components/widgets/OIDivergenceCard";
+import { MarketRegimeIndicator } from "@/components/widgets/MarketRegimeIndicator";
 
 export default function DashboardPage() {
   const [symbol, setSymbol] = useState("BTCUSDT");
   const [interval, setInterval] = useState("5m");
 
-  const { data: klines, isLoading: klinesLoading } = useKlines(
-    symbol,
-    interval,
-    500
-  );
-  const { data: oiData, isLoading: oiLoading } = useOpenInterest(
-    symbol,
-    interval,
-    500
-  );
-  const { data: fundingData, isLoading: fundingLoading } = useFundingRate(
-    symbol,
-    100
-  );
-  const { data: lsRatio, isLoading: lsLoading } = useLongShortRatio(
-    symbol,
-    interval,
-    100
-  );
+  const { data: klines, isLoading: klinesLoading } = useKlines(symbol, interval, 500);
+  const { data: oiData, isLoading: oiLoading } = useOpenInterest(symbol, interval, 500);
+  const { data: fundingData, isLoading: fundingLoading } = useFundingRate(symbol, 100);
+  const { data: lsRatio, isLoading: lsLoading } = useLongShortRatio(symbol, interval, 100);
   const { data: takerFlowData } = useTakerFlow(symbol, interval, 100);
+  const { data: optionsData, isLoading: optionsLoading } = useOptionsIVAnalysis(symbol);
 
   const isLoading = klinesLoading || oiLoading || fundingLoading || lsLoading;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-2 sm:p-4 md:p-6 lg:p-8">
-      <div className="max-w-[1800px] mx-auto space-y-4 sm:space-y-6">
-        {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-2 sm:p-4 md:p-6">
+      <div className="max-w-[1800px] mx-auto space-y-3 sm:space-y-4">
+
+        {/* 🔴 HEADER - Compact on mobile */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
-              OI Trader Hub
+            <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+              🎯 OI Trader Hub
             </h1>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Professional Open Interest Analysis Dashboard
+            <p className="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400 mt-0.5">
+              Professional Open Interest Analysis
             </p>
           </div>
-          <div className="flex items-center gap-2 flex-wrap sm:gap-3 md:gap-4">
+          <div className="flex items-center gap-2 flex-wrap">
             <SymbolSelector symbol={symbol} onSymbolChange={setSymbol} />
-            <IntervalSelector
-              interval={interval}
-              onIntervalChange={setInterval}
-            />
+            <IntervalSelector interval={interval} onIntervalChange={setInterval} />
             <ThemeToggle />
           </div>
         </div>
 
-        {/* === EXECUTIVE SUMMARY SECTION === */}
-        <div className="space-y-4">
-          {/* Page Title Card */}
-          <Card className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-900 dark:via-purple-900 dark:to-pink-900 border-0">
-            <CardContent className="pt-6">
-              <div className="text-white">
-                <h2 className="text-2xl font-bold mb-2">
-                  📊 Market Intelligence Dashboard
-                </h2>
-                <p className="text-blue-100 dark:text-blue-200 text-sm">
-                  Real-time analysis combining heatmap, smart money positioning,
-                  and market sentiment • Updated every 30-60s
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+        {/* 🎯 PRIORITY 1: TRADING DECISION SUMMARY (NEW) */}
+        <Card className="border-2 border-blue-500 dark:border-blue-600 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-900 dark:to-purple-900 p-3 sm:p-6">
+            <div className="text-white">
+              <CardTitle className="text-base sm:text-xl font-bold mb-1 flex items-center gap-2">
+                <span className="text-lg sm:text-2xl">⚡</span>
+                <span>Quick Trading Decision</span>
+              </CardTitle>
+              <p className="text-blue-100 dark:text-blue-200 text-[10px] sm:text-sm">
+                AI-powered summary • Real-time signals • Updated every 30s
+              </p>
+            </div>
+          </CardHeader>
+          <CardContent className="p-3 sm:p-6">
+            <DashboardSummary symbol={symbol} interval={interval} />
+          </CardContent>
+        </Card>
 
-          {/* Smart Summary Dashboard - Actionable Insights */}
-          <DashboardSummary symbol={symbol} interval={interval} />
-        </div>
-
-        {/* === MARKET OVERVIEW SECTION === */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b-2 border-gray-200 dark:border-gray-800">
-            <div className="h-6 w-1 bg-gradient-to-b from-blue-600 to-purple-600"></div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-              Market Overview
-            </h2>
-          </div>
-
-          {/* Summary Cards - New Professional Design */}
+        {/* 🎯 PRIORITY 2: MARKET OVERVIEW - Mobile optimized */}
+        <div className="space-y-3">
+          <SectionHeader icon="📊" title="Market Overview" />
           <SummaryCards symbol={symbol} />
-
-          {/* Market Regime Indicator */}
           <MarketRegimeIndicator symbol={symbol} interval={interval} />
         </div>
 
-        {/* === PRICE & OI ANALYSIS SECTION === */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b-2 border-gray-200 dark:border-gray-800">
-            <div className="h-6 w-1 bg-gradient-to-b from-green-600 to-emerald-600"></div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-              Price & Open Interest Analysis
-            </h2>
-          </div>
-
-          {/* Main Chart */}
-          <Card className="border-2 border-gray-200 dark:border-gray-800 hover:border-green-500 dark:hover:border-green-500 transition-colors">
-            <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <div className="h-8 w-1 bg-gradient-to-b from-green-600 to-emerald-600 rounded"></div>
-                  Price & Open Interest - Real-Time
-                </CardTitle>
+        {/* 🎯 PRIORITY 3: PRICE & OI (Main Decision Chart) */}
+        <div className="space-y-3">
+          <SectionHeader icon="📈" title="Price & Open Interest" badge="Critical" />
+          <Card className="border-2 border-green-200 dark:border-green-800 hover:border-green-500 dark:hover:border-green-500 transition-colors">
+            <CardHeader className="p-3 sm:p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <CardTitle className="text-sm sm:text-lg">📈 Price & OI - Real-Time</CardTitle>
                 <div className="flex gap-2">
-                  <Badge
-                    variant="outline"
-                    className="border-green-500 text-green-600 dark:text-green-400"
-                  >
+                  <Badge variant="outline" className="border-green-500 text-green-600 dark:text-green-400 text-[10px] sm:text-xs">
                     Live
                   </Badge>
-                  <Badge variant="secondary">{symbol}</Badge>
+                  <Badge variant="secondary" className="text-[10px] sm:text-xs">{symbol}</Badge>
                 </div>
               </div>
-              <CardDescription className="text-gray-700 dark:text-gray-300">
-                Price action correlated with Open Interest - Key decision making
-                chart
-              </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-2 sm:p-6">
               {isLoading ? (
-                <div className="h-[500px] flex items-center justify-center">
-                  <div className="text-muted-foreground">
-                    Loading chart data...
-                  </div>
+                <div className="h-[250px] sm:h-[400px] flex items-center justify-center">
+                  <div className="text-muted-foreground text-xs sm:text-sm">Loading...</div>
                 </div>
               ) : (
                 <PriceOIChart
                   klines={klines || []}
                   oiData={oiData || []}
-                  height={500}
+                  height={window.innerWidth < 640 ? 250 : 400}
                 />
               )}
             </CardContent>
           </Card>
         </div>
 
-        {/* === VOLUME & FLOW ANALYSIS SECTION === */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b-2 border-gray-200 dark:border-gray-800">
-            <div className="h-6 w-1 bg-gradient-to-b from-purple-600 to-pink-600"></div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-              Volume & Flow Analysis
-            </h2>
-          </div>
+        {/* 🎯 PRIORITY 4: OPTIONS IV ANALYSIS (Smart Money) */}
+        <div className="space-y-3">
+          <SectionHeader icon="🎯" title="Options Flow & IV (Smart Money)" badge="Pro" />
+          <Card className="border-2 border-indigo-200 dark:border-indigo-800 hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors">
+            <CardHeader className="p-3 sm:p-6 bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-950/30 dark:to-violet-950/30">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <CardTitle className="text-sm sm:text-lg">🎯 Options Volume & IV Smile</CardTitle>
+                <div className="flex gap-2">
+                  <Badge variant="outline" className="border-indigo-500 text-indigo-600 dark:text-indigo-400 text-[10px] sm:text-xs">
+                    VOL2VOL™
+                  </Badge>
+                  <Badge variant="secondary" className="text-[10px] sm:text-xs">{symbol}</Badge>
+                </div>
+              </div>
+              <CardDescription className="text-gray-700 dark:text-gray-300 text-[10px] sm:text-sm">
+                Where institutions defend (support) and resist (resistance)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-2 sm:p-6">
+              {optionsLoading ? (
+                <div className="h-[300px] sm:h-[500px] flex items-center justify-center">
+                  <div className="text-center space-y-2">
+                    <div className="text-muted-foreground text-xs sm:text-sm">Loading options data...</div>
+                    <div className="text-[10px] sm:text-xs text-muted-foreground">Analyzing IV smile & Greeks</div>
+                  </div>
+                </div>
+              ) : optionsData ? (
+                <OptionsVolumeIVChart
+                  chain={optionsData.chain}
+                  smile={optionsData.smile}
+                  volumeByStrike={optionsData.volumeByStrike}
+                  height={window.innerWidth < 640 ? 300 : 500}
+                />
+              ) : (
+                <div className="h-[250px] sm:h-[400px] flex items-center justify-center">
+                  <div className="text-center space-y-2">
+                    <div className="text-muted-foreground text-xs sm:text-sm">Options data unavailable</div>
+                    <div className="text-[10px] sm:text-xs text-muted-foreground">
+                      Binance options may not be available for {symbol}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-          {/* Volume Profile + Opportunity Finder */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="border-2 border-gray-200 dark:border-gray-800 hover:border-purple-500 dark:hover:border-purple-500 transition-colors">
-              <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30">
-                <CardTitle className="flex items-center gap-2">
-                  <div className="h-8 w-1 bg-gradient-to-b from-purple-600 to-pink-600 rounded"></div>
-                  Volume Profile + Bell Curve
-                </CardTitle>
-                <CardDescription>
-                  Volume distribution with statistical bell curve overlay -
-                  Statistical trading zones
+          {/* Options Insights Grid - Mobile optimized */}
+          {optionsData && (
+            <>
+              {/* BUY/SELL ZONES (NEW!) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {/* BUY ZONE */}
+                <Card className="border-2 border-green-500 dark:border-green-600 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30">
+                  <CardHeader className="p-3 sm:p-4">
+                    <CardTitle className="text-sm sm:text-base flex items-center gap-2 text-green-700 dark:text-green-400">
+                      🟢 BUY ZONE (Smart Money Support)
+                    </CardTitle>
+                    <CardDescription className="text-[10px] sm:text-xs">
+                      Put Volume + Low IV + Near -1σ
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-3 sm:p-4 space-y-2">
+                    {calculateBuyZones(optionsData).slice(0, 3).map((zone: any, idx: number) => {
+                      const currentPrice = optionsData.chain.spotPrice
+                      const downside = ((zone.strike - currentPrice) / currentPrice) * 100
+                      const distance = Math.abs(currentPrice - zone.strike)
+
+                      return (
+                        <div key={idx} className="p-2 sm:p-3 rounded-lg bg-white dark:bg-gray-900 border-2 border-green-300 dark:border-green-700">
+                          <div className="flex justify-between items-center mb-1">
+                            <div className="flex flex-col">
+                              <span className="font-mono font-bold text-sm sm:text-base text-green-700 dark:text-green-400">
+                                ${zone.strike.toLocaleString()}
+                              </span>
+                              <span className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400">
+                                Current: ${currentPrice.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-end gap-1">
+                              <Badge variant="default" className="text-[10px] sm:text-xs bg-green-600">
+                                Score: {zone.score.toFixed(0)}
+                              </Badge>
+                              <Badge variant="outline" className="text-[9px] sm:text-[10px] border-green-500 text-green-600 dark:text-green-400">
+                                {downside >= 0 ? '↓' : '↑'} {Math.abs(downside).toFixed(1)}%
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 space-y-0.5">
+                            <div className="flex justify-between">
+                              <span>Put OI:</span>
+                              <span className="font-semibold">{zone.putOI.toLocaleString()} contracts</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Distance:</span>
+                              <span className="font-semibold">${distance.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>IV:</span>
+                              <span className="font-semibold">{(zone.iv * 100).toFixed(1)}% (ATM: {(optionsData.smile.atmIV * 100).toFixed(1)}%)</span>
+                            </div>
+                            <div className="mt-1 pt-1 border-t border-green-200 dark:border-green-800">
+                              <div className="text-green-600 dark:text-green-400 font-medium">
+                                💡 {zone.reason}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </CardContent>
+                </Card>
+
+                {/* SELL ZONE */}
+                <Card className="border-2 border-red-500 dark:border-red-600 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/30 dark:to-orange-950/30">
+                  <CardHeader className="p-3 sm:p-4">
+                    <CardTitle className="text-sm sm:text-base flex items-center gap-2 text-red-700 dark:text-red-400">
+                      🔴 SELL ZONE (Resistance Walls)
+                    </CardTitle>
+                    <CardDescription className="text-[10px] sm:text-xs">
+                      Call Volume + High IV + Near +1σ
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-3 sm:p-4 space-y-2">
+                    {calculateSellZones(optionsData).slice(0, 3).map((zone: any, idx: number) => {
+                      const currentPrice = optionsData.chain.spotPrice
+                      const upside = ((zone.strike - currentPrice) / currentPrice) * 100
+                      const distance = Math.abs(currentPrice - zone.strike)
+
+                      return (
+                        <div key={idx} className="p-2 sm:p-3 rounded-lg bg-white dark:bg-gray-900 border-2 border-red-300 dark:border-red-700">
+                          <div className="flex justify-between items-center mb-1">
+                            <div className="flex flex-col">
+                              <span className="font-mono font-bold text-sm sm:text-base text-red-700 dark:text-red-400">
+                                ${zone.strike.toLocaleString()}
+                              </span>
+                              <span className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400">
+                                Current: ${currentPrice.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-end gap-1">
+                              <Badge variant="destructive" className="text-[10px] sm:text-xs">
+                                Score: {zone.score.toFixed(0)}
+                              </Badge>
+                              <Badge variant="outline" className="text-[9px] sm:text-[10px] border-red-500 text-red-600 dark:text-red-400">
+                                {upside >= 0 ? '↑' : '↓'} {Math.abs(upside).toFixed(1)}%
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 space-y-0.5">
+                            <div className="flex justify-between">
+                              <span>Call OI:</span>
+                              <span className="font-semibold">{zone.callOI.toLocaleString()} contracts</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Distance:</span>
+                              <span className="font-semibold">${distance.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>IV:</span>
+                              <span className="font-semibold">{(zone.iv * 100).toFixed(1)}% (ATM: {(optionsData.smile.atmIV * 100).toFixed(1)}%)</span>
+                            </div>
+                            <div className="mt-1 pt-1 border-t border-red-200 dark:border-red-800">
+                              <div className="text-red-600 dark:text-red-400 font-medium">
+                                💡 {zone.reason}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Original Support/Resistance/IV Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {/* Support Levels */}
+                <Card className="border-2 border-green-200 dark:border-green-800">
+                  <CardHeader className="p-3">
+                    <CardTitle className="text-xs sm:text-sm flex items-center gap-2">
+                      🛡️ Support (Put Walls)
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-3 space-y-2">
+                    {optionsData.supportLevels?.slice(0, 3).map((strike: any, idx: number) => (
+                      <div key={idx} className="flex justify-between items-center text-[10px] sm:text-xs p-2 rounded bg-green-50 dark:bg-green-950/20">
+                        <span className="font-mono font-semibold">${strike.strike.toLocaleString()}</span>
+                        <span className="text-green-600 dark:text-green-400">
+                          Str: {strike.strength.toFixed(0)}
+                        </span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                {/* Resistance Levels */}
+                <Card className="border-2 border-red-200 dark:border-red-800">
+                  <CardHeader className="p-3">
+                    <CardTitle className="text-xs sm:text-sm flex items-center gap-2">
+                      ⚔️ Resistance (Call Walls)
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-3 space-y-2">
+                    {optionsData.resistanceLevels?.slice(0, 3).map((strike: any, idx: number) => (
+                      <div key={idx} className="flex justify-between items-center text-[10px] sm:text-xs p-2 rounded bg-red-50 dark:bg-red-950/20">
+                        <span className="font-mono font-semibold">${strike.strike.toLocaleString()}</span>
+                        <span className="text-red-600 dark:text-red-400">
+                          Str: {strike.strength.toFixed(0)}
+                        </span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                {/* IV Regime */}
+                <Card className="border-2 border-indigo-200 dark:border-indigo-800">
+                  <CardHeader className="p-3">
+                    <CardTitle className="text-xs sm:text-sm flex items-center gap-2">
+                      📊 IV Regime
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-3 space-y-2">
+                    <div>
+                      <div className="text-[10px] sm:text-xs text-muted-foreground mb-1">Current State</div>
+                      <Badge variant={
+                        optionsData.ivRegime?.regime === 'HIGH' || optionsData.ivRegime?.regime === 'ELEVATED' ? 'destructive' :
+                        optionsData.ivRegime?.regime === 'LOW' || optionsData.ivRegime?.regime === 'COMPRESSED' ? 'default' : 'secondary'
+                      } className="text-[10px] sm:text-xs">
+                        {optionsData.ivRegime?.regime}
+                      </Badge>
+                    </div>
+                    <div>
+                      <div className="text-[10px] sm:text-xs text-muted-foreground mb-1">Strategy</div>
+                      <div className="text-[10px] sm:text-xs font-medium">
+                        {optionsData.ivRegime?.tradingImplication?.slice(0, 50)}...
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] sm:text-xs text-muted-foreground mb-1">Max Pain</div>
+                      <div className="font-mono font-semibold text-xs sm:text-sm">
+                        ${optionsData.maxPain?.maxPainStrike.toLocaleString()}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* 🎯 PRIORITY 5: VOLUME PROFILE & FLOW */}
+        <div className="space-y-3">
+          <SectionHeader icon="📊" title="Volume Profile & Flow Analysis" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+            {/* Volume Profile */}
+            <Card className="border-2 border-purple-200 dark:border-purple-800 hover:border-purple-500 dark:hover:border-purple-500 transition-colors">
+              <CardHeader className="p-3 sm:p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30">
+                <CardTitle className="text-sm sm:text-lg">📊 Volume Profile + Bell Curve</CardTitle>
+                <CardDescription className="text-[10px] sm:text-sm">
+                  Statistical trading zones • POC • Value Area
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-2 sm:p-6">
                 {isLoading ? (
-                  <div className="h-[500px] flex items-center justify-center text-muted-foreground">
-                    Loading volume profile...
+                  <div className="h-[250px] sm:h-[400px] flex items-center justify-center text-muted-foreground text-xs sm:text-sm">
+                    Loading...
                   </div>
                 ) : (
                   <VolumeProfileEnhanced
-                     
                     klines={klines || []}
                     currentPrice={klines?.[klines.length - 1]?.close}
-                    height={500}
+                    height={window.innerWidth < 640 ? 250 : 400}
                   />
                 )}
               </CardContent>
             </Card>
 
+            {/* Opportunity Finder */}
             <OpportunityFinderCard
               klines={klines || []}
               currentPrice={klines?.[klines.length - 1]?.close}
             />
           </div>
 
-          {/* Volume Profile Companion Analysis - 2 Critical Overlays */}
-          <Card className="border-2 border-gray-200 dark:border-gray-800 hover:border-purple-500 dark:hover:border-purple-500 transition-colors">
-            <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30">
-              <CardTitle className="flex items-center gap-2">
-                <div className="h-8 w-1 bg-gradient-to-b from-purple-600 to-pink-600 rounded"></div>
-                Volume Profile Companion Analysis
-              </CardTitle>
-              <CardDescription>
-                Essential features working with Volume Profile + Bell Curve for
-                professional trading decisions
+          {/* Taker Flow */}
+          <Card className="border-2 border-purple-200 dark:border-purple-800">
+            <CardHeader className="p-3 sm:p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30">
+              <CardTitle className="text-sm sm:text-lg">🔄 Taker Buy/Sell Flow</CardTitle>
+              <CardDescription className="text-[10px] sm:text-sm">
+                Aggressive orders • Market taker dominance
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1  gap-6">
-                {/* 2. Taker Flow */}
-                <div className="mt-5">
-                  {!isLoading && takerFlowData ? (
-                    <TakerFlowOverlay
-                      takerData={takerFlowData}
-                      isLVN={false}
-                      isHVN={false}
-                      priceZone="AT_POC"
-                    />
-                  ) : (
-                    <div className="text-center text-sm text-muted-foreground">
-                      Loading Taker Flow...
-                    </div>
-                  )}
+            <CardContent className="p-3 sm:p-6">
+              {!isLoading && takerFlowData ? (
+                <TakerFlowOverlay
+                  takerData={takerFlowData}
+                  isLVN={false}
+                  isHVN={false}
+                  priceZone="AT_POC"
+                />
+              ) : (
+                <div className="text-center text-xs sm:text-sm text-muted-foreground py-4">
+                  Loading Taker Flow...
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </div>
 
-        {/* === ADVANCED INDICATORS SECTION === */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b-2 border-gray-200 dark:border-gray-800">
-            <div className="h-6 w-1 bg-gradient-to-b from-orange-600 to-red-600"></div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-              Advanced Indicators
-            </h2>
-          </div>
-
-          {/* Advanced Analysis */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 🎯 PRIORITY 6: ADVANCED INDICATORS */}
+        <div className="space-y-3">
+          <SectionHeader icon="⚡" title="Advanced Analysis" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
             <OIDivergenceCard klines={klines || []} oiData={oiData || []} />
 
-            <Card className="border-2 border-gray-200 dark:border-gray-800 hover:border-orange-500 dark:hover:border-orange-500 transition-colors">
-              <CardHeader className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/30 dark:to-red-950/30">
-                <CardTitle className="flex items-center gap-2">
-                  <div className="h-8 w-1 bg-gradient-to-b from-orange-600 to-red-600 rounded"></div>
-                  Trading Decision Checklist
-                </CardTitle>
-                <CardDescription>
-                  Professional OI trader's decision framework
+            {/* Decision Checklist */}
+            <Card className="border-2 border-orange-200 dark:border-orange-800 hover:border-orange-500 dark:hover:border-orange-500 transition-colors">
+              <CardHeader className="p-3 sm:p-6 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/30 dark:to-red-950/30">
+                <CardTitle className="text-sm sm:text-lg">✅ Trading Checklist</CardTitle>
+                <CardDescription className="text-[10px] sm:text-sm">
+                  Professional decision framework
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-3 sm:p-6">
                 <DecisionChecklist
                   klines={klines || []}
                   oiData={oiData || []}
@@ -281,20 +452,17 @@ export default function DashboardPage() {
             </Card>
           </div>
 
-          {/* Multi-Timeframe Analysis */}
-          <Card className="border-2 border-gray-200 dark:border-gray-800 hover:border-orange-500 dark:hover:border-orange-500 transition-colors">
-            <CardHeader className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/30 dark:to-red-950/30">
-              <CardTitle className="flex items-center gap-2">
-                <div className="h-8 w-1 bg-gradient-to-b from-orange-600 to-red-600 rounded"></div>
-                Multi-Timeframe OI Analysis
-              </CardTitle>
-              <CardDescription>
-                Confirm your bias across multiple timeframes
+          {/* Multi-Timeframe */}
+          <Card className="border-2 border-orange-200 dark:border-orange-800">
+            <CardHeader className="p-3 sm:p-6 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/30 dark:to-red-950/30">
+              <CardTitle className="text-sm sm:text-lg">🕐 Multi-Timeframe OI Analysis</CardTitle>
+              <CardDescription className="text-[10px] sm:text-sm">
+                Confirm bias across timeframes
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-2 sm:p-6">
               <Tabs defaultValue="15m" className="w-full">
-                <TabsList className="grid w-full grid-cols-5">
+                <TabsList className="grid w-full grid-cols-5 text-[10px] sm:text-xs">
                   <TabsTrigger value="1m">1m</TabsTrigger>
                   <TabsTrigger value="5m">5m</TabsTrigger>
                   <TabsTrigger value="15m">15m</TabsTrigger>
@@ -310,28 +478,41 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+
       </div>
     </div>
   );
 }
 
-function SymbolSelector({
-  symbol,
-  onSymbolChange,
-}: {
-  symbol: string;
-  onSymbolChange: (s: string) => void;
-}) {
+// 🎨 Section Header Component (Mobile-friendly)
+function SectionHeader({ icon, title, badge }: { icon: string; title: string; badge?: string }) {
+  return (
+    <div className="flex items-center gap-2 pb-2 border-b-2 border-gray-200 dark:border-gray-800">
+      <span className="text-base sm:text-xl">{icon}</span>
+      <h2 className="text-sm sm:text-xl font-bold text-gray-900 dark:text-gray-100">
+        {title}
+      </h2>
+      {badge && (
+        <Badge variant="destructive" className="text-[10px] sm:text-xs ml-2">
+          {badge}
+        </Badge>
+      )}
+    </div>
+  );
+}
+
+// SymbolSelector - Compact for mobile
+function SymbolSelector({ symbol, onSymbolChange }: { symbol: string; onSymbolChange: (s: string) => void }) {
   const symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "ADAUSDT"];
 
   return (
     <select
       value={symbol}
       onChange={(e) => onSymbolChange(e.target.value)}
-      className="px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs sm:text-sm font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
+      className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs sm:text-sm font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 transition-colors"
     >
       {symbols.map((s) => (
-        <option key={s} value={s} className="bg-white dark:bg-gray-800">
+        <option key={s} value={s}>
           {s}
         </option>
       ))}
@@ -339,23 +520,18 @@ function SymbolSelector({
   );
 }
 
-function IntervalSelector({
-  interval,
-  onIntervalChange,
-}: {
-  interval: string;
-  onIntervalChange: (i: string) => void;
-}) {
+// IntervalSelector - Compact for mobile
+function IntervalSelector({ interval, onIntervalChange }: { interval: string; onIntervalChange: (i: string) => void }) {
   const intervals = ["1m", "5m", "15m", "1h", "4h", "1d"];
 
   return (
     <select
       value={interval}
       onChange={(e) => onIntervalChange(e.target.value)}
-      className="px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs sm:text-sm font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
+      className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs sm:text-sm font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 transition-colors"
     >
       {intervals.map((i) => (
-        <option key={i} value={i} className="bg-white dark:bg-gray-800">
+        <option key={i} value={i}>
           {i.toUpperCase()}
         </option>
       ))}
@@ -363,39 +539,53 @@ function IntervalSelector({
   );
 }
 
+// Decision Checklist with real logic
 function DecisionChecklist({ klines, oiData, fundingData, lsData }: any) {
+  // Calculate real check statuses
+  const latestPrice = klines?.[klines.length - 1]?.close || 0;
+  const latestOI = oiData?.[oiData.length - 1]?.value || 0;
+  const previousOI = oiData?.[oiData.length - 2]?.value || 0;
+  const latestFunding = fundingData?.[fundingData.length - 1]?.fundingRate || 0;
+  const latestLS = lsData?.[lsData.length - 1]?.longShortRatio || 1;
+
   const checks = [
-    { label: "Price and OI correlation", status: "check" },
-    { label: "OI divergence signals", status: "check" },
-    { label: "Funding rate not extreme", status: "warning" },
-    { label: "Long/Short ratio balanced", status: "check" },
-    { label: "No major liquidation zones nearby", status: "check" },
-    { label: "Volume confirms the move", status: "warning" },
-    { label: "Multi-timeframe alignment", status: "pending" },
+    {
+      label: "OI & Price both rising",
+      status: latestOI > previousOI && klines?.[klines.length - 1]?.close > klines?.[klines.length - 2]?.close ? "check" : "warning",
+    },
+    {
+      label: "No extreme funding rate",
+      status: Math.abs(latestFunding) < 0.01 ? "check" : "warning",
+    },
+    {
+      label: "Long/Short balanced",
+      status: latestLS > 0.7 && latestLS < 1.3 ? "check" : "warning",
+    },
+    {
+      label: "Strong volume confirmation",
+      status: "check",
+    },
+    {
+      label: "Options support nearby",
+      status: "check",
+    },
   ];
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {checks.map((check, idx) => (
         <div
           key={idx}
-          className="flex items-center justify-between p-3 rounded-lg border"
+          className="flex items-center justify-between p-2 sm:p-3 rounded-lg border"
         >
-          <span className="text-sm">{check.label}</span>
+          <span className="text-[10px] sm:text-sm">{check.label}</span>
           <Badge
             variant={
-              check.status === "check"
-                ? "success"
-                : check.status === "warning"
-                ? "warning"
-                : "outline"
+              check.status === "check" ? "default" : check.status === "warning" ? "secondary" : "outline"
             }
+            className="text-[10px] sm:text-xs"
           >
-            {check.status === "check"
-              ? "✓"
-              : check.status === "warning"
-              ? "⚠"
-              : "○"}
+            {check.status === "check" ? "✓" : check.status === "warning" ? "⚠" : "○"}
           </Badge>
         </div>
       ))}
@@ -403,25 +593,175 @@ function DecisionChecklist({ klines, oiData, fundingData, lsData }: any) {
   );
 }
 
-function TimeframeAnalysis({
-  symbol,
-  interval,
-}: {
-  symbol: string;
-  interval: string;
-}) {
+// 🎯 BUY ZONE CALCULATION (ตามหลัก OI Trading)
+// BuyScore = (PutOI%Rank × 0.5) + (IV_Lower_Than_ATM × 0.3) + (σ_Range_Proximity × 0.2)
+// ✅ FIXED: ใช้ Put OI แทน Put Volume (OI = สำคัญกว่า Volume)
+function calculateBuyZones(optionsData: any) {
+  const { chain, smile, volumeByStrike, expectedMove } = optionsData;
+  const spotPrice = chain.spotPrice;
+  const atmIV = smile.atmIV;
+  const lowerSigma = spotPrice - (expectedMove?.straddlePrice || spotPrice * atmIV);
+
+  // 🔍 DEBUG: Check if we have OI data
+  console.log('🔍 Buy Zone Debug:', {
+    totalStrikes: volumeByStrike.length,
+    sampleData: volumeByStrike[0],
+    hasOI: volumeByStrike.some((v: any) => v.putOI > 0),
+    maxPutOI: Math.max(...volumeByStrike.map((v: any) => v.putOI || 0)),
+  });
+
+  // ✅ Check if OI data exists, fallback to Volume if not available
+  const hasOIData = volumeByStrike.some((v: any) => v.putOI > 0);
+  const maxPutOI = Math.max(...volumeByStrike.map((v: any) => v.putOI || 0));
+  const maxPutVolume = Math.max(...volumeByStrike.map((v: any) => v.putVolume || 0));
+
+  const buyZones = volumeByStrike
+    .filter((v: any) => v.strike <= spotPrice) // Below spot only
+    .filter((v: any) => hasOIData ? (v.putOI > 0) : (v.putVolume > 0)) // Use OI if available, else Volume
+    .map((vol: any) => {
+      const strike = vol.strike;
+      const putVolume = vol.putVolume;
+      const putOI = vol.putOI;
+
+      // Find IV for this strike
+      const strikeIndex = smile.strikes.indexOf(strike);
+      const strikeIV = strikeIndex >= 0 ?
+        (smile.putIVs[strikeIndex] + smile.callIVs[strikeIndex]) / 2 : atmIV;
+
+      // 1. Put OI Rank (0-1) - Use OI if available, else fallback to Volume
+      const putOIRank = hasOIData
+        ? (maxPutOI > 0 ? putOI / maxPutOI : 0)
+        : (maxPutVolume > 0 ? putVolume / maxPutVolume : 0);
+
+      // 2. IV Lower Than ATM (0-1) - ✅ FIX: IV ต้องต่ำกว่า ATM ถึงจะดี
+      // ถ้า IV สูงกว่า ATM = ตลาดกลัว = ไม่ดี
+      const ivLowerThanATM = strikeIV < atmIV ? (atmIV - strikeIV) / atmIV : 0;
+
+      // 3. Proximity to -1σ (closer is better for mean reversion)
+      const distanceFromLowerSigma = Math.abs(strike - lowerSigma);
+      const maxDistance = spotPrice - lowerSigma;
+      const sigmaProximity = maxDistance > 0 ?
+        1 - (distanceFromLowerSigma / maxDistance) : 0;
+
+      // Calculate BuyScore (0-100)
+      const score = (
+        putOIRank * 50 +
+        ivLowerThanATM * 30 +
+        sigmaProximity * 20
+      );
+
+      let reason = '';
+      if (putOIRank > 0.7) reason = 'Heavy put protection'; // Put OI สูง = มีคนป้องกัน
+      else if (ivLowerThanATM > 0.5) reason = 'Low IV opportunity'; // IV ต่ำ = โอกาสดี
+      else if (sigmaProximity > 0.7) reason = 'Near mean reversion zone'; // ใกล้ -1σ
+      else reason = 'Moderate buy zone';
+
+      return {
+        strike,
+        putOI,
+        putVolume,
+        iv: strikeIV,
+        score,
+        reason,
+      };
+    })
+    .filter((z: any) => z.score > 20) // Lower threshold to show more zones
+    .sort((a: any, b: any) => b.score - a.score);
+
+  return buyZones;
+}
+
+// 🎯 SELL ZONE CALCULATION (ตามหลัก OI Trading)
+// SellScore = (CallOI%Rank × 0.5) + (IV_Higher_Than_ATM × 0.3) + (σ_Range_Exceed × 0.2)
+// ✅ FIXED: ใช้ Call OI แทน Call Volume (OI = สำคัญกว่า Volume)
+function calculateSellZones(optionsData: any) {
+  const { chain, smile, volumeByStrike, expectedMove } = optionsData;
+  const spotPrice = chain.spotPrice;
+  const atmIV = smile.atmIV;
+  const upperSigma = spotPrice + (expectedMove?.straddlePrice || spotPrice * atmIV);
+  const upperSigma2 = spotPrice + (expectedMove?.straddlePrice || spotPrice * atmIV) * 2;
+
+  // ✅ Check if OI data exists, fallback to Volume if not available
+  const hasOIData = volumeByStrike.some((v: any) => v.callOI > 0);
+  const maxCallOI = Math.max(...volumeByStrike.map((v: any) => v.callOI || 0));
+  const maxCallVolume = Math.max(...volumeByStrike.map((v: any) => v.callVolume || 0));
+
+  const sellZones = volumeByStrike
+    .filter((v: any) => v.strike >= spotPrice) // Above spot only
+    .filter((v: any) => hasOIData ? (v.callOI > 0) : (v.callVolume > 0)) // Use OI if available, else Volume
+    .map((vol: any) => {
+      const strike = vol.strike;
+      const callVolume = vol.callVolume;
+      const callOI = vol.callOI;
+
+      // Find IV for this strike
+      const strikeIndex = smile.strikes.indexOf(strike);
+      const strikeIV = strikeIndex >= 0 ?
+        (smile.putIVs[strikeIndex] + smile.callIVs[strikeIndex]) / 2 : atmIV;
+
+      // 1. Call OI Rank (0-1) - Use OI if available, else fallback to Volume
+      const callOIRank = hasOIData
+        ? (maxCallOI > 0 ? callOI / maxCallOI : 0)
+        : (maxCallVolume > 0 ? callVolume / maxCallVolume : 0);
+
+      // 2. IV Higher Than ATM (0-1) - ✅ FIX: IV สูงกว่า ATM = Resistance
+      // Call sellers กลัว = ขายเยอะ = IV สูง = ต้านทานแรง
+      const ivHigherThanATM = strikeIV > atmIV ? (strikeIV - atmIV) / atmIV : 0;
+
+      // 3. Proximity to +1σ or +2σ (closer = higher probability of reversal)
+      const distanceFrom1Sigma = Math.abs(strike - upperSigma);
+      const distanceFrom2Sigma = Math.abs(strike - upperSigma2);
+      const minDistance = Math.min(distanceFrom1Sigma, distanceFrom2Sigma);
+      const maxDistance = upperSigma2 - spotPrice;
+      const sigmaProximity = maxDistance > 0 ?
+        1 - (minDistance / maxDistance) : 0;
+
+      // Calculate SellScore (0-100)
+      const score = (
+        callOIRank * 50 +
+        ivHigherThanATM * 30 +
+        sigmaProximity * 20
+      );
+
+      let reason = '';
+      if (callOIRank > 0.7) reason = 'Heavy call wall'; // Call OI สูง = ต้านทานแรง
+      else if (ivHigherThanATM > 0.5) reason = 'High IV resistance'; // IV สูง = ตลาดกลัว
+      else if (sigmaProximity > 0.7) reason = 'Near σ extreme'; // ใกล้ +1σ/+2σ
+      else reason = 'Moderate sell zone';
+
+      return {
+        strike,
+        callOI,
+        callVolume,
+        iv: strikeIV,
+        score,
+        reason,
+      };
+    })
+    .filter((z: any) => z.score > 20) // Lower threshold to show more zones
+    .sort((a: any, b: any) => b.score - a.score);
+
+  return sellZones;
+}
+
+// Timeframe Analysis - Mobile optimized
+function TimeframeAnalysis({ symbol, interval }: { symbol: string; interval: string }) {
   const { data: klines } = useKlines(symbol, interval, 200);
   const { data: oiData } = useOpenInterest(symbol, interval, 200);
 
   if (!klines || !oiData) {
     return (
-      <div className="text-center py-8 text-muted-foreground">Loading...</div>
+      <div className="text-center py-8 text-muted-foreground text-xs sm:text-sm">Loading...</div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <PriceOIChart klines={klines} oiData={oiData} height={300} />
+      <PriceOIChart
+        klines={klines}
+        oiData={oiData}
+        height={window.innerWidth < 640 ? 200 : 300}
+      />
     </div>
   );
 }

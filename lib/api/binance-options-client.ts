@@ -126,9 +126,30 @@ export class BinanceOptionsClient {
    * @returns Complete options chain with calls and puts
    */
   async getOptionsChain(underlying: string, expiryDate: number): Promise<OptionsChain> {
-    // Get all tickers to filter by underlying and expiry
+    // ✅ FIX: Use /mark endpoint for IV data (not /ticker)
     const allTickers = await this.get24hrTicker()
+    const allMarks = await this.getMarkPrice() // Get mark prices with IV
     const indexData = await this.getIndexPrice(underlying)
+
+    // 🔍 DEBUG: Check if OI data exists in the API response
+    const btcTickers = allTickers.filter((t: any) => t.symbol?.startsWith('BTC-'))
+    const sampleBTC = btcTickers[0] || allTickers[0]
+
+    console.log('🔍 Options API Debug - OI Data Check:', {
+      totalTickers: allTickers.length,
+      totalMarks: allMarks.length,
+      sampleTicker: sampleBTC ? {
+        symbol: sampleBTC.symbol,
+        volume: sampleBTC.volume,
+        openInterest: sampleBTC.openInterest,
+        hasOI: !!sampleBTC.openInterest && parseFloat(sampleBTC.openInterest) > 0,
+        oiValue: parseFloat(sampleBTC.openInterest || '0'),
+      } : 'No data',
+      oiStats: {
+        tickersWithOI: allTickers.filter((t: any) => t.openInterest && parseFloat(t.openInterest) > 0).length,
+        maxOI: Math.max(...allTickers.map((t: any) => parseFloat(t.openInterest || '0'))),
+      },
+    })
 
     // Filter options for this underlying and expiry date
     const filteredOptions = allTickers.filter((ticker: any) => {
@@ -162,6 +183,9 @@ export class BinanceOptionsClient {
         strikes.push(strike)
       }
 
+      // ✅ FIX: Get IV from mark price data (not ticker)
+      const markData = allMarks.find((m: any) => m.symbol === ticker.symbol)
+
       const contract: OptionContract = {
         symbol: ticker.symbol,
         underlying,
@@ -170,18 +194,19 @@ export class BinanceOptionsClient {
         type,
 
         lastPrice: parseFloat(ticker.lastPrice || '0'),
-        markPrice: parseFloat(ticker.markPrice || '0'),
+        markPrice: parseFloat(ticker.markPrice || markData?.markPrice || '0'),
         bidPrice: parseFloat(ticker.bidPrice || '0'),
         askPrice: parseFloat(ticker.askPrice || '0'),
 
         volume: parseFloat(ticker.volume || '0'),
         openInterest: parseFloat(ticker.openInterest || '0'),
 
-        impliedVolatility: parseFloat(ticker.markIv || '0'),
-        delta: parseFloat(ticker.delta || '0'),
-        gamma: parseFloat(ticker.gamma || '0'),
-        theta: parseFloat(ticker.theta || '0'),
-        vega: parseFloat(ticker.vega || '0'),
+        // ✅ Use markIV from /mark endpoint
+        impliedVolatility: parseFloat(markData?.markIV || '0'),
+        delta: parseFloat(markData?.delta || '0'),
+        gamma: parseFloat(markData?.gamma || '0'),
+        theta: parseFloat(markData?.theta || '0'),
+        vega: parseFloat(markData?.vega || '0'),
 
         timestamp: Date.now(),
       }
