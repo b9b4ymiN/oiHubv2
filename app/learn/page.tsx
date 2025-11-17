@@ -138,10 +138,8 @@ export default function LearnPage() {
                 <OptionsVolumeIVChart
                   chain={optionsData.chain}
                   volumeByStrike={optionsData.volumeByStrike}
-                  volatilitySmile={optionsData.volatilitySmile}
-                  expectedMove={optionsData.expectedMove}
-                  title="BTC Options Analysis - Interactive Tutorial"
-                  tutorialMode={true}
+                  smile={optionsData.smile}
+                  height={600}
                 />
               )}
             </CardContent>
