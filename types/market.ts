@@ -178,3 +178,151 @@ export type DataPoint = OHLCV & {
   openInterest?: number
 }
 
+// ============================================
+// OPTIONS & IMPLIED VOLATILITY TYPES
+// ============================================
+
+export interface OptionContract {
+  symbol: string           // BTCUSDT-250131-100000-C
+  underlying: string       // BTCUSDT
+  strike: number          // 100000
+  expiryDate: number      // timestamp
+  type: 'CALL' | 'PUT'
+
+  // Pricing
+  lastPrice: number
+  markPrice: number
+  bidPrice: number
+  askPrice: number
+
+  // Volume & OI
+  volume: number
+  openInterest: number
+
+  // Greeks & IV
+  impliedVolatility: number
+  delta?: number
+  gamma?: number
+  theta?: number
+  vega?: number
+
+  timestamp: number
+}
+
+export interface OptionsChain {
+  underlying: string
+  spotPrice: number
+  expiryDate: number
+
+  calls: OptionContract[]
+  puts: OptionContract[]
+
+  strikes: number[]
+  atmStrike: number
+
+  timestamp: number
+}
+
+export interface VolatilitySmile {
+  underlying: string
+  expiryDate: number
+
+  strikes: number[]
+  callIVs: number[]
+  putIVs: number[]
+
+  atmIV: number
+  atmStrike: number
+
+  // Skew metrics
+  skew: number              // Put IV - Call IV at ATM
+  skewDirection: 'PUT_SKEW' | 'CALL_SKEW' | 'NEUTRAL'
+
+  // IV percentiles
+  ivRank?: number           // 0-100, current IV vs 1Y range
+  ivPercentile?: number     // 0-100
+
+  timestamp: number
+}
+
+export interface OptionsVolumeByStrike {
+  strike: number
+
+  putVolume: number
+  callVolume: number
+
+  putOI: number
+  callOI: number
+
+  netVolume: number         // call - put
+  netOI: number            // call - put
+
+  putCallVolumeRatio: number
+  putCallOIRatio: number
+
+  // Defensive levels
+  isSupport?: boolean       // heavy put buying
+  isResistance?: boolean    // heavy call writing
+}
+
+export interface ExpectedMove {
+  underlying: string
+  spotPrice: number
+  expiryDate: number
+  daysToExpiry: number
+
+  // Calculation based on ATM Straddle
+  atmStrike: number
+  atmCallPrice: number
+  atmPutPrice: number
+  straddlePrice: number
+
+  // Expected range
+  expectedMovePercent: number
+  upperBound: number
+  lowerBound: number
+
+  // Alternative calculation using IV
+  atmIV: number
+  ivBasedMove?: number
+
+  timestamp: number
+}
+
+export interface OptionsFlowSignal {
+  timestamp: number
+  strike: number
+  type: 'CALL' | 'PUT'
+
+  flowType: 'AGGRESSIVE_BUY' | 'AGGRESSIVE_SELL' | 'LARGE_BLOCK' | 'SWEEP'
+
+  volume: number
+  openInterest: number
+  oiChange: number
+
+  impliedVolatility: number
+  ivChange: number
+
+  // Signal interpretation
+  bias: 'BULLISH' | 'BEARISH' | 'NEUTRAL'
+  strength: number          // 0-100
+
+  description: string
+}
+
+export interface IVRegime {
+  underlying: string
+
+  currentIV: number
+  ivRank: number            // 0-100 vs 1Y
+  ivPercentile: number      // 0-100
+
+  regime: 'EXPANSION' | 'COLLAPSE' | 'ELEVATED' | 'COMPRESSED' | 'NORMAL'
+
+  // Expected move impact
+  expectedDailyMove: number
+
+  description: string
+  tradingImplication: string
+}
+
