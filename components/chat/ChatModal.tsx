@@ -13,6 +13,8 @@ export function ChatModal() {
   const { messages, isLoading, sendMessage } = useOITraderChat()
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
+  console.log('ChatModal rendered:', { isOpen, messagesCount: messages.length, isLoading })
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
@@ -26,6 +28,7 @@ export function ChatModal() {
     if (!input.trim() || isLoading) return
 
     const message = input.trim()
+    console.log('Sending message:', message)
     setInput('')
     await sendMessage(message)
   }

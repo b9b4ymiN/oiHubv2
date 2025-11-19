@@ -27,7 +27,6 @@ import { useTakerFlow, useOptionsIVAnalysis } from "@/lib/hooks/useMarketData";
 import { OptionsVolumeIVChart } from "@/components/charts/OptionsVolumeIVChart";
 import { OIDivergenceCard } from "@/components/widgets/OIDivergenceCard";
 import { MarketRegimeIndicator } from "@/components/widgets/MarketRegimeIndicator";
-import { OITraderChatButton } from "@/components/ai/OITraderChatModal";
 
 export default function DashboardPage() {
   const [symbol, setSymbol] = useState("BTCUSDT");
@@ -61,7 +60,6 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-blur-bg-primary">
       <BlurNav />
-      <OITraderChatButton />
 
       <div
         className="max-w-[1800px] mt-12
