@@ -1,761 +1,258 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ChevronRight, TrendingUp, Shield, Zap, BarChart3, Target, CheckCircle2 } from 'lucide-react'
+import { BlurNav } from '@/components/navigation/blur-nav'
+import { BlurCard, BlurCardHeader, BlurCardTitle, BlurCardDescription, BlurCardContent } from '@/components/ui/blur-card'
+import { BlurButton } from '@/components/ui/blur-button'
+import { TrendingUp, Shield, Zap, BarChart3, Target, Eye } from 'lucide-react'
 
-const content = {
-  en: {
-    title: 'OI Trader Hub',
-    subtitle: 'Professional Futures Open Interest Analysis Platform',
-    rating: 'Professional Rating: 8.5/10 - Highly Sufficient',
-    cta: 'Launch Dashboard',
-    features: {
-      title: 'Core Features',
-      items: [
-        {
-          icon: '📊',
-          title: 'Statistical Analysis',
-          desc: 'Volume Profile with Bell Curve (±1σ, ±2σ, ±3σ) for probability-based trading'
-        },
-        {
-          icon: '🎯',
-          title: 'OI Divergence Detection',
-          desc: 'Automated signals for traps and continuations with confidence scoring'
-        },
-        {
-          icon: '⚡',
-          title: 'Smart Money Tracking',
-          desc: 'Taker flow analysis, OI delta by price, and position building detection'
-        }
-      ]
+export default function HomePage() {
+  const features = [
+    {
+      icon: BarChart3,
+      title: 'OPTIONS IV ANALYSIS',
+      description: 'Real-time implied volatility tracking with volatility smile visualization and Greeks analysis',
+      color: 'text-blur-orange',
     },
-    highlights: {
-      title: 'What Makes This Different',
-      items: [
-        '✅ 90% information sufficiency for professional trading',
-        '✅ AI-powered opportunity finder with entry/target/stop levels',
-        '✅ Multi-factor validation (7+ independent indicators)',
-        '✅ Expected win rate: 65-70% on high-confidence setups (>80%)',
-        '✅ Free alternative to $50-100/month professional tools'
-      ]
+    {
+      icon: Shield,
+      title: 'SUPPORT & RESISTANCE',
+      description: 'Auto-detect key levels from options OI concentration and heavy dealer positioning',
+      color: 'text-blur-green',
     },
-    guides: {
-      title: 'Chart Guides - How to Use Each Tool',
-      items: [
-        {
-          title: 'Summary Cards',
-          what: 'Shows 24h OI change, funding bias, taker flow, and top trader positioning - reveals if leverage is piling into longs/shorts and if aggressive flow confirms the build.',
-          steps: [
-            'Check if OI change is >+2% (strong position building)',
-            'Verify taker flow shows AGGRESSIVE_BUY (smart money entering)',
-            'Confirm funding rate is <0.05% (not overheated)',
-            'If all align → Open LONG position',
-            'If OI turns negative with AGGRESSIVE_SELL → Close/Fade position',
-            'If funding exceeds ±0.08% → Reduce size or exit',
-            'If cards disagree → Stand aside, no trade'
-          ]
-        },
-        {
-          title: 'Market Regime Indicator',
-          what: 'Blends price trend, OI delta, taker flow, and funding into named regimes (TRENDING, OVERHEATED, SQUEEZE, etc.) with risk badges.',
-          steps: [
-            'Look for TRENDING regime with LOW risk badge',
-            'Trade in direction of the trend with standard position size',
-            'When OVERHEATED appears → Tighten stop losses immediately',
-            'When HIGH_VOL_SQUEEZE flashes → Reduce position size by 50%',
-            'When LOW_LIQ_TRAP shows → Exit all positions and wait',
-            'Only re-enter when regime returns to TRENDING or HEALTHY'
-          ]
-        },
-        {
-          title: 'Price & OI Chart',
-          what: 'Overlays closing price, OI, and volume - shows if rallies are backed by new positions (price↑ OI↑), short-covering (price↑ OI↓), or liquidation chop.',
-          steps: [
-            'Check if price and OI both trending up → Strong bullish continuation',
-            'If yes → Enter LONG, ride the trend',
-            'Check if price up but OI falling → Short squeeze happening',
-            'If yes → Fade the move, prepare SHORT after exhaustion',
-            'Check if price and OI both falling → Bearish continuation',
-            'If yes → Enter SHORT or hold shorts',
-            'If both lines flat/sideways → No trade, wait for clarity'
-          ]
-        },
-        {
-          title: 'Volume Profile + Bell Curve',
-          what: 'Exposes POC, value area, sigma ranges, LVN/HVN zones, and probability bands - shows where market considers "fair value" vs extremes.',
-          steps: [
-            'Find current price position on the bell curve',
-            'If price at -1σ or Value Area Low → Oversold zone',
-            'Enter LONG with target at POC (mean)',
-            'If price at +2σ or +3σ → Overbought zone',
-            'Enter SHORT with target back to POC',
-            'If price at POC → Wait for taker flow confirmation first',
-            'Set stop loss beyond ±3σ (99.7% confidence level)'
-          ]
-        },
-        {
-          title: 'Opportunity Finder',
-          what: 'Converts profile into specific entry/target/stop ideas with confidence scores, R:R ratios, and zone explanations.',
-          steps: [
-            'Look at the top setup displayed',
-            'Check confidence score → Must be ≥70%',
-            'Check Risk:Reward ratio → Must be ≥2:1',
-            'If both criteria met → Use the exact entry/target/stop prices shown',
-            'Review alternate setups only if they align with main zone bias',
-            'If card shows "No setups" → Do not trade, wait',
-            'If zone = VALUE with no confluence → Skip, too risky'
-          ]
-        },
-        {
-          title: 'OI Delta Overlay',
-          what: 'Buckets OI changes by price level - highlights where longs/shorts are building or unwinding and how intense each pocket is.',
-          steps: [
-            'Find "Build Long" clusters on the chart',
-            'Note prices below current level → These are support zones',
-            'Buy when price approaches these Build Long zones',
-            'Find "Build Short" clusters above price → Resistance zones',
-            'Sell/short when price reaches these levels',
-            'If you see "Unwind Long" or "Unwind Short" → Wait!',
-            'Unwinding = liquidations coming, let it finish before entering'
-          ]
-        },
-        {
-          title: 'Taker Flow Overlay',
-          what: 'Measures aggressive buy vs sell flow, cumulative bias - emits STRONG_LONG/SHORT/BREAKOUT/FAKEOUT/WAIT signals with net-flow bars.',
-          steps: [
-            'Check the current signal displayed',
-            'If STRONG_LONG at LVN or POC zone → Enter LONG immediately',
-            'If BREAKOUT signal at LVN → Join the breakout, go LONG',
-            'If STRONG_SHORT at HVN zone → Fade it, go SHORT',
-            'If FAKEOUT signal at HVN → Do not chase, prepare reverse',
-            'If WAIT signal with bars oscillating → Stay out completely',
-            'Always confirm signal matches volume profile zone'
-          ]
-        },
-        {
-          title: 'OI Divergence Signals',
-          what: 'Names latest divergence (bearish/bullish trap or continuation), quantifies price/OI changes, and lists recent alerts.',
-          steps: [
-            'Read the latest divergence type shown',
-            'If "Bearish Trap" → Shorts piling in, squeeze coming',
-            'Wait for Price/OI chart to confirm reversal up',
-            'Then enter LONG for squeeze play',
-            'If "Bullish Trap" → Longs piling in, flush coming',
-            'Wait for reversal confirmation down, then SHORT',
-            'If "Continuation" signal → Trade with the trend',
-            'Only act when signal agrees with Market Regime'
-          ]
-        },
-        {
-          title: 'Trading Decision Checklist',
-          what: 'Preflight list for OI/price correlation, divergence, funding extremes, L/S balance, liquidation proximity, volume, and multi-timeframe alignment.',
-          steps: [
-            'Go through each row in the checklist one by one',
-            'Count how many show green checkmark ✓',
-            'If all critical rows = ✓ → Green light, execute trade',
-            'If any row shows ⚠ (warning) → Reduce position size by 50%',
-            'If multi-timeframe row is pending (○) → Do not trade yet',
-            'Wait for all checks to align',
-            'Only take trade when confident all signals agree'
-          ]
-        },
-        {
-          title: 'Multi-Timeframe OI Analysis',
-          what: 'Five stacked Price/OI charts show if lower and higher timeframes are synchronized or fighting each other.',
-          steps: [
-            'Look at all five timeframe charts (1m, 5m, 15m, 1h, 4h)',
-            'Check if 3+ consecutive timeframes show same direction',
-            'Example: 15m, 1h, 4h all bullish → Good alignment',
-            'If yes → Safe to scale into larger position',
-            'Use the shortest timeframe (1m or 5m) only for precise entry',
-            'But only after higher timeframes (1h, 4h) confirm direction',
-            'If higher timeframe (4h) flips direction → Exit immediately'
-          ]
-        }
-      ]
+    {
+      icon: Zap,
+      title: 'MARKET REGIME',
+      description: 'AI-powered regime classification using funding rates, taker flow, and OI delta patterns',
+      color: 'text-blur-yellow',
     },
-    quickstart: {
-      title: 'Quick Start',
-      steps: [
-        'Install dependencies: npm install',
-        'Copy .env.example to .env.local (optional)',
-        'Start dev server: npm run dev',
-        'Visit /dashboard to start analysis',
-        'Read PROFESSIONAL_REVIEW.md for complete trading guide'
-      ]
+    {
+      icon: TrendingUp,
+      title: 'OI DIVERGENCE',
+      description: 'Identify bull/bear traps and continuation patterns through OI-price correlation analysis',
+      color: 'text-blur-orange',
     },
-    notes: {
-      title: 'Development Notes',
-      items: [
-        'Some widgets (FundingRateCard, LongShortRatioCard, MarketRegimeCard, OIMetricsCard) imported but not rendered - will be integrated in next update',
-        'DecisionChecklist currently shows static statuses - real-time validation coming soon',
-        'Multi-timeframe tabs load all charts simultaneously - lazy loading optimization planned',
-        'API proxies to Binance without rate limiting - caching layer in development'
-      ]
-    }
-  },
-  th: {
-    title: 'OI Trader Hub',
-    subtitle: 'แพลตฟอร์มวิเคราะห์ Open Interest แบบมืออาชีพ',
-    rating: 'คะแนนจากมืออาชีพ: 8.5/10 - เพียงพอสำหรับการเทรดจริง',
-    cta: 'เปิด Dashboard',
-    features: {
-      title: 'ฟีเจอร์หลัก',
-      items: [
-        {
-          icon: '📊',
-          title: 'การวิเคราะห์เชิงสถิติ',
-          desc: 'Volume Profile พร้อม Bell Curve (±1σ, ±2σ, ±3σ) สำหรับเทรดด้วยความน่าจะเป็น'
-        },
-        {
-          icon: '🎯',
-          title: 'ตรวจจับ OI Divergence',
-          desc: 'สัญญาณอัตโนมัติสำหรับ trap และ continuation พร้อมคะแนนความมั่นใจ'
-        },
-        {
-          icon: '⚡',
-          title: 'ติดตามเงินใหญ่',
-          desc: 'วิเคราะห์ Taker flow, OI delta ตามราคา และตรวจจับการสะสมสถานะ'
-        }
-      ]
+    {
+      icon: Target,
+      title: 'SMART MONEY FLOW',
+      description: 'Track institutional positioning through taker buy/sell volume and top trader metrics',
+      color: 'text-blur-green',
     },
-    highlights: {
-      title: 'จุดเด่นที่แตกต่าง',
-      items: [
-        '✅ ข้อมูลครบ 90% สำหรับการเทรดมืออาชีพ',
-        '✅ AI หาจังหวะเทรดพร้อม entry/target/stop อัตโนมัติ',
-        '✅ ตรวจสอบหลายมิติ (7+ ตัวชี้วัดอิสระ)',
-        '✅ อัตราชนะคาดการณ์: 65-70% ในสัญญาณความมั่นใจสูง (>80%)',
-        '✅ ฟรี! ทดแทนเครื่องมือมืออาชีพราคา $50-100/เดือน'
-      ]
+    {
+      icon: Eye,
+      title: 'LIQUIDATION ZONES',
+      description: 'Visualize high-risk areas where cascading liquidations are likely to trigger',
+      color: 'text-blur-yellow',
     },
-    guides: {
-      title: 'คู่มือการใช้งานแต่ละกราฟ',
-      items: [
-        {
-          title: 'Summary Cards (การ์ดสรุป)',
-          what: 'แสดง OI เปลี่ยนแปลง 24 ชม., funding bias, taker flow และตำแหน่ง top trader - เปิดเผยว่าเลเวอเรจกำลังกองเข้า long/short และ flow รุนแรงยืนยันหรือไม่',
-          steps: [
-            'ตรวจสอบ OI เปลี่ยนแปลง >+2% (มีการสะสมสถานะแรง)',
-            'ยืนยัน taker flow แสดง AGGRESSIVE_BUY (เงินใหญ่เข้า)',
-            'ตรวจสอบ funding rate <0.05% (ไม่ร้อนแรงเกิน)',
-            'ถ้าทั้งหมดสอดคล้อง → เปิด LONG',
-            'ถ้า OI กลายเป็นลบพร้อม AGGRESSIVE_SELL → ปิด/Fade',
-            'ถ้า funding เกิน ±0.08% → ลดขนาดหรือออก',
-            'ถ้าการ์ดขัดแย้งกัน → หยุด ไม่เทรด'
-          ]
-        },
-        {
-          title: 'Market Regime Indicator (ตัวบอกสภาวะตลาด)',
-          what: 'ผสมผสาน price trend, OI delta, taker flow และ funding เป็นชื่อสภาวะ (TRENDING, OVERHEATED, SQUEEZE ฯลฯ) พร้อมป้ายความเสี่ยง',
-          steps: [
-            'มองหาสภาวะ TRENDING พร้อมป้าย LOW risk',
-            'เทรดตามทิศทางเทรนด์ด้วยขนาดปกติ',
-            'เมื่อขึ้น OVERHEATED → ขยับ stop loss เข้าใกล้ทันที',
-            'เมื่อเห็น HIGH_VOL_SQUEEZE → ลดขนาดสถานะ 50%',
-            'เมื่อแสดง LOW_LIQ_TRAP → ปิดทุกสถานะและรอ',
-            'กลับเข้าเทรดเมื่อสภาวะกลับมาเป็น TRENDING หรือ HEALTHY'
-          ]
-        },
-        {
-          title: 'Price & OI Chart (กราฟราคา & OI)',
-          what: 'วางทับราคาปิด, OI และ volume - แสดงว่าการขึ้นมีสถานะใหม่เปิดรองรับ (price↑ OI↑), short ปิด (price↑ OI↓) หรือ liquidation chop',
-          steps: [
-            'ตรวจสอบราคาและ OI ขึ้นพร้อมกันไหม → Bullish continuation แรง',
-            'ถ้าใช่ → เปิด LONG ตามเทรนด์',
-            'ตรวจสอบราคาขึ้นแต่ OI ลง → Short squeeze กำลังเกิด',
-            'ถ้าใช่ → Fade การขยับนี้ เตรียม SHORT หลังหมดแรง',
-            'ตรวจสอบราคาและ OI ลงพร้อมกัน → Bearish continuation',
-            'ถ้าใช่ → เปิด SHORT หรือถือ short ต่อ',
-            'ถ้าทั้งสองเส้นแบน/ไซด์เวย์ → ไม่เทรด รอให้ชัด'
-          ]
-        },
-        {
-          title: 'Volume Profile + Bell Curve',
-          what: 'เปิดเผย POC, value area, ช่วง sigma, โซน LVN/HVN และแถบความน่าจะเป็น - บอกว่าตลาดถือว่า "ราคายุติธรรม" อยู่ที่ไหนเทียบกับจุดสุดขั้ว',
-          steps: [
-            'หาตำแหน่งราคาปัจจุบันบน bell curve',
-            'ถ้าราคาที่ -1σ หรือ Value Area Low → โซน Oversold',
-            'เปิด LONG เป้าหมาย POC (ค่าเฉลี่ย)',
-            'ถ้าราคาที่ +2σ หรือ +3σ → โซน Overbought',
-            'เปิด SHORT เป้าหมายกลับไป POC',
-            'ถ้าราคาที่ POC → รอ taker flow ยืนยันก่อน',
-            'ตั้ง stop loss เลย ±3σ (ระดับความเชื่อมั่น 99.7%)'
-          ]
-        },
-        {
-          title: 'Opportunity Finder (ตัวหาจังหวะ)',
-          what: 'แปลง profile เป็นไอเดีย entry/target/stop พร้อมคะแนนความมั่นใจ, R:R และอธิบายโซนราคาปัจจุบัน',
-          steps: [
-            'ดูที่จังหวะอันดับต้นที่แสดง',
-            'เช็คคะแนนความมั่นใจ → ต้อง ≥70%',
-            'เช็คอัตราส่วน Risk:Reward → ต้อง ≥2:1',
-            'ถ้าผ่านทั้งสอง → ใช้ราคา entry/target/stop ที่แสดงเลย',
-            'ดูจังหวะสำรองเมื่อสอดคล้องกับ zone bias หลักเท่านั้น',
-            'ถ้าการ์ดแสดง "No setups" → ห้ามเทรด รอก่อน',
-            'ถ้า zone = VALUE โดยไม่มีสัญญาณรอง → ข้าม เสี่ยงเกิน'
-          ]
-        },
-        {
-          title: 'OI Delta Overlay (OI เปลี่ยนแปลงตามราคา)',
-          what: 'แบ่ง OI เปลี่ยนแปลงตามช่วงราคา - เน้นว่า long/short สะสมหรือปิดที่ไหนและเข้มข้นแค่ไหน',
-          steps: [
-            'หากลุ่ม "Build Long" บนกราฟ',
-            'จดราคาที่ต่ำกว่าระดับปัจจุบัน → โซน support',
-            'ซื้อเมื่อราคาเข้าใกล้โซน Build Long เหล่านี้',
-            'หากลุ่ม "Build Short" เหนือราคา → โซน resistance',
-            'ขาย/short เมื่อราคาถึงระดับเหล่านี้',
-            'ถ้าเห็น "Unwind Long" หรือ "Unwind Short" → รอก่อน!',
-            'Unwinding = liquidation กำลังมา รอให้จบก่อนเข้า'
-          ]
-        },
-        {
-          title: 'Taker Flow Overlay (การไหลของคำสั่งรุนแรง)',
-          what: 'วัด aggressive buy vs sell flow, bias สะสม - ส่งสัญญาณ STRONG_LONG/SHORT/BREAKOUT/FAKEOUT/WAIT พร้อมกราฟแท่ง net-flow',
-          steps: [
-            'เช็คสัญญาณที่แสดงอยู่',
-            'ถ้า STRONG_LONG ที่โซน LVN หรือ POC → เปิด LONG ทันที',
-            'ถ้าสัญญาณ BREAKOUT ที่ LVN → ตามเบรกเอาท์ ไป LONG',
-            'ถ้า STRONG_SHORT ที่โซน HVN → Fade มัน ไป SHORT',
-            'ถ้าสัญญาณ FAKEOUT ที่ HVN → อย่าไล่ เตรียมกลับ',
-            'ถ้าสัญญาณ WAIT พร้อมแท่งแกว่ง → อยู่นอกสนามทั้งหมด',
-            'เช็คให้แน่ใจสัญญาณตรงกับ volume profile zone'
-          ]
-        },
-        {
-          title: 'OI Divergence Signals (สัญญาณ Divergence)',
-          what: 'ตั้งชื่อ divergence ล่าสุด (bearish/bullish trap หรือ continuation), วัดการเปลี่ยนแปลงราคา/OI และแสดงการแจ้งเตือนล่าสุด',
-          steps: [
-            'อ่านประเภท divergence ล่าสุดที่แสดง',
-            'ถ้า "Bearish Trap" → Short กองเข้า squeeze กำลังมา',
-            'รอ Price/OI chart ยืนยันกลับขึ้น',
-            'แล้วเปิด LONG เล่น squeeze',
-            'ถ้า "Bullish Trap" → Long กองเข้า flush กำลังมา',
-            'รอยืนยันกลับลง แล้ว SHORT',
-            'ถ้าสัญญาณ "Continuation" → เทรดตามเทรนด์',
-            'ทำเมื่อสัญญาณตรงกับ Market Regime เท่านั้น'
-          ]
-        },
-        {
-          title: 'Trading Decision Checklist (เช็กลิสต์ก่อนเทรด)',
-          what: 'รายการตรวจสอบ OI/price correlation, divergence, funding สุดโต่ง, สมดุล L/S, ระยะใกล้ liquidation, volume และ multi-timeframe alignment',
-          steps: [
-            'ไล่เช็คแต่ละแถวทีละอัน',
-            'นับว่ามีกี่แถวแสดงเครื่องหมายถูกเขียว ✓',
-            'ถ้าแถวสำคัญทั้งหมด = ✓ → ไฟเขียว ดำเนินการเทรด',
-            'ถ้าแถวใดแสดง ⚠ (เตือน) → ลดขนาดสถานะ 50%',
-            'ถ้าแถว multi-timeframe ค้าง (○) → ยังไม่เทรด',
-            'รอให้ทุกเช็คเรียงตัว',
-            'เทรดเมื่อมั่นใจว่าสัญญาณทั้งหมดเห็นพ้องกัน'
-          ]
-        },
-        {
-          title: 'Multi-Timeframe OI Analysis (OI หลายไทม์เฟรม)',
-          what: 'กราฟ Price/OI ห้าชั้นซ้อนกัน - แสดงว่าไทม์เฟรมต่ำและสูงเดินสอดคล้องหรือสู้กัน',
-          steps: [
-            'ดูกราฟไทม์เฟรมทั้งห้า (1m, 5m, 15m, 1h, 4h)',
-            'เช็คว่า 3+ ไทม์เฟรมติดกันแสดงทิศทางเดียวกันไหม',
-            'ตัวอย่าง: 15m, 1h, 4h ขึ้นหมด → สอดคล้องดี',
-            'ถ้าใช่ → ปลอดภัยที่จะเพิ่มสถานะใหญ่ขึ้น',
-            'ใช้ไทม์เฟรมสั้นสุด (1m หรือ 5m) หาจุดเข้าที่แม่นยำเท่านั้น',
-            'แต่ต้องหลังจากไทม์เฟรมสูง (1h, 4h) ยืนยันทิศทางแล้ว',
-            'ถ้าไทม์เฟรมสูง (4h) กลับทิศ → ออกทันที'
-          ]
-        }
-      ]
-    },
-    quickstart: {
-      title: 'เริ่มต้นใช้งาน',
-      steps: [
-        'ติดตั้ง dependencies: npm install',
-        'คัดลอก .env.example เป็น .env.local (ไม่บังคับ)',
-        'สั่งรัน dev server: npm run dev',
-        'เข้าไปที่ /dashboard เพื่อเริ่มวิเคราะห์',
-        'อ่าน PROFESSIONAL_REVIEW.md สำหรับคู่มือเทรดฉบับสมบูรณ์'
-      ]
-    },
-    notes: {
-      title: 'หมายเหตุการพัฒนา',
-      items: [
-        'บาง widget (FundingRateCard, LongShortRatioCard, MarketRegimeCard, OIMetricsCard) โหลดแล้วแต่ยังไม่แสดง - จะผนวกเข้ามาในอัปเดตถัดไป',
-        'DecisionChecklist ยังแสดงสถานะคงที่ - การตรวจสอบแบบเรียลไทม์กำลังพัฒนา',
-        'Multi-timeframe tabs โหลดกราฟทั้งหมดพร้อมกัน - กำลังเพิ่ม lazy loading',
-        'API ส่งต่อไป Binance โดยไม่จำกัดอัตรา - กำลังสร้างชั้น caching'
-      ]
-    }
-  }
-}
+  ]
 
-export default function Home() {
-  const [lang, setLang] = useState<'en' | 'th'>('en')
-  const t = content[lang]
+  const stats = [
+    { label: 'PROFESSIONAL RATING', value: '8.5/10' },
+    { label: 'INFORMATION SUFFICIENCY', value: '90%' },
+    { label: 'WIN RATE (HIGH CONFIDENCE)', value: '65-70%' },
+  ]
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-800 relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 -left-4 w-96 h-96 bg-purple-300 dark:bg-purple-900 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-20 animate-blob"></div>
-        <div className="absolute top-0 -right-4 w-96 h-96 bg-blue-300 dark:bg-blue-900 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-8 left-20 w-96 h-96 bg-cyan-300 dark:bg-cyan-900 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
-      </div>
+    <div className="min-h-screen bg-blur-bg-primary">
+      <BlurNav />
 
-      {/* Language Toggle */}
-      <div className="fixed top-3 right-3 sm:top-4 sm:right-4 md:top-6 md:right-6 z-50 animate-fade-in">
-        <div className="flex gap-1 sm:gap-2 p-0.5 sm:p-1 rounded-lg sm:rounded-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl border border-gray-200 dark:border-gray-700 sm:border-2">
-          <button
-            onClick={() => setLang('en')}
-            className={`px-2 py-1 sm:px-3 sm:py-1.5 md:px-4 md:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 ${
-              lang === 'en'
-                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg scale-105'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-          >
-            EN
-          </button>
-          <button
-            onClick={() => setLang('th')}
-            className={`px-2 py-1 sm:px-3 sm:py-1.5 md:px-4 md:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 ${
-              lang === 'th'
-                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg scale-105'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-          >
-            TH
-          </button>
-        </div>
-      </div>
+      {/* Hero Section */}
+      <section className="relative pt-[100px] sm:pt-[140px] pb-xl3 px-md overflow-hidden">
+        {/* Background gradient blobs */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blur-orange/10 rounded-full blur-3xl animate-blob" />
+        <div className="absolute top-20 right-1/4 w-96 h-96 bg-blur-yellow/10 rounded-full blur-3xl animate-blob animation-delay-2000" />
 
-      <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-12 md:py-16 max-w-7xl relative z-10">
-        {/* Hero Section */}
-        <div className="text-center mb-12 sm:mb-16 md:mb-20 animate-fade-in-up">
-          {/* Logo */}
-          <div className="flex justify-center mb-4 sm:mb-6">
-            <div className="relative w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 animate-float">
-              <Image
-                src="/avatars/THP.png"
-                alt="THP Stock Logo"
-                width={128}
-                height={128}
-                className="rounded-2xl   "
-                priority
-              />
-              <div className="absolute  rounded-2xl blur opacity-30 animate-pulse"></div>
-            </div>
-          </div>
-
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold mb-4 sm:mb-6 bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 bg-clip-text text-transparent animate-gradient px-2">
-            {t.title}
-          </h1>
-          <p className="text-base sm:text-xl md:text-2xl lg:text-3xl text-gray-700 dark:text-gray-300 mb-6 sm:mb-8 font-light px-4">
-            {t.subtitle}
-          </p>
-          <div className="inline-block animate-bounce-slow px-2">
-            <Badge variant="default" className="text-xs sm:text-sm md:text-base lg:text-lg px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg text-white border-0">
-              <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">{t.rating}</span>
-              <span className="sm:hidden">8.5/10</span>
-            </Badge>
-          </div>
-
-          <div className="mt-6 sm:mt-8 md:mt-10 flex gap-3 sm:gap-4 justify-center items-center flex-wrap px-4">
-            <Link
-              href="/dashboard"
-              className="group inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 md:px-12 md:py-5 text-sm sm:text-base md:text-lg lg:text-xl font-bold text-white bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 rounded-xl sm:rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-300 shadow-xl relative overflow-hidden"
-            >
-              <span className="relative z-10 flex items-center gap-2 sm:gap-3">
-                <Zap className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
-                <span className="whitespace-nowrap">{t.cta}</span>
-                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 group-hover:translate-x-1 transition-transform" />
+        <div className="container mx-auto relative z-10">
+          <div className="max-w-4xl mx-auto text-center space-y-lg">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-blur border border-blur-orange/30 bg-blur-orange/5">
+              <div className="w-2 h-2 bg-blur-orange rounded-full animate-pulse" />
+              <span className="text-blur-text-secondary text-xs uppercase tracking-wider">
+                PROFESSIONAL TRADING PLATFORM
               </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-700 via-blue-700 to-cyan-700 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </Link>
-          </div>
-        </div>
-
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-12 sm:mb-16 md:mb-20">
-          {t.features.items.map((feature, idx) => (
-            <Card 
-              key={idx} 
-              className="border-2 border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm animate-fade-in-up group"
-              style={{ animationDelay: `${idx * 100}ms` }}
-            >
-              <CardHeader>
-                <div className="text-6xl mb-4 transform group-hover:scale-110 transition-transform duration-300">
-                  {feature.icon}
-                </div>
-                <CardTitle className="text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  {feature.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                  {feature.desc}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Highlights */}
-        <Card className="mb-20 border-2 border-green-500/50 dark:border-green-600/50 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 animate-fade-in-up">
-          <CardHeader>
-            <CardTitle className="text-3xl flex items-center gap-3 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-              <TrendingUp className="h-8 w-8 text-green-600" />
-              {t.highlights.title}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-4">
-              {t.highlights.items.map((item, idx) => (
-                <li 
-                  key={idx} 
-                  className="text-lg flex items-start gap-3 p-3 rounded-lg hover:bg-white/50 dark:hover:bg-gray-800/50 transition-all duration-200 animate-fade-in-up"
-                  style={{ animationDelay: `${idx * 50}ms` }}
-                >
-                  <CheckCircle2 className="h-6 w-6 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-700 dark:text-gray-300">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-
-        {/* 🎓 Interactive Tutorial Features */}
-        <Card className="mb-20 border-2 border-indigo-500/50 dark:border-indigo-600/50 shadow-2xl backdrop-blur-sm bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-950/30 dark:via-purple-950/30 dark:to-pink-950/30 animate-fade-in-up overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl"></div>
-          <CardHeader className="relative z-10">
-            <div className="text-center mb-6">
-              <div className="text-6xl mb-4 animate-bounce-slow">🎓</div>
-              <CardTitle className="text-5xl mb-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent font-extrabold">
-                {lang === 'en' ? 'Interactive Learning Mode' : 'โหมดเรียนรู้แบบโต้ตอบ'}
-              </CardTitle>
-              <CardDescription className="text-xl text-gray-700 dark:text-gray-300">
-                {lang === 'en'
-                  ? 'Master professional options analysis in just 9 steps - Learn by doing!'
-                  : 'เรียนรู้การวิเคราะห์ออปชั่นระดับมืออาชีพใน 9 ขั้นตอน - เรียนจากการปฏิบัติ!'}
-              </CardDescription>
             </div>
 
-            <div className="flex gap-4 justify-center items-center flex-wrap mb-8">
-              <Badge variant="secondary" className="text-base px-4 py-2 bg-white/60 dark:bg-gray-800/60 backdrop-blur border-2 border-indigo-300 dark:border-indigo-700">
-                ⏱️ {lang === 'en' ? '3-5 minutes' : '3-5 นาที'}
-              </Badge>
-              <Badge variant="secondary" className="text-base px-4 py-2 bg-white/60 dark:bg-gray-800/60 backdrop-blur border-2 border-purple-300 dark:border-purple-700">
-                🎯 {lang === 'en' ? 'Beginner Friendly' : 'เหมาะสำหรับมือใหม่'}
-              </Badge>
-              <Badge variant="secondary" className="text-base px-4 py-2 bg-white/60 dark:bg-gray-800/60 backdrop-blur border-2 border-pink-300 dark:border-pink-700">
-                💡 {lang === 'en' ? 'Step-by-Step' : 'ทีละขั้นตอน'}
-              </Badge>
-            </div>
-          </CardHeader>
+            {/* Headline */}
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-blur-text-primary leading-tight">
+              PROFESSIONAL{' '}
+              <span className="text-blur-orange text-glow-orange">OPTIONS & FUTURES</span>
+              <br />
+              ANALYSIS PLATFORM
+            </h1>
 
-          <CardContent className="relative z-10">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {/* Feature 1: Visual Highlighting */}
-              <div className="p-6 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur border-2 border-indigo-200 dark:border-indigo-800 hover:border-indigo-500 dark:hover:border-indigo-500 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1">
-                <div className="text-4xl mb-3">🎨</div>
-                <h4 className="text-lg font-bold mb-2 text-indigo-600 dark:text-indigo-400">
-                  {lang === 'en' ? 'Visual Highlighting' : 'เน้นส่วนที่เรียน'}
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {lang === 'en'
-                    ? 'Each step highlights the relevant chart element while dimming others - Focus on what matters!'
-                    : 'แต่ละขั้นจะเน้นส่วนที่สำคัญของกราฟและทำให้ส่วนอื่นจางลง - โฟกัสในสิ่งที่สำคัญ!'}
-                </p>
-              </div>
-
-              {/* Feature 2: Progress Tracking */}
-              <div className="p-6 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur border-2 border-purple-200 dark:border-purple-800 hover:border-purple-500 dark:hover:border-purple-500 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1">
-                <div className="text-4xl mb-3">📊</div>
-                <h4 className="text-lg font-bold mb-2 text-purple-600 dark:text-purple-400">
-                  {lang === 'en' ? 'Progress Tracking' : 'ติดตามความคืบหน้า'}
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {lang === 'en'
-                    ? 'Visual progress dots and step counter show you exactly where you are in the journey'
-                    : 'จุดแสดงความคืบหน้าและตัวนับขั้นตอนบอกคุณว่าคุณอยู่ตรงไหนในการเรียนรู้'}
-                </p>
-              </div>
-
-              {/* Feature 3: Interactive Controls */}
-              <div className="p-6 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur border-2 border-pink-200 dark:border-pink-800 hover:border-pink-500 dark:hover:border-pink-500 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1">
-                <div className="text-4xl mb-3">🎮</div>
-                <h4 className="text-lg font-bold mb-2 text-pink-600 dark:text-pink-400">
-                  {lang === 'en' ? 'Your Own Pace' : 'เรียนตามจังหวะของคุณ'}
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {lang === 'en'
-                    ? 'Previous/Next buttons let you learn at your speed. Skip or restart anytime!'
-                    : 'ปุ่มย้อนกลับ/ถัดไปให้คุณเรียนด้วยความเร็วของคุณเอง ข้ามหรือเริ่มใหม่ได้ทุกเมื่อ!'}
-                </p>
-              </div>
-            </div>
-
-            {/* Tutorial Steps Preview */}
-            <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur rounded-xl p-6 border-2 border-gray-200 dark:border-gray-700">
-              <h4 className="text-xl font-bold mb-4 text-center bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                {lang === 'en' ? '9-Step Learning Path' : 'เส้นทางการเรียนรู้ 9 ขั้นตอน'}
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {[
-                  { step: 1, icon: '👋', title: lang === 'en' ? 'Welcome' : 'ยินดีต้อนรับ' },
-                  { step: 2, icon: '📊', title: lang === 'en' ? 'Chart Basics' : 'พื้นฐานกราฟ' },
-                  { step: 3, icon: '🟠', title: lang === 'en' ? 'Put Volume' : 'ปริมาณ Put' },
-                  { step: 4, icon: '🔵', title: lang === 'en' ? 'Call Volume' : 'ปริมาณ Call' },
-                  { step: 5, icon: '📈', title: lang === 'en' ? 'IV Smile' : 'เส้น IV' },
-                  { step: 6, icon: '🎯', title: lang === 'en' ? 'Spot Price' : 'ราคาปัจจุบัน' },
-                  { step: 7, icon: '🟢', title: lang === 'en' ? 'Expected Range' : 'ช่วงคาดการณ์' },
-                  { step: 8, icon: '🛡️', title: lang === 'en' ? 'Support Zones' : 'โซนซัพพอร์ต' },
-                  { step: 9, icon: '⚔️', title: lang === 'en' ? 'Resistance' : 'เรซิสแตนซ์' },
-                ].map((item) => (
-                  <div
-                    key={item.step}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50 border border-indigo-200 dark:border-indigo-800 hover:scale-105 transition-transform duration-200"
-                  >
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white flex items-center justify-center text-sm font-bold">
-                      {item.step}
-                    </div>
-                    <div className="text-2xl">{item.icon}</div>
-                    <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      {item.title}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* CTA to Learn Page */}
-            <div className="mt-8 text-center">
-              <Link
-                href="/learn"
-                className="group inline-flex items-center justify-center px-10 py-5 text-lg font-bold text-white bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-300 shadow-xl gap-3"
-              >
-                <span className="text-2xl">🚀</span>
-                <span>
-                  {lang === 'en' ? 'Start Interactive Tutorial' : 'เริ่มบทเรียนแบบโต้ตอบ'}
-                </span>
-                <ChevronRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
-                {lang === 'en'
-                  ? '✨ Dedicated learning page with step-by-step guidance'
-                  : '✨ หน้าเรียนรู้เฉพาะพร้อมคำแนะนำทีละขั้นตอน'}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Chart Guides */}
-        <Card className="mb-20 border-2 border-purple-500/30 dark:border-purple-600/30 shadow-xl backdrop-blur-sm bg-white/80 dark:bg-gray-800/80 animate-fade-in-up">
-          <CardHeader className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 border-b-2 border-purple-200 dark:border-purple-800">
-            <CardTitle className="text-4xl mb-3 flex items-center gap-3 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              <Shield className="h-10 w-10 text-purple-600" />
-              {t.guides.title}
-            </CardTitle>
-            <CardDescription className="text-lg text-gray-600 dark:text-gray-400">
-              {lang === 'en' 
-                ? 'Comprehensive guide to understanding and using each chart effectively'
-                : 'คู่มือครบถ้วนเพื่อเข้าใจและใช้งานแต่ละกราฟอย่างมีประสิทธิภาพ'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-8">
-            <div className="space-y-8">
-              {t.guides.items.map((guide, idx) => (
-                <div 
-                  key={idx} 
-                  className="p-6 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-fade-in-up"
-                  style={{ animationDelay: `${idx * 50}ms` }}
-                >
-                  <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
-                    <span className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white flex items-center justify-center text-lg font-bold shadow-lg">
-                      {idx + 1}
-                    </span>
-                    {guide.title}
-                  </h3>
-                  <div className="space-y-4">
-                    <div>
-                      <span className="font-semibold text-green-600 dark:text-green-400 flex items-center gap-2">
-                        <BarChart3 className="h-4 w-4" />
-                        {lang === 'en' ? 'What This Chart Tells You:' : 'กราฟนี้บอกอะไร:'}
-                      </span>
-                      <p className="text-muted-foreground mt-2 leading-relaxed">{guide.what}</p>
-                    </div>
-                    <div>
-                      <span className="font-semibold text-orange-600 dark:text-orange-400 flex items-center gap-2 mb-3">
-                        <Target className="h-4 w-4" />
-                        {lang === 'en' ? 'Step-by-Step Action Guide:' : 'แนวทางปฏิบัติทีละขั้น:'}
-                      </span>
-                      <ol className="space-y-2">
-                        {guide.steps.map((step, stepIdx) => (
-                          <li key={stepIdx} className="flex items-start gap-3 text-sm">
-                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white flex items-center justify-center text-xs font-bold">
-                              {stepIdx + 1}
-                            </span>
-                            <span className="text-muted-foreground pt-0.5">{step}</span>
-                          </li>
-                        ))}
-                      </ol>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-         
-
-        {/* Final CTA */}
-        <div className="relative text-center p-6 sm:p-8 md:p-12 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 text-white shadow-2xl overflow-hidden animate-fade-in-up">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-700 via-blue-700 to-cyan-700 animate-gradient-slow"></div>
-          <div className="relative z-10">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold mb-4 sm:mb-6 animate-pulse-slow px-2">
-              {lang === 'en' ? 'Ready to Trade Smarter?' : 'พร้อมเทรดอย่างชาญฉลาดแล้วหรือยัง?'}
-            </h2>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl mb-6 sm:mb-8 text-white/95 font-light px-4">
-              {lang === 'en'
-                ? '65-70% win rate on high-confidence setups with proper risk management'
-                : 'อัตราชนะ 65-70% ในสัญญาณความมั่นใจสูงพร้อมการจัดการความเสี่ยงที่เหมาะสม'}
+            {/* Subheadline */}
+            <p className="text-sm sm:text-base lg:text-lg text-blur-text-secondary max-w-2xl mx-auto">
+              Real-time IV analysis, OI divergence detection, and AI-powered market regime insights.
+              Free alternative to $50-100/month professional tools.
             </p>
-            <Link
-              href="/dashboard"
-              className="group inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 md:px-12 md:py-5 text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-white text-purple-600 rounded-xl sm:rounded-2xl hover:bg-gray-50 hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-3xl relative overflow-hidden"
-            >
-              <span className="relative z-10 flex items-center gap-2 sm:gap-3">
-                <Target className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-7 lg:w-7" />
-                <span className="whitespace-nowrap">{lang === 'en' ? 'Start Analyzing Now' : 'เริ่มวิเคราะห์ตอนนี้'}</span>
-                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-7 lg:w-7 group-hover:translate-x-2 transition-transform" />
-              </span>
-            </Link>
-          </div>
-        </div>
 
-        {/* Footer */}
-        <div className="mt-12 sm:mt-16 md:mt-20 text-center space-y-3 sm:space-y-4 animate-fade-in px-4">
-          <div className="flex items-center justify-center gap-3 sm:gap-4 md:gap-6 text-xs sm:text-sm text-gray-600 dark:text-gray-400 flex-wrap">
-            <span className="flex items-center gap-1 sm:gap-2">
-              <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 flex-shrink-0" />
-              <span className="whitespace-nowrap">{lang === 'en' ? 'Open Source' : 'โอเพนซอร์ส'}</span>
-            </span>
-            <span className="flex items-center gap-1 sm:gap-2">
-              <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 flex-shrink-0" />
-              <span className="whitespace-nowrap">{lang === 'en' ? 'Free Forever' : 'ฟรีตลอดกาล'}</span>
-            </span>
-            <span className="flex items-center gap-1 sm:gap-2">
-              <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 flex-shrink-0" />
-              <span className="whitespace-nowrap">{lang === 'en' ? 'No Registration' : 'ไม่ต้องสมัคร'}</span>
-            </span>
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-lg">
+              <BlurButton variant="primary" size="lg" asChild>
+                <Link href="/dashboard">
+                  LAUNCH DASHBOARD
+                </Link>
+              </BlurButton>
+              <BlurButton variant="outline" size="lg" asChild>
+                <Link href="/learn">
+                  INTERACTIVE TUTORIAL
+                </Link>
+              </BlurButton>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-xl2 max-w-3xl mx-auto">
+              {stats.map((stat) => (
+                <BlurCard key={stat.label} variant="glass" className="p-md sm:p-lg">
+                  <div className="text-center">
+                    <div className="text-xl sm:text-2xl font-bold text-blur-orange mb-2">
+                      {stat.value}
+                    </div>
+                    <div className="text-xs text-blur-text-muted uppercase tracking-wide">
+                      {stat.label}
+                    </div>
+                  </div>
+                </BlurCard>
+              ))}
+            </div>
           </div>
-          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-500 font-semibold">
-            THP Stock : OI-Hub Platform Copyright © 2025
-          </p>
         </div>
-      </div>
-    </main>
+      </section>
+
+      {/* Features Grid */}
+      <section className="py-xl3 px-md">
+        <div className="container mx-auto">
+          <div className="text-center mb-xl2">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blur-text-primary mb-4">
+              CORE FEATURES
+            </h2>
+            <p className="text-blur-text-secondary text-sm sm:text-base max-w-2xl mx-auto">
+              Multi-factor validation with 7+ independent indicators for professional-grade trading decisions
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {features.map((feature) => {
+              const Icon = feature.icon
+              return (
+                <BlurCard
+                  key={feature.title}
+                  variant="glass"
+                  className="group hover:border-blur-orange/30 transition-all duration-300"
+                >
+                  <BlurCardHeader>
+                    <div className={`w-12 h-12 rounded-blur bg-blur-bg-tertiary border border-white/8 flex items-center justify-center mb-4 group-hover:border-blur-orange/30 transition-all ${feature.color}`}>
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <BlurCardTitle className="text-xs sm:text-sm">
+                      {feature.title}
+                    </BlurCardTitle>
+                  </BlurCardHeader>
+                  <BlurCardContent>
+                    <BlurCardDescription className="text-xs">
+                      {feature.description}
+                    </BlurCardDescription>
+                  </BlurCardContent>
+                </BlurCard>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-xl3 px-md bg-gradient-to-b from-transparent via-blur-bg-secondary/20 to-transparent">
+        <div className="container mx-auto max-w-4xl">
+          <div className="text-center mb-xl2">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blur-text-primary mb-4">
+              HOW IT WORKS
+            </h2>
+          </div>
+
+          <div className="space-y-6">
+            <BlurCard variant="glass">
+              <BlurCardHeader>
+                <div className="flex items-center gap-4">
+                  <div className="w-8 h-8 rounded-blur bg-blur-orange text-blur-bg-primary flex items-center justify-center font-bold text-sm">
+                    1
+                  </div>
+                  <BlurCardTitle>CONNECT TO REAL-TIME DATA</BlurCardTitle>
+                </div>
+              </BlurCardHeader>
+              <BlurCardContent>
+                <p className="text-blur-text-secondary text-xs sm:text-sm">
+                  Direct integration with Binance Futures & Options API for live OI, IV, funding rates, and taker flow
+                </p>
+              </BlurCardContent>
+            </BlurCard>
+
+            <BlurCard variant="glass">
+              <BlurCardHeader>
+                <div className="flex items-center gap-4">
+                  <div className="w-8 h-8 rounded-blur bg-blur-orange text-blur-bg-primary flex items-center justify-center font-bold text-sm">
+                    2
+                  </div>
+                  <BlurCardTitle>AI ANALYZES 7+ INDICATORS</BlurCardTitle>
+                </div>
+              </BlurCardHeader>
+              <BlurCardContent>
+                <p className="text-blur-text-secondary text-xs sm:text-sm">
+                  Automated detection of OI divergences, IV skew anomalies, support/resistance from options positioning, and market regime classification
+                </p>
+              </BlurCardContent>
+            </BlurCard>
+
+            <BlurCard variant="glass">
+              <BlurCardHeader>
+                <div className="flex items-center gap-4">
+                  <div className="w-8 h-8 rounded-blur bg-blur-orange text-blur-bg-primary flex items-center justify-center font-bold text-sm">
+                    3
+                  </div>
+                  <BlurCardTitle>GET ACTIONABLE SIGNALS</BlurCardTitle>
+                </div>
+              </BlurCardHeader>
+              <BlurCardContent>
+                <p className="text-blur-text-secondary text-xs sm:text-sm">
+                  Clear entry/target/stop levels with confidence scoring. High-confidence setups (80%+) deliver 65-70% win rates
+                </p>
+              </BlurCardContent>
+            </BlurCard>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-xl3 px-md">
+        <div className="container mx-auto max-w-3xl">
+          <BlurCard variant="bordered" glow className="p-lg sm:p-xl2 text-center">
+            <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-blur-text-primary mb-4">
+              READY TO TRADE LIKE A PRO?
+            </h3>
+            <p className="text-blur-text-secondary text-sm sm:text-base mb-lg">
+              Join professional traders using OI Trader Hub for data-driven decisions
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <BlurButton variant="primary" size="lg" asChild>
+                <Link href="/dashboard">
+                  START NOW - FREE
+                </Link>
+              </BlurButton>
+              <BlurButton variant="ghost" size="lg" asChild>
+                <Link href="/learn">
+                  LEARN MORE
+                </Link>
+              </BlurButton>
+            </div>
+          </BlurCard>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-xl px-md border-t border-white/8">
+        <div className="container mx-auto text-center text-blur-text-muted text-xs">
+          <p>© 2025 OI TRADER HUB. BUILT FOR PROFESSIONAL TRADERS.</p>
+        </div>
+      </footer>
+    </div>
   )
 }

@@ -2,50 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Space Mono font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
+    --font-proto-mono: 'Space Mono', 'Courier New', monospace;
+
+    /* Blur.io inspired color system */
+    --blur-bg-primary: #080404;
+    --blur-bg-secondary: #1e1e1e;
+    --blur-bg-tertiary: #2a2a2a;
+    --blur-text-primary: #d9d9d9;
+    --blur-text-secondary: #c1c1c1;
+    --blur-text-muted: #808080;
+    --blur-orange: #ff8700;
+    --blur-orange-bright: #f95200;
+
+    /* shadcn compatibility - default to blur.io dark theme */
+    --background: 8 4% 2%;
+    --foreground: 0 0% 85%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 85%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 85%;
+    --primary: 28 100% 50%;
+    --primary-foreground: 8 4% 2%;
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 0 0% 85%;
+    --muted: 0 0% 16%;
+    --muted-foreground: 0 0% 50%;
+    --accent: 28 100% 50%;
+    --accent-foreground: 8 4% 2%;
+    --destructive: 0 100% 63%;
+    --destructive-foreground: 0 0% 85%;
+    --border: 0 0% 16%;
+    --input: 0 0% 16%;
+    --ring: 28 100% 50%;
+    --radius: 4px;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    /* Keep same values for dark mode */
+    --background: 8 4% 2%;
+    --foreground: 0 0% 85%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 85%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 85%;
+    --primary: 28 100% 50%;
+    --primary-foreground: 8 4% 2%;
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 0 0% 85%;
+    --muted: 0 0% 16%;
+    --muted-foreground: 0 0% 50%;
+    --accent: 28 100% 50%;
+    --accent-foreground: 8 4% 2%;
+    --destructive: 0 100% 63%;
+    --destructive-foreground: 0 0% 85%;
+    --border: 0 0% 16%;
+    --input: 0 0% 16%;
+    --ring: 28 100% 50%;
   }
 }
 
@@ -54,7 +71,27 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-blur-bg-primary text-blur-text-primary font-mono antialiased;
+  }
+
+  /* Glassmorphism utilities */
+  .glass {
+    backdrop-filter: blur(10px);
+    background-color: rgba(30, 30, 30, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .glass-card {
+    backdrop-filter: blur(10px);
+    background-color: rgba(30, 30, 30, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Orange glow effect */
+  .text-glow-orange {
+    text-shadow: 0 0 10px rgba(255, 135, 0, 0.5);
   }
 }
 

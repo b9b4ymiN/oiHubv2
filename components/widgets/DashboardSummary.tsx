@@ -69,14 +69,23 @@ export function DashboardSummary({ symbol, interval }: DashboardSummaryProps) {
     if (!topPosition || topPosition.length === 0) return null
 
     const latest = topPosition[topPosition.length - 1]
-    const longRatio = latest.longPosition / (latest.longPosition + latest.shortPosition)
-    const bias = longRatio > 0.55 ? 'BULLISH' : longRatio < 0.45 ? 'BEARISH' : 'NEUTRAL'
+
+    // Use longShortRatio directly from Binance API
+    // longShortRatio > 1 means more longs, < 1 means more shorts
+    const ratio = latest.longShortRatio || 1
+
+    // Convert ratio to percentages
+    // If ratio = 2.0, that means 2:1 long:short = 66.67% long, 33.33% short
+    const longPercent = (ratio / (ratio + 1)) * 100
+    const shortPercent = (1 / (ratio + 1)) * 100
+
+    const bias = ratio > 1.2 ? 'BULLISH' : ratio < 0.8 ? 'BEARISH' : 'NEUTRAL'
 
     return {
-      longRatio: (longRatio * 100).toFixed(1),
-      shortRatio: ((1 - longRatio) * 100).toFixed(1),
+      longRatio: longPercent.toFixed(1),
+      shortRatio: shortPercent.toFixed(1),
       bias,
-      confidence: Math.abs(longRatio - 0.5) > 0.15 ? 'HIGH' : Math.abs(longRatio - 0.5) > 0.08 ? 'MEDIUM' : 'LOW'
+      confidence: ratio > 1.5 || ratio < 0.67 ? 'HIGH' : ratio > 1.2 || ratio < 0.8 ? 'MEDIUM' : 'LOW'
     }
   }, [topPosition])
 

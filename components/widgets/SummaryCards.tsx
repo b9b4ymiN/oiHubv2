@@ -102,8 +102,8 @@ export function SummaryCards({ symbol }: SummaryCardsProps) {
                   <h3 className="text-2xl font-bold text-green-900 dark:text-green-200">
                     {latestTaker.bias.replace('AGGRESSIVE_', '')}
                   </h3>
-                  <p className={`text-xs mt-1 font-semibold ${latestTaker.netImbalance > 0 ? 'text-green-600 dark:text-green-300' : 'text-red-600 dark:text-red-400'}`}>
-                    {latestTaker.netImbalance > 0 ? '+' : ''}{latestTaker.netImbalance.toFixed(2)}%
+                  <p className={`text-xs mt-1 font-semibold ${latestTaker.buySellRatio > 1 ? 'text-green-600 dark:text-green-300' : 'text-red-600 dark:text-red-400'}`}>
+                    Ratio: {latestTaker.buySellRatio.toFixed(2)}
                   </p>
                 </div>
               ) : (
@@ -111,13 +111,12 @@ export function SummaryCards({ symbol }: SummaryCardsProps) {
               )}
             </div>
             <div className="h-12 w-12 rounded-full bg-green-200 dark:bg-green-800 flex items-center justify-center">
-              {latestTaker && latestTaker.netImbalance > 0 ? (
+              {latestTaker && latestTaker.buySellRatio > 1 ? (
                 <ArrowUp className="h-6 w-6 text-green-700 dark:text-green-300" />
               ) : (
                 <ArrowDown className="h-6 w-6 text-green-700 dark:text-green-300" />
               )}
-            </div>
-          </div>
+            </div>          </div>
         </CardContent>
       </Card>
 
