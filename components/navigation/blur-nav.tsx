@@ -11,6 +11,8 @@ export function BlurNav() {
   const navItems = [
     { href: '/', label: 'Home' },
     { href: '/dashboard', label: 'Dashboard' },
+    { href: '/options-volume', label: 'Options' },
+    { href: '/options-pro', label: 'Pro Flow' },
     { href: '/learn', label: 'Learn' },
   ]
 

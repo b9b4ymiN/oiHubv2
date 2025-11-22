@@ -163,6 +163,8 @@ export default function DashboardPage() {
                   klines={klines || []}
                   oiData={oiData || []}
                   height={window.innerWidth < 640 ? 250 : 400}
+                  symbol={symbol}
+                  interval={interval}
                 />
               )}
             </CardContent>
@@ -1005,6 +1007,8 @@ function TimeframeAnalysis({
         klines={klines}
         oiData={oiData}
         height={window.innerWidth < 640 ? 200 : 300}
+        symbol={symbol}
+        interval={interval}
       />
     </div>
   );

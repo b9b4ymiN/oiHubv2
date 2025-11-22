@@ -1,19 +1,23 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { X, Send, MessageSquare, Sparkles } from 'lucide-react'
+import { X, Send, MessageSquare, Sparkles, Copy, Check, Trash2, RotateCcw, Database, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { useOITraderChat } from '@/lib/hooks/useOITraderChat'
+import { useChatContext } from '@/lib/contexts/ChatContextProvider'
 import ReactMarkdown from 'react-markdown'
+import { cn } from '@/lib/utils'
 
 export function ChatModal() {
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState('')
-  const { messages, isLoading, sendMessage } = useOITraderChat()
+  const { messages, isLoading, sendMessage, clearMessages } = useOITraderChat()
+  const { context, clearContext, pendingQuestion, setPendingQuestion } = useChatContext()
   const messagesEndRef = useRef<HTMLDivElement>(null)
-
-  console.log('ChatModal rendered:', { isOpen, messagesCount: messages.length, isLoading })
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -23,14 +27,89 @@ export function ChatModal() {
     scrollToBottom()
   }, [messages])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  // Listen for openChatWithContext event
+  useEffect(() => {
+    const handleOpenChat = () => {
+      setIsOpen(true)
+    }
+
+    window.addEventListener('openChatWithContext', handleOpenChat)
+    return () => window.removeEventListener('openChatWithContext', handleOpenChat)
+  }, [])
+
+  // Send pending question when modal opens with context
+  useEffect(() => {
+    if (isOpen && pendingQuestion && context) {
+      const question = pendingQuestion
+      setPendingQuestion(null)
+      sendMessage(question)
+    }
+  }, [isOpen, pendingQuestion, context])
+
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault()
     if (!input.trim() || isLoading) return
 
     const message = input.trim()
-    console.log('Sending message:', message)
     setInput('')
+    // Reset textarea height
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+    }
     await sendMessage(message)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Send on Enter (without Shift)
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSubmit()
+    }
+    // Allow Shift+Enter for new line (default behavior)
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value)
+    // Auto-resize textarea
+    e.target.style.height = 'auto'
+    e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`
+  }
+
+  const copyToClipboard = async (text: string, index: number) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedIndex(index)
+      setTimeout(() => setCopiedIndex(null), 2000)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
+
+  const handleClearChat = () => {
+    if (confirm('Are you sure you want to clear all messages?')) {
+      clearMessages()
+      clearContext()
+    }
+  }
+
+  const getContextSummary = () => {
+    if (!context) return null
+
+    const typeLabels: Record<string, string> = {
+      'price-oi': 'Price & OI Chart',
+      'options-iv': 'Options IV Analysis',
+      'volume-profile': 'Volume Profile',
+      'taker-flow': 'Taker Flow',
+      'oi-divergence': 'OI Divergence',
+      'general': 'Chart Data'
+    }
+
+    return {
+      label: typeLabels[context.type] || 'Chart Data',
+      symbol: context.metadata?.symbol,
+      interval: context.metadata?.interval,
+      title: context.metadata?.chartTitle
+    }
   }
 
   return (
@@ -38,74 +117,134 @@ export function ChatModal() {
       {/* Floating Chat Button */}
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-2xl bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:shadow-[0_0_30px_rgba(147,51,234,0.5)] hover:scale-110 z-50 group transition-all duration-300 border-2 border-white/20"
+        className="fixed bottom-8 right-8  chat-floating-button h-14 w-14 sm:h-16 sm:w-16 rounded-full shadow-2xl bg-gradient-to-br from-[var(--blur-orange)] to-[var(--blur-orange-bright)] hover:shadow-[0_0_40px_rgba(255,135,0,0.6)] hover:scale-110 active:scale-95 z-50 group transition-all duration-300 border-2 border-white/20 backdrop-blur-sm"
+        //style={{ bottom: 'calc(env(safe-area-inset-bottom, 1rem) + 0.5rem)', right: 'calc(env(safe-area-inset-right, 1rem) + 0.5rem)' }}
         size="icon"
       >
-        <MessageSquare className="h-7 w-7 group-hover:rotate-12 transition-transform duration-300" />
-        <span className="absolute -top-1 -right-1 h-4 w-4 bg-green-500 rounded-full animate-pulse shadow-lg border-2 border-white"></span>
+        <MessageSquare className="h-6 w-6 sm:h-7 sm:w-7 text-white group-hover:rotate-12 transition-transform duration-300" />
+        <span className="absolute -top-1 -right-1 h-3.5 w-3.5 sm:h-4 sm:w-4 bg-[#22c55e] rounded-full animate-pulse shadow-lg border-2 border-white"></span>
+        {messages.length > 0 && (
+          <span className="absolute -top-2 -left-2 h-5 w-5 sm:h-6 sm:w-6 bg-[var(--blur-orange-bright)] rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold text-white border-2 border-white shadow-lg">
+            {messages.filter(m => m.role === 'assistant').length}
+          </span>
+        )}
       </Button>
 
       {/* Modal */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <Card className="w-full max-w-2xl h-[600px] flex flex-col shadow-2xl border-2 border-purple-500/30 animate-in zoom-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-[var(--blur-bg-primary)]/80 backdrop-blur-md animate-in fade-in duration-200">
+          <Card className="w-full max-w-3xl h-[100dvh] sm:h-[85vh] sm:max-h-[700px] flex flex-col shadow-2xl border-0 sm:border-2 border-[var(--blur-orange)]/30 animate-in slide-in-from-bottom sm:zoom-in duration-200 bg-[var(--blur-bg-secondary)] sm:rounded-lg overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 text-white rounded-t-lg shadow-lg">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center ring-2 ring-white/30 shadow-xl">
-                  <Sparkles className="h-5 w-5 animate-pulse" />
+            <div className="flex items-center justify-between p-3 sm:p-4 border-b border-[var(--blur-orange)]/30 bg-gradient-to-r from-[var(--blur-orange)] to-[var(--blur-orange-bright)] text-white shadow-lg">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white/20 backdrop-blur flex items-center justify-center ring-2 ring-white/40 shadow-xl flex-shrink-0">
+                  <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 animate-pulse" />
                 </div>
-                <div>
-                  <h3 className="font-bold text-lg">OI Trader Assistant</h3>
-                  <p className="text-xs text-cyan-100">
-                    Powered by AI • Ask anything about OI Trading
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-bold text-base sm:text-xl truncate">OI Trader AI</h3>
+                  <p className="text-[10px] sm:text-xs text-white/90 font-medium truncate">
+                    ⚡ {messages.length} messages
                   </p>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsOpen(false)}
-                className="text-white hover:bg-white/20"
-              >
-                <X className="h-5 w-5" />
-              </Button>
+              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                {messages.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleClearChat}
+                    className="h-9 w-9 sm:h-10 sm:w-10 text-white hover:bg-white/20 active:bg-white/30 transition-all duration-200 touch-manipulation"
+                    title="Clear all messages"
+                  >
+                    <Trash2 className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsOpen(false)}
+                  className="h-9 w-9 sm:h-10 sm:w-10 text-white hover:bg-white/20 active:bg-white/30 transition-all duration-200 touch-manipulation"
+                >
+                  <X className="h-4 w-4 sm:h-5 sm:w-5" />
+                </Button>
+              </div>
             </div>
 
+            {/* Context Display */}
+            {context && (
+              <div className="px-3 sm:px-4 py-2 border-b border-[var(--blur-orange)]/30 bg-[var(--blur-orange)]/5">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <Database className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[var(--blur-orange)] flex-shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge variant="outline" className="text-[10px] sm:text-xs border-[var(--blur-orange)] text-[var(--blur-orange)]">
+                          {getContextSummary()?.label}
+                        </Badge>
+                        {getContextSummary()?.symbol && (
+                          <span className="text-[10px] sm:text-xs text-[var(--blur-text-secondary)] font-mono">
+                            {getContextSummary()?.symbol}
+                          </span>
+                        )}
+                        {getContextSummary()?.interval && (
+                          <span className="text-[10px] sm:text-xs text-[var(--blur-text-muted)]">
+                            {getContextSummary()?.interval}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[9px] sm:text-[10px] text-[var(--blur-text-muted)] mt-0.5">
+                        AI has access to this chart data
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={clearContext}
+                    className="h-7 w-7 sm:h-8 sm:w-8 text-[var(--blur-text-muted)] hover:text-[var(--blur-orange)] hover:bg-[var(--blur-orange)]/10 flex-shrink-0"
+                    title="Clear context"
+                  >
+                    <XCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-900">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-[var(--blur-bg-primary)] scrollbar-thin scrollbar-thumb-[var(--blur-orange)]/20 scrollbar-track-transparent">
               {messages.length === 0 && (
-                <div className="text-center text-muted-foreground py-12">
-                  <Sparkles className="h-12 w-12 mx-auto mb-4 text-purple-500" />
-                  <h4 className="font-semibold text-lg mb-2">Welcome to OI Trader Assistant!</h4>
-                  <p className="text-sm">
-                    Ask me anything about Open Interest trading, market analysis, or how to use this
-                    platform.
+                <div className="text-center py-8 sm:py-12 px-4">
+                  <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-[var(--blur-orange)] to-[var(--blur-orange-bright)] mb-3 sm:mb-4 shadow-xl">
+                    <Sparkles className="h-8 w-8 sm:h-10 sm:w-10 text-white animate-pulse" />
+                  </div>
+                  <h4 className="font-bold text-xl sm:text-2xl mb-2 sm:mb-3 text-[var(--blur-orange)]" style={{ fontFamily: 'var(--font-proto-mono)' }}>Welcome to OI Trader AI!</h4>
+                  <p className="text-xs sm:text-sm mb-4 sm:mb-6 max-w-md mx-auto text-[var(--blur-text-secondary)]">
+                    Ask me anything about Open Interest trading, market analysis, strategies, or how to use this platform.
                   </p>
-                  <div className="mt-6 flex flex-wrap gap-2 justify-center">
+                  <div className="flex flex-col gap-2 max-w-md mx-auto">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => sendMessage('What is OI trading?')}
-                      className="text-xs border-purple-500 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/30 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                      className="text-xs sm:text-sm h-10 sm:h-11 border border-[var(--blur-orange)]/50 bg-[var(--blur-bg-secondary)] text-[var(--blur-orange)] hover:bg-[var(--blur-orange)]/10 hover:border-[var(--blur-orange)] active:scale-95 transition-all duration-300 hover:shadow-lg font-medium touch-manipulation"
                     >
-                      What is OI trading?
+                      💡 What is OI trading?
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => sendMessage('How to read the heatmap?')}
-                      className="text-xs border-blue-500 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                      className="text-xs sm:text-sm h-10 sm:h-11 border border-[var(--blur-orange)]/50 bg-[var(--blur-bg-secondary)] text-[var(--blur-orange)] hover:bg-[var(--blur-orange)]/10 hover:border-[var(--blur-orange)] active:scale-95 transition-all duration-300 hover:shadow-lg font-medium touch-manipulation"
                     >
-                      How to read the heatmap?
+                      📊 How to read the heatmap?
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => sendMessage('Explain volume profile')}
-                      className="text-xs border-cyan-500 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-950/30 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                      className="text-xs sm:text-sm h-10 sm:h-11 border border-[var(--blur-orange)]/50 bg-[var(--blur-bg-secondary)] text-[var(--blur-orange)] hover:bg-[var(--blur-orange)]/10 hover:border-[var(--blur-orange)] active:scale-95 transition-all duration-300 hover:shadow-lg font-medium touch-manipulation"
                     >
-                      Explain volume profile
+                      📈 Explain volume profile
                     </Button>
                   </div>
                 </div>
@@ -114,23 +253,59 @@ export function ChatModal() {
               {messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`flex ${
+                  className={cn(
+                    'flex group',
                     message.role === 'user' ? 'justify-end' : 'justify-start'
-                  }`}
+                  )}
                 >
                   <div
-                    className={`max-w-[80%] rounded-lg p-4 ${
+                    className={cn(
+                      'max-w-[90%] sm:max-w-[85%] rounded-xl p-3 sm:p-4 relative',
                       message.role === 'user'
-                        ? 'bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 text-white shadow-lg'
-                        : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-md'
-                    }`}
+                        ? 'bg-gradient-to-br from-[var(--blur-orange)] to-[var(--blur-orange-bright)] text-white shadow-lg'
+                        : 'glass-card text-[var(--blur-text-primary)]'
+                    )}
                   >
+                    {/* Copy Button */}
+                    <button
+                      onClick={() => copyToClipboard(message.content, index)}
+                      className={cn(
+                        'absolute top-2 right-2 p-2 rounded-md transition-all duration-200 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 touch-manipulation',
+                        message.role === 'user'
+                          ? 'bg-white/20 hover:bg-white/30 active:bg-white/40 text-white'
+                          : 'bg-[var(--blur-bg-tertiary)] hover:bg-[var(--blur-orange)]/20 active:bg-[var(--blur-orange)]/30 text-[var(--blur-orange)]'
+                      )}
+                      title="Copy message"
+                    >
+                      {copiedIndex === index ? (
+                        <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      ) : (
+                        <Copy className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      )}
+                    </button>
+
                     {message.role === 'assistant' ? (
-                      <div className="prose prose-sm dark:prose-invert max-w-none">
-                        <ReactMarkdown>{message.content}</ReactMarkdown>
+                      <div className="prose prose-sm max-w-none text-[var(--blur-text-primary)]">
+                        <ReactMarkdown
+                          components={{
+                            code: ({ node, inline, className, children, ...props }: any) => (
+                              inline ? (
+                                <code className="bg-[var(--blur-orange)]/10 text-[var(--blur-orange)] px-1.5 py-0.5 rounded text-xs font-mono" {...props}>
+                                  {children}
+                                </code>
+                              ) : (
+                                <code className="block bg-[var(--blur-bg-primary)] text-[var(--blur-text-primary)] p-2 sm:p-3 rounded-lg overflow-x-auto text-[10px] sm:text-xs font-mono border border-[var(--blur-orange)]/20" {...props}>
+                                  {children}
+                                </code>
+                              )
+                            ),
+                          }}
+                        >
+                          {message.content}
+                        </ReactMarkdown>
                       </div>
                     ) : (
-                      <p className="text-sm">{message.content}</p>
+                      <p className="text-xs sm:text-sm font-medium whitespace-pre-wrap">{message.content}</p>
                     )}
                   </div>
                 </div>
@@ -138,17 +313,20 @@ export function ChatModal() {
 
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-md">
-                    <div className="flex gap-2">
-                      <div className="h-2 w-2 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full animate-bounce"></div>
-                      <div
-                        className="h-2 w-2 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-full animate-bounce"
-                        style={{ animationDelay: '0.1s' }}
-                      ></div>
-                      <div
-                        className="h-2 w-2 bg-gradient-to-r from-cyan-600 to-purple-600 rounded-full animate-bounce"
-                        style={{ animationDelay: '0.2s' }}
-                      ></div>
+                  <div className="glass-card p-3 sm:p-4 shadow-lg">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="flex gap-1.5">
+                        <div className="h-2 w-2 sm:h-2.5 sm:w-2.5 bg-[var(--blur-orange)] rounded-full animate-bounce"></div>
+                        <div
+                          className="h-2 w-2 sm:h-2.5 sm:w-2.5 bg-[var(--blur-orange-bright)] rounded-full animate-bounce"
+                          style={{ animationDelay: '0.15s' }}
+                        ></div>
+                        <div
+                          className="h-2 w-2 sm:h-2.5 sm:w-2.5 bg-[var(--blur-orange)] rounded-full animate-bounce"
+                          style={{ animationDelay: '0.3s' }}
+                        ></div>
+                      </div>
+                      <span className="text-[10px] sm:text-xs text-[var(--blur-text-secondary)] font-medium">AI is thinking...</span>
                     </div>
                   </div>
                 </div>
@@ -160,28 +338,56 @@ export function ChatModal() {
             {/* Input */}
             <form
               onSubmit={handleSubmit}
-              className="p-4 border-t bg-white dark:bg-gray-950 rounded-b-lg"
+              className="p-3 sm:p-4 border-t border-[var(--blur-orange)]/30 bg-[var(--blur-bg-secondary)]"
             >
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask about OI trading, strategies, or analysis..."
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white dark:bg-gray-900"
-                  disabled={isLoading}
-                />
+              <div className="flex gap-2 items-end">
+                <div className="flex-1 relative">
+                  <textarea
+                    ref={textareaRef}
+                    value={input}
+                    onChange={handleInputChange}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Ask about OI trading... (Shift+Enter for new line)"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-10 sm:pr-12 border border-[var(--blur-orange)]/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--blur-orange)] focus:border-transparent bg-[var(--blur-bg-tertiary)] text-[var(--blur-text-primary)] placeholder:text-[var(--blur-text-muted)] resize-none transition-all duration-200 min-h-[44px] sm:min-h-[48px] max-h-[120px] sm:max-h-[150px] text-sm sm:text-base touch-manipulation"
+                    disabled={isLoading}
+                    rows={1}
+                    style={{ height: 'auto' }}
+                  />
+                  {input.trim() && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setInput('')
+                        if (textareaRef.current) {
+                          textareaRef.current.style.height = 'auto'
+                        }
+                      }}
+                      className="absolute right-2 sm:right-3 bottom-2.5 sm:bottom-3 text-[var(--blur-text-muted)] hover:text-[var(--blur-orange)] active:text-[var(--blur-orange-bright)] transition-colors touch-manipulation"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
                 <Button
                   type="submit"
                   disabled={!input.trim() || isLoading}
-                  className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-11 sm:h-12 px-4 sm:px-5 bg-gradient-to-br from-[var(--blur-orange)] to-[var(--blur-orange-bright)] hover:shadow-xl hover:shadow-[var(--blur-orange)]/20 active:scale-95 hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 touch-manipulation"
                 >
-                  <Send className="h-4 w-4" />
+                  {isLoading ? (
+                    <RotateCcw className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4 sm:h-5 sm:w-5" />
+                  )}
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground mt-2 text-center">
-                Powered by OI Trader AI • Real-time trading analysis
-              </p>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-2 mt-2 sm:mt-3 px-1">
+                <p className="text-[10px] sm:text-xs text-[var(--blur-text-muted)]">
+                  ⚡ Powered by OI Trader AI
+                </p>
+                <p className="text-[10px] sm:text-xs text-[var(--blur-text-muted)]">
+                  💡 <kbd className="px-1 sm:px-1.5 py-0.5 bg-[var(--blur-bg-tertiary)] text-[var(--blur-orange)] rounded text-[9px] sm:text-[10px] font-mono border border-[var(--blur-orange)]/20">Enter</kbd> send • <kbd className="px-1 sm:px-1.5 py-0.5 bg-[var(--blur-bg-tertiary)] text-[var(--blur-orange)] rounded text-[9px] sm:text-[10px] font-mono border border-[var(--blur-orange)]/20">Shift+Enter</kbd> new line
+                </p>
+              </div>
             </form>
           </Card>
         </div>

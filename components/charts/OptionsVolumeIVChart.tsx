@@ -217,24 +217,28 @@ export function OptionsVolumeIVChart({
       {/* Legend */}
       <div className="flex items-center justify-center gap-6 text-sm">
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-orange-500 rounded" />
-          <span>
-            Puts ({formatNumber(totalPutVolume)})
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-blue-500 rounded" />
           <span>
             Calls ({formatNumber(totalCallVolume)})
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-0.5 bg-orange-600" />
-          <span>Vol Stl ({(smile.atmIV * 100).toFixed(2)}%)</span>
+          <div className="w-4 h-4 bg-amber-500 rounded" />
+          <span>
+            Puts ({formatNumber(totalPutVolume)})
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-0.5 bg-yellow-400" />
+          <span>Call IV ({(smile.atmIV * 100).toFixed(2)}%)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-0.5 bg-green-500" />
+          <span>Put IV</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-0.5 bg-gray-400 border-dashed border-t-2" />
-          <span>Future Stl ({formatPrice(spotPrice, 1)})</span>
+          <span>Spot ({formatPrice(spotPrice, 1)})</span>
         </div>
       </div>
 
@@ -326,39 +330,12 @@ export function OptionsVolumeIVChart({
             fillOpacity={0.4}
           />
 
-          {/* Put Volume Bars (Orange) */}
-          <Bar yAxisId="volume" dataKey="putVolume" radius={[4, 4, 0, 0]} stackId="volume">
-            {chartData.map((entry, index) => {
-              let fill = '#F97316' // Orange for puts
-              let opacity = 1
-
-              // Tutorial mode highlighting
-              if (tutorialMode) {
-                if (step.highlight === 'puts') {
-                  opacity = 1 // Full opacity for puts
-                } else if (step.highlight === 'calls' || step.highlight === 'smile' || step.highlight === 'spot' || step.highlight === 'range') {
-                  opacity = 0.2 // Dim puts when highlighting other elements
-                } else if (step.highlight === 'support' && !entry.isSupport) {
-                  opacity = 0.3 // Dim non-support puts
-                } else if (step.highlight === 'resistance') {
-                  opacity = 0.2 // Dim puts when showing resistance
-                }
-              }
-
-              // Highlight support levels (heavy put buying)
-              if (entry.isSupport) {
-                fill = '#DC2626' // Darker red
-              }
-
-              return <Cell key={`put-${index}`} fill={fill} fillOpacity={opacity} />
-            })}
-          </Bar>
-
-          {/* Call Volume Bars (Blue) */}
+          {/* Call Volume Bars (Blue/Cyan - matching example.jpg) */}
           <Bar yAxisId="volume" dataKey="callVolume" radius={[4, 4, 0, 0]} stackId="volume">
             {chartData.map((entry, index) => {
-              let fill = '#3B82F6' // Blue for calls
-              let opacity = 1
+              // Blue/Cyan color scheme for calls (matching example.jpg)
+              let fill = entry.strike < spotPrice ? '#60A5FA' : '#3B82F6'
+              let opacity = 0.8
 
               // Tutorial mode highlighting
               if (tutorialMode) {
@@ -375,23 +352,68 @@ export function OptionsVolumeIVChart({
 
               // Highlight resistance levels (heavy call writing)
               if (entry.isResistance) {
-                fill = '#1D4ED8' // Darker blue
+                fill = '#1D4ED8' // Darker blue for resistance
               }
 
               return <Cell key={`call-${index}`} fill={fill} fillOpacity={opacity} />
             })}
           </Bar>
 
-          {/* Volatility Smile Curve (Orange Line) - MUST be visible */}
+          {/* Put Volume Bars (Orange/Amber - matching example.jpg) */}
+          <Bar yAxisId="volume" dataKey="putVolume" radius={[4, 4, 0, 0]} stackId="volume">
+            {chartData.map((entry, index) => {
+              // Orange/Amber color scheme for puts (matching example.jpg)
+              let fill = entry.strike > spotPrice ? '#F59E0B' : '#FBBF24'
+              let opacity = 0.8
+
+              // Tutorial mode highlighting
+              if (tutorialMode) {
+                if (step.highlight === 'puts') {
+                  opacity = 1 // Full opacity for puts
+                } else if (step.highlight === 'calls' || step.highlight === 'smile' || step.highlight === 'spot' || step.highlight === 'range') {
+                  opacity = 0.2 // Dim puts when highlighting other elements
+                } else if (step.highlight === 'support' && !entry.isSupport) {
+                  opacity = 0.3 // Dim non-support puts
+                } else if (step.highlight === 'resistance') {
+                  opacity = 0.2 // Dim puts when showing resistance
+                }
+              }
+
+              // Highlight support levels (heavy put buying)
+              if (entry.isSupport) {
+                fill = '#DC2626' // Darker red for support
+              }
+
+              return <Cell key={`put-${index}`} fill={fill} fillOpacity={opacity} />
+            })}
+          </Bar>
+
+          {/* Volatility Smile Curve (Yellow/Green - matching example.jpg) */}
           <Line
             yAxisId="volatility"
             type="monotone"
-            dataKey="volatility"
-            stroke="#F97316"
-            strokeWidth={tutorialMode && step.highlight === 'smile' ? 5 : 3}
-            dot={{ fill: '#F97316', r: tutorialMode && step.highlight === 'smile' ? 5 : 3 }}
+            dataKey="callIV"
+            stroke="#FBBF24"
+            strokeWidth={tutorialMode && step.highlight === 'smile' ? 5 : 2.5}
+            dot={{ fill: '#FBBF24', r: tutorialMode && step.highlight === 'smile' ? 5 : 3 }}
             activeDot={{ r: 5 }}
-            name="IV Smile"
+            name="Call IV"
+            connectNulls
+            opacity={
+              tutorialMode && (step.highlight === 'puts' || step.highlight === 'calls' || step.highlight === 'spot' || step.highlight === 'range' || step.highlight === 'support' || step.highlight === 'resistance')
+                ? 0.3
+                : 1
+            }
+          />
+          <Line
+            yAxisId="volatility"
+            type="monotone"
+            dataKey="putIV"
+            stroke="#10B981"
+            strokeWidth={tutorialMode && step.highlight === 'smile' ? 5 : 2.5}
+            dot={{ fill: '#10B981', r: tutorialMode && step.highlight === 'smile' ? 5 : 3 }}
+            activeDot={{ r: 5 }}
+            name="Put IV"
             connectNulls
             opacity={
               tutorialMode && (step.highlight === 'puts' || step.highlight === 'calls' || step.highlight === 'spot' || step.highlight === 'range' || step.highlight === 'support' || step.highlight === 'resistance')

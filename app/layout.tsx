@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Space_Mono } from "next/font/google"
 import "./globals.css"
 import { QueryProvider } from "@/components/providers/query-provider"
+import { ChatContextProvider } from "@/lib/contexts/ChatContextProvider"
 import { ChatModal } from "@/components/chat/ChatModal"
 
 const spaceMono = Space_Mono({
@@ -27,8 +28,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className="dark">
       <body className={`${spaceMono.variable} font-mono antialiased`}>
         <QueryProvider>
-          {children}
-          <ChatModal />
+          <ChatContextProvider>
+            {children}
+            <ChatModal />
+          </ChatContextProvider>
         </QueryProvider>
       </body>
     </html>

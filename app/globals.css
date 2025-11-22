@@ -209,4 +209,13 @@
   .animate-bounce-slow {
     animation: bounce-slow 2s ease-in-out infinite;
   }
+
+  /* Floating chat button helpers */
+  .chat-floating-button {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    will-change: transform;
+    /* Ensure the button stays on top of any local stacking contexts */
+    z-index: 99999;
+  }
 }

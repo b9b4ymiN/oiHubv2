@@ -15,14 +15,25 @@ import {
 import { OHLCV, OIPoint, DataPoint } from '@/types/market'
 import { formatPrice, formatNumber } from '@/lib/utils/data'
 import { format } from 'date-fns'
+import { AskAIButton } from '@/components/ui/AskAIButton'
 
 interface PriceOIChartProps {
   klines: OHLCV[]
   oiData: OIPoint[]
   height?: number
+  symbol?: string
+  interval?: string
+  showAskAI?: boolean
 }
 
-export function PriceOIChart({ klines, oiData, height = 400 }: PriceOIChartProps) {
+export function PriceOIChart({
+  klines,
+  oiData,
+  height = 400,
+  symbol,
+  interval,
+  showAskAI = true
+}: PriceOIChartProps) {
   const chartData = useMemo(() => {
     // Merge price and OI data
     const merged: DataPoint[] = klines.map((k, idx) => {
@@ -44,8 +55,51 @@ export function PriceOIChart({ klines, oiData, height = 400 }: PriceOIChartProps
     )
   }
 
+  // Prepare context for AI
+  const latestData = chartData[chartData.length - 1]
+  const previousData = chartData[chartData.length - 20] || chartData[0]
+  const priceChange = ((latestData.close - previousData.close) / previousData.close) * 100
+  const oiChange = ((latestData.openInterest ?? 0) - (previousData.openInterest ?? 0)) / ((previousData.openInterest ?? 1) || 1) * 100
+
+  const chartContext = {
+    type: 'price-oi' as const,
+    data: {
+      summary: {
+        currentPrice: latestData.close,
+        currentOI: latestData.openInterest,
+        priceChange24h: priceChange,
+        oiChange24h: oiChange,
+        volume24h: chartData.reduce((sum, d) => sum + d.volume, 0),
+      },
+      recent: chartData.slice(-50), // Last 50 data points
+      statistics: {
+        highPrice: Math.max(...chartData.map(d => d.high)),
+        lowPrice: Math.min(...chartData.map(d => d.low)),
+        avgVolume: chartData.reduce((sum, d) => sum + d.volume, 0) / chartData.length,
+        oiTrend: oiChange > 0 ? 'increasing' : 'decreasing',
+        priceTrend: priceChange > 0 ? 'bullish' : 'bearish',
+      }
+    },
+    metadata: {
+      symbol: symbol,
+      interval: interval,
+      timestamp: Date.now(),
+      chartTitle: 'Price & Open Interest Analysis'
+    }
+  }
+
   return (
-    <ResponsiveContainer width="100%" height={height}>
+    <div className="relative">
+      {showAskAI && (
+        <div className="absolute top-2 right-2 z-10">
+          <AskAIButton
+            context={chartContext}
+            question="Analyze the current Price and OI relationship. What does this indicate about market sentiment?"
+            variant="icon"
+          />
+        </div>
+      )}
+      <ResponsiveContainer width="100%" height={height}>
       <ComposedChart data={chartData}>
         <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
 
@@ -110,6 +164,7 @@ export function PriceOIChart({ klines, oiData, height = 400 }: PriceOIChartProps
         />
       </ComposedChart>
     </ResponsiveContainer>
+    </div>
   )
 }
 
