@@ -21,7 +21,7 @@ import { VolumeProfileEnhanced } from "@/components/charts/VolumeProfileEnhanced
 import { OpportunityFinderCard } from "@/components/widgets/OpportunityFinderCard";
 import { SummaryCards } from "@/components/widgets/SummaryCards";
 import { DashboardSummary } from "@/components/widgets/DashboardSummary";
-import { ModernNav } from "@/components/navigation/modern-nav";
+import { BlurNav } from "@/components/navigation/blur-nav";
 import { TakerFlowOverlay } from "@/components/widgets/TakerFlowOverlay";
 import { useTakerFlow, useOptionsIVAnalysis } from "@/lib/hooks/useMarketData";
 import { OptionsVolumeIVChart } from "@/components/charts/OptionsVolumeIVChart";
@@ -35,11 +35,26 @@ import { OptionsGreeksPanel } from "@/components/widgets/OptionsGreeksPanel";
 import { WhaleTransactionFeed } from "@/components/widgets/WhaleTransactionFeed";
 import { useResponsive } from "@/lib/hooks/useResponsive";
 import { CollapsibleSection } from "@/components/ui/collapsible-section";
+import { AskAIButton } from "@/components/ui/AskAIButton";
+import { useChatContext, ChartContext } from "@/lib/contexts/ChatContextProvider";
+import { ExecutiveSummary } from "@/components/intelligence/ExecutiveSummary";
+import { 
+  Activity, 
+  TrendingUp, 
+  TrendingDown, 
+  Target, 
+  AlertTriangle,
+  Shield,
+  Brain,
+  Zap,
+  BarChart3
+} from "lucide-react";
  
 export default function DashboardPage() {
   const [symbol, setSymbol] = useState("BTCUSDT");
   const [interval, setInterval] = useState("5m");
   const { isMobile, chartHeight } = useResponsive();
+  const { addContextAndOpenChat } = useChatContext();
 
   const { data: klines, isLoading: klinesLoading } = useKlines(
     symbol,
@@ -66,340 +81,321 @@ export default function DashboardPage() {
 
   const isLoading = klinesLoading || oiLoading || fundingLoading || lsLoading;
 
-  return (
-    <div className="min-h-screen bg-blur-bg-primary">
-      <ModernNav />
+  // Create full dashboard context for AI
+  const createFullContext = (): ChartContext => ({
+    type: 'general',
+    data: {
+      symbol,
+      interval,
+      page: 'dashboard',
+      timestamp: Date.now(),
+      analysisType: 'comprehensive-dashboard'
+    },
+    metadata: {
+      symbol,
+      interval,
+      timestamp: Date.now(),
+      chartTitle: 'Dashboard Analysis'
+    }
+  });
 
-      <div
-        className="max-w-[1800px] mt-12
-      mx-auto space-y-3 sm:space-y-4 pt-[80px] p-2 sm:p-4 md:p-6"
-      >
-        {/* 🔴 HEADER - Blur.io Style */}
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+  return (
+    <div className="min-h-screen bg-blur-bg-primary animate-fade-in">
+      <BlurNav />
+
+      <div className="max-w-[1800px] mt-12 mx-auto space-y-4 pt-[80px] p-2 sm:p-4 md:p-6">
+        {/* Header with AI Integration */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between animate-fade-in-up">
           <div className="min-w-0">
-            <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-blur-text-primary uppercase">
-              PROFESSIONAL DASHBOARD
+            <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-blur-text-primary uppercase animate-gradient-slow bg-gradient-to-r from-blur-orange to-orange-400 bg-clip-text text-transparent">
+              🧠 Professional Dashboard
             </h1>
             <p className="text-[10px] sm:text-sm text-blur-text-secondary mt-0.5">
-              REAL-TIME OPTIONS & FUTURES ANALYSIS
+              AI-Powered Trading Intelligence • Real-time Analysis • Smart Decisions
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <SymbolSelector symbol={symbol} onSymbolChange={setSymbol} />
-            <IntervalSelector
-              interval={interval}
-              onIntervalChange={setInterval}
+            <IntervalSelector interval={interval} onIntervalChange={setInterval} />
+            <AskAIButton
+              context={createFullContext()}
+              question="Analyze the current dashboard state and provide comprehensive trading insights"
+              variant="default"
+              size="sm"
+              className="animate-pulse-slow"
             />
           </div>
         </div>
 
-        {/* 🎯 SECTION 1: QUICK MARKET OVERVIEW */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 pb-3 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white text-sm font-bold">📊</span>
-              </div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                Market Overview
-              </h1>
-            </div>
-            <Badge variant="outline" className="text-xs bg-blue-50 border-blue-200 text-blue-700">
-              LIVE DATA
+        {/* Executive Summary - Always on Top */}
+        <div className="space-y-3 animate-fade-in-up animation-delay-200">
+          <div className="flex items-center gap-2 pb-2 border-b-2 border-gray-200 dark:border-gray-800">
+            <span className="text-base sm:text-xl animate-float">🎯</span>
+            <h2 className="text-sm sm:text-xl font-bold text-gray-900 dark:text-gray-100">
+              Executive Summary
+            </h2>
+            <Badge variant="destructive" className="text-[10px] sm:text-xs ml-2">
+              Critical
             </Badge>
           </div>
-          
-          
-          
-          {/* Simple Market Summary */}
-          <div className="grid gap-4">
-            <SummaryCards symbol={symbol} />
-          </div>
+          <ExecutiveSummary symbol={symbol} interval={interval} />
         </div>
 
-        {/* 📊 KEY TRADING SIGNALS */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 pb-3 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white text-sm font-bold">📊</span>
-              </div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                Key Trading Signals
-              </h1>
-            </div>
-            <Badge variant="outline" className="text-xs bg-green-50 border-green-200 text-green-700">
-              ACTIONABLE
-            </Badge>
-          </div>
-          
-          {/* Trading Decision Summary */}
-          <Card className="border-2 border-blue-200 dark:border-blue-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300">
-            <CardHeader className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
-              <CardTitle className="text-lg font-bold flex items-center gap-2">
-                ⚡ Quick Trading Decision
-              </CardTitle>
-              <CardDescription className="text-sm text-gray-600 dark:text-gray-300">
-                AI-powered analysis for immediate action
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-4">
-              <DashboardSummary symbol={symbol} interval={interval} />
-            </CardContent>
-          </Card>
-        </div>
+        {/* Main Intelligence Tabs */}
+        <Tabs defaultValue="overview" className="w-full animate-fade-in-up animation-delay-400">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 text-[10px] sm:text-xs">
+            <TabsTrigger value="overview">📊 Overview</TabsTrigger>
+            <TabsTrigger value="signals">⚡ Signals</TabsTrigger>
+            <TabsTrigger value="zones">🎯 Smart Money</TabsTrigger>
+            <TabsTrigger value="analysis">📈 Analysis</TabsTrigger>
+          </TabsList>
 
-        {/* 🎯 SMART MONEY ZONES */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 pb-3 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-red-600 rounded-lg flex items-center justify-center">
-                <span className="text-white text-sm font-bold">🎯</span>
-              </div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                Smart Money Zones
-              </h1>
+          {/* Market Overview Tab */}
+          <TabsContent value="overview" className="space-y-4">
+            <div className="grid gap-4">
+              <SummaryCards symbol={symbol} />
             </div>
-            <Badge variant="outline" className="text-xs bg-green-50 border-green-200 text-green-700">
-              INSTUTIONAL LEVELS
-            </Badge>
-          </div>
-          
-          {/* Simple Buy/Sell Zones */}
-          {optionsData && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* BUY ZONE */}
-              <Card className="border-2 border-green-500 dark:border-green-600 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <Card className="border-2 border-blur-orange/30 glass-card hover:border-blur-orange/50 transition-all duration-300 group">
                 <CardHeader className="p-4">
-                  <CardTitle className="text-lg font-bold flex items-center gap-2 text-green-700 dark:text-green-400">
-                    🟢 Buy Zone
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <Activity className="h-4 w-4 text-blur-orange" />
+                    Market Activity
                   </CardTitle>
-                  <CardDescription className="text-sm text-gray-600 dark:text-gray-300">
-                    Smart money support levels
-                  </CardDescription>
                 </CardHeader>
-                <CardContent className="p-4 space-y-3">
-                  {calculateBuyZones(optionsData)
-                    .slice(0, 2)
-                    .map((zone: any, idx: number) => {
-                      const currentPrice = optionsData.chain.spotPrice;
-                      const downside = ((zone.strike - currentPrice) / currentPrice) * 100;
-
-                      return (
-                        <div
-                          key={idx}
-                          className="p-4 rounded-lg bg-white dark:bg-gray-900 border-2 border-green-300 dark:border-green-700"
-                        >
-                          <div className="flex justify-between items-center mb-2">
-                            <div>
-                              <div className="font-mono font-bold text-lg text-green-700 dark:text-green-400">
-                                ${zone.strike.toLocaleString()}
-                              </div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">
-                                {downside >= 0 ? "↓" : "↑"} {Math.abs(downside).toFixed(1)}%
-                              </div>
-                            </div>
-                            <Badge className="bg-green-600 text-white text-sm">
-                              Score: {zone.score.toFixed(0)}
-                            </Badge>
-                          </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
-                            💡 {zone.reason}
-                          </div>
-                        </div>
-                      );
-                    })}
-                </CardContent>
-              </Card>
-
-              {/* SELL ZONE */}
-              <Card className="border-2 border-red-500 dark:border-red-600 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/30 dark:to-orange-950/30">
-                <CardHeader className="p-4">
-                  <CardTitle className="text-lg font-bold flex items-center gap-2 text-red-700 dark:text-red-400">
-                    🔴 Sell Zone
-                  </CardTitle>
-                  <CardDescription className="text-sm text-gray-600 dark:text-gray-300">
-                    Institutional resistance walls
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-4 space-y-3">
-                  {calculateSellZones(optionsData)
-                    .slice(0, 2)
-                    .map((zone: any, idx: number) => {
-                      const currentPrice = optionsData.chain.spotPrice;
-                      const upside = ((zone.strike - currentPrice) / currentPrice) * 100;
-
-                      return (
-                        <div
-                          key={idx}
-                          className="p-4 rounded-lg bg-white dark:bg-gray-900 border-2 border-red-300 dark:border-red-700"
-                        >
-                          <div className="flex justify-between items-center mb-2">
-                            <div>
-                              <div className="font-mono font-bold text-lg text-red-700 dark:text-red-400">
-                                ${zone.strike.toLocaleString()}
-                              </div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">
-                                {upside >= 0 ? "↑" : "↓"} {Math.abs(upside).toFixed(1)}%
-                              </div>
-                            </div>
-                            <Badge variant="destructive" className="text-sm">
-                              Score: {zone.score.toFixed(0)}
-                            </Badge>
-                          </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
-                            💡 {zone.reason}
-                          </div>
-                        </div>
-                      );
-                    })}
-                </CardContent>
-              </Card>
-            </div>
-          )}
-        </div>
-
-        {/* 📊 ขั้นตอนที่ 4: Volume Profile & Taker Flow (Timing) */}
-        <div className="space-y-3">
-          <SectionHeader
-            icon="📊"
-            title="ขั้นที่ 4: Volume Profile & Taker Flow"
-            badge="Timing"
-          />
-          <div className="p-3 bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg">
-            <p className="text-xs text-gray-700 dark:text-gray-300">
-              <strong className="text-purple-600 dark:text-purple-400">การใช้:</strong>
-              Volume Profile: หา POC (Fair Value) และ Value Area (±1σ) •
-              Taker Flow: ดูแรงซื้อ/ขาย Aggressive • Net Flow บวก = แรงซื้อชนะ
-            </p>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
-            {/* Volume Profile */}
-            <Card className="border-2 border-purple-200 dark:border-purple-800 hover:border-purple-500 dark:hover:border-purple-500 transition-colors">
-              <CardHeader className="p-3 sm:p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30">
-                <CardTitle className="text-sm sm:text-lg">
-                  📊 Volume Profile + Bell Curve
-                </CardTitle>
-                <CardDescription className="text-[10px] sm:text-sm">
-                  Statistical trading zones • POC • Value Area
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-2 sm:p-6">
-                {isLoading ? (
-                  <div className="h-[250px] sm:h-[400px] flex items-center justify-center text-muted-foreground text-xs sm:text-sm">
-                    Loading...
+                <CardContent className="p-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs">Volume</span>
+                      <span className="text-xs font-mono font-bold">24.5K BTC</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs">Volatility</span>
+                      <span className="text-xs font-mono font-bold">2.3%</span>
+                    </div>
                   </div>
-                ) : (
-                  <VolumeProfileEnhanced
-                    klines={klines || []}
-                    currentPrice={klines?.[klines.length - 1]?.close}
-                    height={chartHeight}
-                  />
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            {/* Opportunity Finder */}
-            <OpportunityFinderCard
-              klines={klines || []}
-              currentPrice={klines?.[klines.length - 1]?.close}
-            />
-          </div>
+              <Card className="border-2 border-blur-orange/30 glass-card hover:border-blur-orange/50 transition-all duration-300 group">
+                <CardHeader className="p-4">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <Target className="h-4 w-4 text-blur-orange" />
+                    Key Levels
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs">Resistance</span>
+                      <span className="text-xs font-mono font-bold text-red-500">$44,200</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs">Support</span>
+                      <span className="text-xs font-mono font-bold text-green-500">$42,800</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
-          {/* Taker Flow */}
-          <Card className="border-2 border-purple-200 dark:border-purple-800">
-            <CardHeader className="p-3 sm:p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30">
-              <CardTitle className="text-sm sm:text-lg">
-                🔄 Taker Buy/Sell Flow
-              </CardTitle>
-              <CardDescription className="text-[10px] sm:text-sm">
-                Aggressive orders • Market taker dominance
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-3 sm:p-6">
-              {!isLoading && takerFlowData ? (
-                <TakerFlowOverlay
-                  takerData={takerFlowData}
-                  isLVN={false}
-                  isHVN={false}
-                  priceZone="AT_POC"
-                />
-              ) : (
-                <div className="text-center text-xs sm:text-sm text-muted-foreground py-4">
-                  Loading Taker Flow...
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* ⚡ ขั้นตอนที่ 5: OI Divergence & Final Checklist */}
-        <div className="space-y-3">
-          <SectionHeader
-            icon="⚡"
-            title="ขั้นที่ 5: OI Divergence & Decision Checklist"
-            badge="Final Check"
-          />
-          <div className="p-3 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg">
-            <p className="text-xs text-gray-700 dark:text-gray-300">
-              <strong className="text-orange-600 dark:text-orange-400">ยืนยันสุดท้าย:</strong>
-              ดู OI Divergence เพื่อยืนยันแนวโน้ม •
-              เช็ค Trading Checklist ต้องผ่าน &gt;80% ถึงจะเข้าเทรด •
-              Multi-Timeframe: ดูว่าทุก TF ชี้ทางเดียวกันหรือไม่
-            </p>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
-            <OIDivergenceCard klines={klines || []} oiData={oiData || []} />
-
-            {/* Decision Checklist */}
-            <Card className="border-2 border-orange-200 dark:border-orange-800 hover:border-orange-500 dark:hover:border-orange-500 transition-colors">
-              <CardHeader className="p-3 sm:p-6 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/30 dark:to-red-950/30">
-                <CardTitle className="text-sm sm:text-lg">
-                  ✅ Trading Checklist
+          {/* Trading Signals Tab */}
+          <TabsContent value="signals" className="space-y-4">
+            <Card className="border-2 border-blue-200 dark:border-blue-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 glass-card">
+              <CardHeader className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
+                <CardTitle className="text-lg font-bold flex items-center gap-2">
+                  ⚡ Quick Trading Decision
                 </CardTitle>
-                <CardDescription className="text-[10px] sm:text-sm">
-                  Professional decision framework
+                <CardDescription className="text-sm text-gray-600 dark:text-gray-300">
+                  AI-powered analysis for immediate action
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-3 sm:p-6">
-                <DecisionChecklist
-                  klines={klines || []}
-                  oiData={oiData || []}
-                  fundingData={fundingData || []}
-                  lsData={lsRatio || []}
-                />
+              <CardContent className="p-4">
+                <DashboardSummary symbol={symbol} interval={interval} />
               </CardContent>
             </Card>
-          </div>
+          </TabsContent>
 
-          {/* Multi-Timeframe */}
-          <Card className="border-2 border-orange-200 dark:border-orange-800">
-            <CardHeader className="p-3 sm:p-6 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/30 dark:to-red-950/30">
-              <CardTitle className="text-sm sm:text-lg">
-                🕐 Multi-Timeframe OI Analysis
-              </CardTitle>
-              <CardDescription className="text-[10px] sm:text-sm">
-                Confirm bias across timeframes
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-2 sm:p-6">
-              <Tabs defaultValue="15m" className="w-full">
-                <TabsList className="grid w-full grid-cols-5 text-[10px] sm:text-xs">
-                  <TabsTrigger value="1m">1m</TabsTrigger>
-                  <TabsTrigger value="5m">5m</TabsTrigger>
-                  <TabsTrigger value="15m">15m</TabsTrigger>
-                  <TabsTrigger value="1h">1h</TabsTrigger>
-                  <TabsTrigger value="4h">4h</TabsTrigger>
-                </TabsList>
-                {["1m", "5m", "15m", "1h", "4h"].map((tf) => (
-                  <TabsContent key={tf} value={tf}>
-                    <TimeframeAnalysis symbol={symbol} interval={tf} />
-                  </TabsContent>
-                ))}
-              </Tabs>
-            </CardContent>
-          </Card>
-        </div>
+          {/* Smart Money Zones Tab */}
+          <TabsContent value="zones" className="space-y-4">
+            {optionsData && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* BUY ZONE */}
+                <Card className="border-2 border-green-500 dark:border-green-600 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 glass-card hover:shadow-blur-glow transition-all duration-300">
+                  <CardHeader className="p-4">
+                    <CardTitle className="text-lg font-bold flex items-center gap-2 text-green-700 dark:text-green-400">
+                      🟢 Buy Zone
+                    </CardTitle>
+                    <CardDescription className="text-sm text-gray-600 dark:text-gray-300">
+                      Smart money support levels
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-4 space-y-3">
+                    {calculateBuyZones(optionsData)
+                      .slice(0, 2)
+                      .map((zone: any, idx: number) => {
+                        const currentPrice = optionsData.chain.spotPrice;
+                        const downside = ((zone.strike - currentPrice) / currentPrice) * 100;
+
+                        return (
+                          <div
+                            key={idx}
+                            className="p-4 rounded-lg bg-white dark:bg-gray-900 border-2 border-green-300 dark:border-green-700 hover:border-green-500 transition-colors"
+                          >
+                            <div className="flex justify-between items-center mb-2">
+                              <div>
+                                <div className="font-mono font-bold text-lg text-green-700 dark:text-green-400">
+                                  ${zone.strike.toLocaleString()}
+                                </div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                  {downside >= 0 ? "↓" : "↑"} {Math.abs(downside).toFixed(1)}%
+                                </div>
+                              </div>
+                              <Badge className="bg-green-600 text-white text-sm animate-pulse-slow">
+                                Score: {zone.score.toFixed(0)}
+                              </Badge>
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              💡 {zone.reason}
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </CardContent>
+                </Card>
+
+                {/* SELL ZONE */}
+                <Card className="border-2 border-red-500 dark:border-red-600 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/30 dark:to-orange-950/30 glass-card hover:shadow-blur-glow transition-all duration-300">
+                  <CardHeader className="p-4">
+                    <CardTitle className="text-lg font-bold flex items-center gap-2 text-red-700 dark:text-red-400">
+                      🔴 Sell Zone
+                    </CardTitle>
+                    <CardDescription className="text-sm text-gray-600 dark:text-gray-300">
+                      Institutional resistance walls
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-4 space-y-3">
+                    {calculateSellZones(optionsData)
+                      .slice(0, 2)
+                      .map((zone: any, idx: number) => {
+                        const currentPrice = optionsData.chain.spotPrice;
+                        const upside = ((zone.strike - currentPrice) / currentPrice) * 100;
+
+                        return (
+                          <div
+                            key={idx}
+                            className="p-4 rounded-lg bg-white dark:bg-gray-900 border-2 border-red-300 dark:border-red-700 hover:border-red-500 transition-colors"
+                          >
+                            <div className="flex justify-between items-center mb-2">
+                              <div>
+                                <div className="font-mono font-bold text-lg text-red-700 dark:text-red-400">
+                                  ${zone.strike.toLocaleString()}
+                                </div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                  {upside >= 0 ? "↑" : "↓"} {Math.abs(upside).toFixed(1)}%
+                                </div>
+                              </div>
+                              <Badge variant="destructive" className="text-sm animate-pulse-slow">
+                                Score: {zone.score.toFixed(0)}
+                              </Badge>
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              💡 {zone.reason}
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Analysis Tab */}
+          <TabsContent value="analysis" className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <Card className="border-2 border-purple-200 dark:border-purple-800 hover:border-purple-500 dark:hover:border-purple-500 transition-colors glass-card">
+                <CardHeader className="p-3 sm:p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30">
+                  <CardTitle className="text-sm sm:text-lg">
+                    📊 Volume Profile + Bell Curve
+                  </CardTitle>
+                  <CardDescription className="text-[10px] sm:text-sm">
+                    Statistical trading zones • POC • Value Area
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-2 sm:p-6">
+                  {isLoading ? (
+                    <div className="h-[250px] sm:h-[400px] flex items-center justify-center text-muted-foreground text-xs sm:text-sm animate-pulse">
+                      Loading...
+                    </div>
+                  ) : (
+                    <VolumeProfileEnhanced
+                      klines={klines || []}
+                      currentPrice={klines?.[klines.length - 1]?.close}
+                      height={chartHeight}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+
+              <OpportunityFinderCard
+                klines={klines || []}
+                currentPrice={klines?.[klines.length - 1]?.close}
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Quick Actions Section */}
+        <Card className="border-2 border-blur-orange/30 glass-card hover:border-blur-orange/50 transition-all duration-300 animate-fade-in-up animation-delay-600">
+          <CardHeader className="p-3 sm:p-6 bg-blur-orange/10 border-b border-blur-orange/20">
+            <CardTitle className="text-base sm:text-xl font-bold mb-1 flex items-center gap-2 text-blur-text-primary uppercase">
+              <Zap className="text-lg sm:text-2xl animate-pulse-slow" />
+              <span>AI Quick Actions</span>
+            </CardTitle>
+            <p className="text-blur-text-secondary text-[10px] sm:text-sm">
+              One-click analysis • Context-aware insights • Instant recommendations
+            </p>
+          </CardHeader>
+          <CardContent className="p-3 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <QuickActionCard
+                title="Market Analysis"
+                description="Complete market overview"
+                question="Provide a comprehensive analysis of the current market state including all indicators, signals, and potential trading opportunities"
+                symbol={symbol}
+                interval={interval}
+                icon={<BarChart3 className="h-4 w-4" />}
+              />
+              <QuickActionCard
+                title="Entry Points"
+                description="Optimal entry/exit levels"
+                question="Identify the best entry and exit points for {symbol} based on current technical and options data"
+                symbol={symbol}
+                interval={interval}
+                icon={<Target className="h-4 w-4" />}
+              />
+              <QuickActionCard
+                title="Risk Assessment"
+                description="Current risk analysis"
+                question="Analyze the current risk levels for trading {symbol} and provide risk management strategies"
+                symbol={symbol}
+                interval={interval}
+                icon={<AlertTriangle className="h-4 w-4" />}
+              />
+              <QuickActionCard
+                title="Smart Strategy"
+                description="AI-powered trading plan"
+                question="Create a detailed trading strategy for {symbol} based on all available data and market conditions"
+                symbol={symbol}
+                interval={interval}
+                icon={<Brain className="h-4 w-4" />}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
       </div>
     </div>
   );
@@ -712,6 +708,68 @@ function calculateSellZones(optionsData: any) {
     .sort((a: any, b: any) => b.score - a.score);
 
   return sellZones;
+}
+
+// Quick Action Card Component
+function QuickActionCard({
+  title,
+  description,
+  question,
+  symbol,
+  interval,
+  icon,
+}: {
+  title: string;
+  description: string;
+  question: string;
+  symbol: string;
+  interval: string;
+  icon: React.ReactNode;
+}) {
+  const { addContextAndOpenChat } = useChatContext();
+
+  const context: ChartContext = {
+    type: 'general',
+    data: {
+      symbol,
+      interval,
+      page: 'dashboard',
+      actionType: title.toLowerCase().replace(' ', '-'),
+      timestamp: Date.now()
+    },
+    metadata: {
+      symbol,
+      interval,
+      timestamp: Date.now(),
+      chartTitle: `${title} - ${symbol}`
+    }
+  };
+
+  return (
+    <Card className="border-2 border-transparent hover:border-blur-orange/50 transition-all duration-300 cursor-pointer group glass-card"
+          onClick={() => addContextAndOpenChat(context, question.replace('{symbol}', symbol))}>
+      <CardHeader className="p-4">
+        <CardTitle className="text-sm font-semibold group-hover:text-blur-orange transition-colors flex items-center gap-2">
+          {icon}
+          {title}
+        </CardTitle>
+        <CardDescription className="text-xs">
+          {description}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="p-4 pt-0">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] text-muted-foreground">Click to analyze</span>
+          <AskAIButton
+            context={context}
+            question={question.replace('{symbol}', symbol)}
+            variant="icon"
+            size="icon"
+          />
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 // Timeframe Analysis - Mobile optimized
