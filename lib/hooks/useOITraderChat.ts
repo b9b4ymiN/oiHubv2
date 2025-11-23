@@ -59,6 +59,7 @@ export function useOITraderChat() {
       const requestBody: any = {
         messages: updatedMessages,
         user_id: userId,
+        language: 'thai'
       }
 
       // Include session_id if we have one (for memory continuation)

@@ -48,10 +48,10 @@ export default function IntelligencePage() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-blur-text-primary uppercase">
-              🧠 INTELLIGENCE HUB
+              🧠 ศูนย์ข่าวกรองการเทรด
             </h1>
             <p className="text-[10px] sm:text-sm text-blur-text-secondary mt-0.5">
-              AI-POWERED TRADING ANALYSIS • REAL-TIME INSIGHTS • SMART DECISIONS
+              การวิเคราะห์การเทรดโดย AI • ข้อมูลเชิงลึกแบบเรียลไทม์ • การตัดสินใจอัจฉริยะ
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
@@ -59,7 +59,7 @@ export default function IntelligencePage() {
             <IntervalSelector interval={interval} onIntervalChange={setInterval} />
             <AskAIButton
               context={createFullContext()}
-              question="Analyze the current market intelligence and provide trading recommendations"
+              question="วิเคราะห์ข่าวกรองการเทรดปัจจุบันและให้คำแนะนำการเทรด"
               variant="default"
               size="sm"
             />
@@ -71,10 +71,10 @@ export default function IntelligencePage() {
           <div className="flex items-center gap-2 pb-2 border-b-2 border-gray-200 dark:border-gray-800">
             <span className="text-base sm:text-xl">🎯</span>
             <h2 className="text-sm sm:text-xl font-bold text-gray-900 dark:text-gray-100">
-              EXECUTIVE SUMMARY
+              สรุปผู้บริหาร
             </h2>
             <Badge variant="destructive" className="text-[10px] sm:text-xs ml-2">
-              CRITICAL
+              สำคัญ
             </Badge>
           </div>
           <ExecutiveSummary symbol={symbol} interval={interval} />
@@ -83,10 +83,10 @@ export default function IntelligencePage() {
         {/* Main Intelligence Tabs */}
         <Tabs defaultValue="signals" className="w-full">
           <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 text-[10px] sm:text-xs">
-            <TabsTrigger value="signals">📊 Signals</TabsTrigger>
-            <TabsTrigger value="risk">⚠️ Risk</TabsTrigger>
-            <TabsTrigger value="opportunities">🎯 Opportunities</TabsTrigger>
-            <TabsTrigger value="decisions">✅ Decisions</TabsTrigger>
+            <TabsTrigger value="signals">📊 สัญญาณ</TabsTrigger>
+            <TabsTrigger value="risk">⚠️ ความเสี่ยง</TabsTrigger>
+            <TabsTrigger value="opportunities">🎯 โอกาส</TabsTrigger>
+            <TabsTrigger value="decisions">✅ การตัดสินใจ</TabsTrigger>
           </TabsList>
 
           {/* Signals Intelligence */}
@@ -149,39 +149,39 @@ export default function IntelligencePage() {
           <CardHeader className="p-3 sm:p-6 bg-blur-orange/10 border-b border-blur-orange/20">
             <CardTitle className="text-base sm:text-xl font-bold mb-1 flex items-center gap-2 text-blur-text-primary uppercase">
               <span className="text-lg sm:text-2xl">🚀</span>
-              <span>QUICK AI ACTIONS</span>
+              <span>การทำงานด่วน AI</span>
             </CardTitle>
             <p className="text-blur-text-secondary text-[10px] sm:text-sm">
-              ONE-CLICK ANALYSIS • CONTEXT-AWARE QUESTIONS • INSTANT INSIGHTS
+              วิเคราะห์ด้วยคลิกเดียว • คำถามตามบริบท • ข้อมูลเชิงลึกทันที
             </p>
           </CardHeader>
           <CardContent className="p-3 sm:p-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <QuickActionCard
-                title="Market Analysis"
-                description="Full market breakdown"
-                question="Provide a comprehensive analysis of the current market conditions including all signals, risks, and opportunities"
+                title="วิเคราะห์ตลาด"
+                description="การวิเคราะห์ตลาดทั้งหมด"
+                question="ให้การวิเคราะห์แบบครอบคลุมของสภาพตลาดปัจจุบัน รวมถึงสัญญาณ ความเสี่ยง และโอกาสทั้งหมด"
                 symbol={symbol}
                 interval={interval}
               />
               <QuickActionCard
-                title="Trade Setup"
-                description="Find optimal entry/exit"
-                question="Analyze the current setup and provide specific entry, exit, and stop-loss recommendations with confidence scores"
+                title="การตั้งค่าการเทรด"
+                description="หาจุดเข้า-ออกที่เหมาะสม"
+                question="วิเคราะห์การตั้งค่าปัจจุบันและให้คำแนะนำการเข้า ออก และตัดขาดทุนเฉพาะเจาะจงพร้อมคะแนนความมั่นใจ"
                 symbol={symbol}
                 interval={interval}
               />
               <QuickActionCard
-                title="Risk Assessment"
-                description="Evaluate trading risks"
-                question="Assess all potential risks for trading {symbol} right now and provide risk management strategies"
+                title="ประเมินความเสี่ยง"
+                description="ประเมินความเสี่ยงในการเทรด"
+                question="ประเมินความเสี่ยงทั้งหมดสำหรับการเทรด {symbol} ตอนนี้และให้กลยุทธ์การจัดการความเสี่ยง"
                 symbol={symbol}
                 interval={interval}
               />
               <QuickActionCard
-                title="Strategy Review"
-                description="Optimize trading approach"
-                question="Review my current trading strategy based on market conditions and suggest improvements"
+                title="ตรวจสอบกลยุทธ์"
+                description="ปรับปรุงแนวทางการเทรด"
+                question="ตรวจสอบกลยุทธ์การเทรดปัจจุบันของฉันตามสภาพตลาดและเสนอแนะการปรับปรุง"
                 symbol={symbol}
                 interval={interval}
               />
@@ -289,7 +289,7 @@ function QuickActionCard({
       </CardHeader>
       <CardContent className="p-4 pt-0">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] text-muted-foreground">Click to analyze</span>
+          <span className="text-[10px] text-muted-foreground">คลิกเพื่อวิเคราะห์</span>
           <AskAIButton
             context={context}
             question={question.replace('{symbol}', symbol)}

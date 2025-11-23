@@ -149,13 +149,13 @@ export function SmartQuestionHub({ symbol, interval, marketData }: SmartQuestion
 
   // Categories for filtering
   const categories = [
-    { id: "all", name: "All Questions", icon: <MessageCircle className="h-4 w-4" /> },
-    { id: "analysis", name: "Market Analysis", icon: <Brain className="h-4 w-4" /> },
-    { id: "strategy", name: "Trading Strategy", icon: <Target className="h-4 w-4" /> },
-    { id: "risk", name: "Risk Management", icon: <Shield className="h-4 w-4" /> },
-    { id: "opportunity", name: "Opportunities", icon: <Gem className="h-4 w-4" /> },
-    { id: "technical", name: "Technical Analysis", icon: <TrendingUp className="h-4 w-4" /> },
-    { id: "timing", name: "Market Timing", icon: <Clock className="h-4 w-4" /> }
+    { id: "all", name: "คำถามทั้งหมด", icon: <MessageCircle className="h-4 w-4" /> },
+    { id: "analysis", name: "การวิเคราะห์ตลาด", icon: <Brain className="h-4 w-4" /> },
+    { id: "strategy", name: "กลยุทธ์การเทรด", icon: <Target className="h-4 w-4" /> },
+    { id: "risk", name: "การจัดการความเสี่ยง", icon: <Shield className="h-4 w-4" /> },
+    { id: "opportunity", name: "โอกาส", icon: <Gem className="h-4 w-4" /> },
+    { id: "technical", name: "การวิเคราะห์ทางเทคนิค", icon: <TrendingUp className="h-4 w-4" /> },
+    { id: "timing", name: "การจัดการเวลา", icon: <Clock className="h-4 w-4" /> }
   ];
 
   // Create AI context
@@ -191,16 +191,16 @@ export function SmartQuestionHub({ symbol, interval, marketData }: SmartQuestion
       <CardHeader className="pb-4">
         <CardTitle className="text-base font-semibold flex items-center gap-2">
           <Sparkles className="h-5 w-5" />
-          SMART QUESTION HUB
+          ศูนย์คำถามอัจฉริยะ
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Get instant AI-powered insights with pre-configured intelligent questions
+          รับข้อมูลเชิงลึกจาก AI ทันทีกับคำถามอัจฉริยะที่กำหนดไว้
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Category Filter */}
         <div className="space-y-3">
-          <div className="text-sm font-medium">Browse by Category:</div>
+            <div className="text-sm font-medium">เลือกหมวดหมู่:</div>
           <div className="flex flex-wrap gap-2">
             {categories.map((category) => (
               <Button

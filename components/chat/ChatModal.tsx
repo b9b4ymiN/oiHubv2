@@ -342,9 +342,9 @@ export function ChatModal() {
                   <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-[var(--blur-orange)] to-[var(--blur-orange-bright)] mb-3 sm:mb-4 shadow-xl">
                     <Sparkles className="h-8 w-8 sm:h-10 sm:w-10 text-white animate-pulse" />
                   </div>
-                  <h4 className="font-bold text-xl sm:text-2xl mb-2 sm:mb-3 text-[var(--blur-orange)]" style={{ fontFamily: 'var(--font-proto-mono)' }}>Welcome to OI Trader AI!</h4>
+                  <h4 className="font-bold text-xl sm:text-2xl mb-2 sm:mb-3 text-[var(--blur-orange)]" style={{ fontFamily: 'var(--font-proto-mono)' }}>ยินดีต้อนรับ AI ของ OI Trader!</h4>
                   <p className="text-xs sm:text-sm mb-4 sm:mb-6 max-w-md mx-auto text-[var(--blur-text-secondary)]">
-                    Ask me anything about Open Interest trading, market analysis, strategies, or how to use this platform.
+                    ถามถามอะไรเกี่ยวกับการเทรด Open Interest การวิเคราะห์ตลาด กลยุทธ์ หรือวิธีการใช้แพลตฟอร์มนี้
                   </p>
                   <div className="flex flex-col gap-2 max-w-md mx-auto">
                     <Button
@@ -472,7 +472,7 @@ export function ChatModal() {
                     value={input}
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
-                    placeholder={isMobile ? "Ask about OI trading..." : "Ask about OI trading... (Shift+Enter for new line)"}
+                    placeholder={isMobile ? "ถามเกี่ยวกับการเทรด OI..." : "ถามเกี่ยวกับการเทรด OI... (Shift+Enter สำหรับบรรทัดใหม่)"}
                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-10 sm:pr-12 border border-[var(--blur-orange)]/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--blur-orange)] focus:border-transparent bg-[var(--blur-bg-tertiary)] text-[var(--blur-text-primary)] placeholder:text-[var(--blur-text-muted)] resize-none transition-all duration-200 min-h-[44px] sm:min-h-[48px] max-h-[120px] sm:max-h-[150px] text-base touch-manipulation"
                     disabled={isLoading}
                     rows={1}
