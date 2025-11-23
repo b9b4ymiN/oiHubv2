@@ -18,6 +18,9 @@ services:
 
       # Node environment
       - NODE_ENV=production
+      - CHAT_API_URL=http://bf-gai.duckdns.org/chat
+    networks:
+      - web-net
     restart: unless-stopped
     # Optional: Limit resources
     deploy:
@@ -34,3 +37,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
+networks:
+  web-net:
+    external: true
