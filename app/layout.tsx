@@ -4,6 +4,7 @@ import "./globals.css"
 import { QueryProvider } from "@/components/providers/query-provider"
 import { ChatContextProvider } from "@/lib/contexts/ChatContextProvider"
 import { ChatModal } from "@/components/chat/ChatModal"
+import { ModernNav } from "@/components/navigation/modern-nav"
 
 const spaceMono = Space_Mono({
   weight: ['400', '700'],

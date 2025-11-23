@@ -251,7 +251,7 @@ export function calculateProMetrics(snapshot: {
   // ATM IV Change
   const atmCallIVChange = atmMetrics.find(s => s.side === 'CALL')?.ivChange
   const atmPutIVChange = atmMetrics.find(s => s.side === 'PUT')?.ivChange
-  const atmIVChange = atmCallIVChange !== null && atmPutIVChange !== null
+  const atmIVChange = atmCallIVChange !== null && atmCallIVChange !== undefined && atmPutIVChange !== null && atmPutIVChange !== undefined
     ? (atmCallIVChange + atmPutIVChange) / 2
     : null
 

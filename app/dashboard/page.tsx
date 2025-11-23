@@ -21,16 +21,25 @@ import { VolumeProfileEnhanced } from "@/components/charts/VolumeProfileEnhanced
 import { OpportunityFinderCard } from "@/components/widgets/OpportunityFinderCard";
 import { SummaryCards } from "@/components/widgets/SummaryCards";
 import { DashboardSummary } from "@/components/widgets/DashboardSummary";
-import { BlurNav } from "@/components/navigation/blur-nav";
+import { ModernNav } from "@/components/navigation/modern-nav";
 import { TakerFlowOverlay } from "@/components/widgets/TakerFlowOverlay";
 import { useTakerFlow, useOptionsIVAnalysis } from "@/lib/hooks/useMarketData";
 import { OptionsVolumeIVChart } from "@/components/charts/OptionsVolumeIVChart";
 import { OIDivergenceCard } from "@/components/widgets/OIDivergenceCard";
 import { MarketRegimeIndicator } from "@/components/widgets/MarketRegimeIndicator";
-
+import { MultiTimeframeMatrix } from "@/components/widgets/MultiTimeframeMatrix";
+import { VolatilityPercentile } from "@/components/widgets/VolatilityPercentile";
+import { SmartMoneyDivergence } from "@/components/widgets/SmartMoneyDivergence";
+import { OIAdvancedMetrics } from "@/components/widgets/OIAdvancedMetrics";
+import { OptionsGreeksPanel } from "@/components/widgets/OptionsGreeksPanel";
+import { WhaleTransactionFeed } from "@/components/widgets/WhaleTransactionFeed";
+import { useResponsive } from "@/lib/hooks/useResponsive";
+import { CollapsibleSection } from "@/components/ui/collapsible-section";
+ 
 export default function DashboardPage() {
   const [symbol, setSymbol] = useState("BTCUSDT");
   const [interval, setInterval] = useState("5m");
+  const { isMobile, chartHeight } = useResponsive();
 
   const { data: klines, isLoading: klinesLoading } = useKlines(
     symbol,
@@ -59,7 +68,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-blur-bg-primary">
-      <BlurNav />
+      <ModernNav />
 
       <div
         className="max-w-[1800px] mt-12
@@ -84,446 +93,169 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* 📊 ขั้นตอนที่ 1: ภาพรวมตลาด (Market Overview) */}
-        <div className="space-y-3">
-          <SectionHeader
-            icon="📊"
-            title="ขั้นที่ 1: ภาพรวมตลาด (Market Overview)"
-            badge="START HERE"
-          />
-          <div className="p-3 bg-blur-orange/5 border border-blur-orange/20 rounded-lg">
-            <p className="text-blur-text-secondary text-xs">
-              <strong className="text-blur-orange">วัตถุประสงค์:</strong> เข้าใจสภาวะตลาดโดยรวมก่อนเข้าสู่รายละเอียด •
-              ดู OI, Funding Rate, Smart Money และ Top Traders positioning
-            </p>
+        {/* 🎯 SECTION 1: QUICK MARKET OVERVIEW */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <span className="text-white text-sm font-bold">📊</span>
+              </div>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                Market Overview
+              </h1>
+            </div>
+            <Badge variant="outline" className="text-xs bg-blue-50 border-blue-200 text-blue-700">
+              LIVE DATA
+            </Badge>
           </div>
-          <SummaryCards symbol={symbol} />
-          <MarketRegimeIndicator symbol={symbol} interval={interval} />
+          
+          
+          
+          {/* Simple Market Summary */}
+          <div className="grid gap-4">
+            <SummaryCards symbol={symbol} />
+          </div>
         </div>
 
-        {/* ⚡ QUICK DECISION SUMMARY */}
-        <Card className="glass-card border-blur-orange/30 shadow-blur-glow">
-          <CardHeader className="p-3 sm:p-6 bg-blur-orange/10 border-b border-blur-orange/20">
-            <CardTitle className="text-base sm:text-xl font-bold mb-1 flex items-center gap-2 text-blur-text-primary uppercase">
-              <span className="text-lg sm:text-2xl">⚡</span>
-              <span>QUICK TRADING DECISION</span>
-            </CardTitle>
-            <p className="text-blur-text-secondary text-[10px] sm:text-sm">
-              AI-POWERED SUMMARY • MULTI-INDICATOR ANALYSIS • REAL-TIME
-            </p>
-          </CardHeader>
-          <CardContent className="p-3 sm:p-6">
-            <DashboardSummary symbol={symbol} interval={interval} />
-          </CardContent>
-        </Card>
-
-        {/* 📈 ขั้นตอนที่ 2: ความเคลื่อนไหวของ Price & OI */}
-        <div className="space-y-3">
-          <SectionHeader
-            icon="📈"
-            title="ขั้นที่ 2: ความเคลื่อนไหวของ Price & OI"
-            badge="Core Analysis"
-          />
-          <div className="p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <p className="text-xs text-gray-700 dark:text-gray-300">
-              <strong className="text-blue-600 dark:text-blue-400">สัญญาณสำคัญ:</strong>
-              OI ↑ + Price ↑ = Healthy Uptrend ✅ •
-              OI ↑ + Price ↓ = New Shorts Entering ⚠️ •
-              OI ↓ + Price Change = Position Closing (อาจกลับตัว)
-            </p>
-          </div>
-          <Card className="border-2 border-green-200 dark:border-green-800 hover:border-green-500 dark:hover:border-green-500 transition-colors">
-            <CardHeader className="p-3 sm:p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <CardTitle className="text-sm sm:text-lg">
-                  📈 Price & OI - Real-Time
-                </CardTitle>
-                <div className="flex gap-2">
-                  <Badge
-                    variant="outline"
-                    className="border-green-500 text-green-600 dark:text-green-400 text-[10px] sm:text-xs"
-                  >
-                    Live
-                  </Badge>
-                  <Badge variant="secondary" className="text-[10px] sm:text-xs">
-                    {symbol}
-                  </Badge>
-                </div>
+        {/* 📊 KEY TRADING SIGNALS */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white text-sm font-bold">📊</span>
               </div>
-            </CardHeader>
-            <CardContent className="p-2 sm:p-6">
-              {isLoading ? (
-                <div className="h-[250px] sm:h-[400px] flex items-center justify-center">
-                  <div className="text-muted-foreground text-xs sm:text-sm">
-                    Loading...
-                  </div>
-                </div>
-              ) : (
-                <PriceOIChart
-                  klines={klines || []}
-                  oiData={oiData || []}
-                  height={window.innerWidth < 640 ? 250 : 400}
-                  symbol={symbol}
-                  interval={interval}
-                />
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* 🎯 ขั้นตอนที่ 3: Options Flow & IV (Smart Money Bias) */}
-        <div className="space-y-3">
-          <SectionHeader
-            icon="🎯"
-            title="ขั้นที่ 3: Options Flow & IV (Smart Money)"
-            badge="Pro Analysis"
-          />
-          <div className="p-3 bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-800 rounded-lg">
-            <p className="text-xs text-gray-700 dark:text-gray-300">
-              <strong className="text-indigo-600 dark:text-indigo-400">หลักการ:</strong>
-              Call OI &gt; Put OI = สถาบันเดิมพันขึ้น (Bullish Bias) •
-              IV สูง (&gt;70%) = ตลาดกลัว/ผันผวน •
-              Strike ที่มี OI หนา = ราคาแม่เหล็ก (Magnet Price)
-            </p>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                Key Trading Signals
+              </h1>
+            </div>
+            <Badge variant="outline" className="text-xs bg-green-50 border-green-200 text-green-700">
+              ACTIONABLE
+            </Badge>
           </div>
-          <Card className="border-2 border-indigo-200 dark:border-indigo-800 hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors">
-            <CardHeader className="p-3 sm:p-6 bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-950/30 dark:to-violet-950/30">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <CardTitle className="text-sm sm:text-lg">
-                  🎯 Options Volume & IV Smile
-                </CardTitle>
-                <div className="flex gap-2">
-                  <Badge
-                    variant="outline"
-                    className="border-indigo-500 text-indigo-600 dark:text-indigo-400 text-[10px] sm:text-xs"
-                  >
-                    VOL2VOL™
-                  </Badge>
-                  <Badge variant="secondary" className="text-[10px] sm:text-xs">
-                    {symbol}
-                  </Badge>
-                </div>
-              </div>
-              <CardDescription className="text-gray-700 dark:text-gray-300 text-[10px] sm:text-sm">
-                Where institutions defend (support) and resist (resistance)
+          
+          {/* Trading Decision Summary */}
+          <Card className="border-2 border-blue-200 dark:border-blue-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300">
+            <CardHeader className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
+              <CardTitle className="text-lg font-bold flex items-center gap-2">
+                ⚡ Quick Trading Decision
+              </CardTitle>
+              <CardDescription className="text-sm text-gray-600 dark:text-gray-300">
+                AI-powered analysis for immediate action
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-2 sm:p-6">
-              {optionsLoading ? (
-                <div className="h-[300px] sm:h-[500px] flex items-center justify-center">
-                  <div className="text-center space-y-2">
-                    <div className="text-muted-foreground text-xs sm:text-sm">
-                      Loading options data...
-                    </div>
-                    <div className="text-[10px] sm:text-xs text-muted-foreground">
-                      Analyzing IV smile & Greeks
-                    </div>
-                  </div>
-                </div>
-              ) : optionsData ? (
-                <OptionsVolumeIVChart
-                  chain={optionsData.chain}
-                  smile={optionsData.smile}
-                  volumeByStrike={optionsData.volumeByStrike}
-                  height={window.innerWidth < 640 ? 300 : 500}
-                />
-              ) : (
-                <div className="h-[250px] sm:h-[400px] flex items-center justify-center">
-                  <div className="text-center space-y-2">
-                    <div className="text-muted-foreground text-xs sm:text-sm">
-                      Options data unavailable
-                    </div>
-                    <div className="text-[10px] sm:text-xs text-muted-foreground">
-                      Binance options may not be available for {symbol}
-                    </div>
-                  </div>
-                </div>
-              )}
+            <CardContent className="p-4">
+              <DashboardSummary symbol={symbol} interval={interval} />
             </CardContent>
           </Card>
+        </div>
 
-          {/* Options Insights Grid - Mobile optimized */}
+        {/* 🎯 SMART MONEY ZONES */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-red-600 rounded-lg flex items-center justify-center">
+                <span className="text-white text-sm font-bold">🎯</span>
+              </div>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                Smart Money Zones
+              </h1>
+            </div>
+            <Badge variant="outline" className="text-xs bg-green-50 border-green-200 text-green-700">
+              INSTUTIONAL LEVELS
+            </Badge>
+          </div>
+          
+          {/* Simple Buy/Sell Zones */}
           {optionsData && (
-            <>
-              {/* BUY/SELL ZONES (NEW!) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {/* BUY ZONE */}
-                <Card className="border-2 border-green-500 dark:border-green-600 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30">
-                  <CardHeader className="p-3 sm:p-4">
-                    <CardTitle className="text-sm sm:text-base flex items-center gap-2 text-green-700 dark:text-green-400">
-                      🟢 BUY ZONE (Smart Money Support)
-                    </CardTitle>
-                    <CardDescription className="text-[10px] sm:text-xs">
-                      Put Volume + Low IV + Near -1σ
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-3 sm:p-4 space-y-2">
-                    {calculateBuyZones(optionsData)
-                      .slice(0, 3)
-                      .map((zone: any, idx: number) => {
-                        const currentPrice = optionsData.chain.spotPrice;
-                        const downside =
-                          ((zone.strike - currentPrice) / currentPrice) * 100;
-                        const distance = Math.abs(currentPrice - zone.strike);
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* BUY ZONE */}
+              <Card className="border-2 border-green-500 dark:border-green-600 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30">
+                <CardHeader className="p-4">
+                  <CardTitle className="text-lg font-bold flex items-center gap-2 text-green-700 dark:text-green-400">
+                    🟢 Buy Zone
+                  </CardTitle>
+                  <CardDescription className="text-sm text-gray-600 dark:text-gray-300">
+                    Smart money support levels
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 space-y-3">
+                  {calculateBuyZones(optionsData)
+                    .slice(0, 2)
+                    .map((zone: any, idx: number) => {
+                      const currentPrice = optionsData.chain.spotPrice;
+                      const downside = ((zone.strike - currentPrice) / currentPrice) * 100;
 
-                        return (
-                          <div
-                            key={idx}
-                            className="p-2 sm:p-3 rounded-lg bg-white dark:bg-gray-900 border-2 border-green-300 dark:border-green-700"
-                          >
-                            <div className="flex justify-between items-center mb-1">
-                              <div className="flex flex-col">
-                                <span className="font-mono font-bold text-sm sm:text-base text-green-700 dark:text-green-400">
-                                  ${zone.strike.toLocaleString()}
-                                </span>
-                                <span className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400">
-                                  Current: $
-                                  {currentPrice.toLocaleString(undefined, {
-                                    maximumFractionDigits: 0,
-                                  })}
-                                </span>
-                              </div>
-                              <div className="flex flex-col items-end gap-1">
-                                <Badge
-                                  variant="default"
-                                  className="text-[10px] sm:text-xs bg-green-600"
-                                >
-                                  Score: {zone.score.toFixed(0)}
-                                </Badge>
-                                <Badge
-                                  variant="outline"
-                                  className="text-[9px] sm:text-[10px] border-green-500 text-green-600 dark:text-green-400"
-                                >
-                                  {downside >= 0 ? "↓" : "↑"}{" "}
-                                  {Math.abs(downside).toFixed(1)}%
-                                </Badge>
-                              </div>
-                            </div>
-                            <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 space-y-0.5">
-                              <div className="flex justify-between">
-                                <span>Put OI:</span>
-                                <span className="font-semibold">
-                                  {zone.putOI.toLocaleString()} contracts
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Distance:</span>
-                                <span className="font-semibold">
-                                  $
-                                  {distance.toLocaleString(undefined, {
-                                    maximumFractionDigits: 0,
-                                  })}
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>IV:</span>
-                                <span className="font-semibold">
-                                  {(zone.iv * 100).toFixed(1)}% (ATM:{" "}
-                                  {(optionsData.smile.atmIV * 100).toFixed(1)}%)
-                                </span>
-                              </div>
-                              <div className="mt-1 pt-1 border-t border-green-200 dark:border-green-800">
-                                <div className="text-green-600 dark:text-green-400 font-medium">
-                                  💡 {zone.reason}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                  </CardContent>
-                </Card>
-
-                {/* SELL ZONE */}
-                <Card className="border-2 border-red-500 dark:border-red-600 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/30 dark:to-orange-950/30">
-                  <CardHeader className="p-3 sm:p-4">
-                    <CardTitle className="text-sm sm:text-base flex items-center gap-2 text-red-700 dark:text-red-400">
-                      🔴 SELL ZONE (Resistance Walls)
-                    </CardTitle>
-                    <CardDescription className="text-[10px] sm:text-xs">
-                      Call Volume + High IV + Near +1σ
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-3 sm:p-4 space-y-2">
-                    {calculateSellZones(optionsData)
-                      .slice(0, 3)
-                      .map((zone: any, idx: number) => {
-                        const currentPrice = optionsData.chain.spotPrice;
-                        const upside =
-                          ((zone.strike - currentPrice) / currentPrice) * 100;
-                        const distance = Math.abs(currentPrice - zone.strike);
-
-                        return (
-                          <div
-                            key={idx}
-                            className="p-2 sm:p-3 rounded-lg bg-white dark:bg-gray-900 border-2 border-red-300 dark:border-red-700"
-                          >
-                            <div className="flex justify-between items-center mb-1">
-                              <div className="flex flex-col">
-                                <span className="font-mono font-bold text-sm sm:text-base text-red-700 dark:text-red-400">
-                                  ${zone.strike.toLocaleString()}
-                                </span>
-                                <span className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400">
-                                  Current: $
-                                  {currentPrice.toLocaleString(undefined, {
-                                    maximumFractionDigits: 0,
-                                  })}
-                                </span>
-                              </div>
-                              <div className="flex flex-col items-end gap-1">
-                                <Badge
-                                  variant="destructive"
-                                  className="text-[10px] sm:text-xs"
-                                >
-                                  Score: {zone.score.toFixed(0)}
-                                </Badge>
-                                <Badge
-                                  variant="outline"
-                                  className="text-[9px] sm:text-[10px] border-red-500 text-red-600 dark:text-red-400"
-                                >
-                                  {upside >= 0 ? "↑" : "↓"}{" "}
-                                  {Math.abs(upside).toFixed(1)}%
-                                </Badge>
-                              </div>
-                            </div>
-                            <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 space-y-0.5">
-                              <div className="flex justify-between">
-                                <span>Call OI:</span>
-                                <span className="font-semibold">
-                                  {zone.callOI.toLocaleString()} contracts
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Distance:</span>
-                                <span className="font-semibold">
-                                  $
-                                  {distance.toLocaleString(undefined, {
-                                    maximumFractionDigits: 0,
-                                  })}
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>IV:</span>
-                                <span className="font-semibold">
-                                  {(zone.iv * 100).toFixed(1)}% (ATM:{" "}
-                                  {(optionsData.smile.atmIV * 100).toFixed(1)}%)
-                                </span>
-                              </div>
-                              <div className="mt-1 pt-1 border-t border-red-200 dark:border-red-800">
-                                <div className="text-red-600 dark:text-red-400 font-medium">
-                                  💡 {zone.reason}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Original Support/Resistance/IV Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {/* Support Levels */}
-                <Card className="border-2 border-green-200 dark:border-green-800">
-                  <CardHeader className="p-3">
-                    <CardTitle className="text-xs sm:text-sm flex items-center gap-2">
-                      🛡️ Support (Put Walls)
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-3 space-y-2">
-                    {optionsData.supportLevels
-                      ?.slice(0, 3)
-                      .map((strike: any, idx: number) => (
+                      return (
                         <div
                           key={idx}
-                          className="flex justify-between items-center text-[10px] sm:text-xs p-2 rounded bg-green-50 dark:bg-green-950/20"
+                          className="p-4 rounded-lg bg-white dark:bg-gray-900 border-2 border-green-300 dark:border-green-700"
                         >
-                          <span className="font-mono font-semibold">
-                            ${strike.strike.toLocaleString()}
-                          </span>
-                          <span className="text-green-600 dark:text-green-400">
-                            Str: {strike.strength.toFixed(0)}
-                          </span>
+                          <div className="flex justify-between items-center mb-2">
+                            <div>
+                              <div className="font-mono font-bold text-lg text-green-700 dark:text-green-400">
+                                ${zone.strike.toLocaleString()}
+                              </div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                                {downside >= 0 ? "↓" : "↑"} {Math.abs(downside).toFixed(1)}%
+                              </div>
+                            </div>
+                            <Badge className="bg-green-600 text-white text-sm">
+                              Score: {zone.score.toFixed(0)}
+                            </Badge>
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            💡 {zone.reason}
+                          </div>
                         </div>
-                      ))}
-                  </CardContent>
-                </Card>
+                      );
+                    })}
+                </CardContent>
+              </Card>
 
-                {/* Resistance Levels */}
-                <Card className="border-2 border-red-200 dark:border-red-800">
-                  <CardHeader className="p-3">
-                    <CardTitle className="text-xs sm:text-sm flex items-center gap-2">
-                      ⚔️ Resistance (Call Walls)
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-3 space-y-2">
-                    {optionsData.resistanceLevels
-                      ?.slice(0, 3)
-                      .map((strike: any, idx: number) => (
+              {/* SELL ZONE */}
+              <Card className="border-2 border-red-500 dark:border-red-600 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/30 dark:to-orange-950/30">
+                <CardHeader className="p-4">
+                  <CardTitle className="text-lg font-bold flex items-center gap-2 text-red-700 dark:text-red-400">
+                    🔴 Sell Zone
+                  </CardTitle>
+                  <CardDescription className="text-sm text-gray-600 dark:text-gray-300">
+                    Institutional resistance walls
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 space-y-3">
+                  {calculateSellZones(optionsData)
+                    .slice(0, 2)
+                    .map((zone: any, idx: number) => {
+                      const currentPrice = optionsData.chain.spotPrice;
+                      const upside = ((zone.strike - currentPrice) / currentPrice) * 100;
+
+                      return (
                         <div
                           key={idx}
-                          className="flex justify-between items-center text-[10px] sm:text-xs p-2 rounded bg-red-50 dark:bg-red-950/20"
+                          className="p-4 rounded-lg bg-white dark:bg-gray-900 border-2 border-red-300 dark:border-red-700"
                         >
-                          <span className="font-mono font-semibold">
-                            ${strike.strike.toLocaleString()}
-                          </span>
-                          <span className="text-red-600 dark:text-red-400">
-                            Str: {strike.strength.toFixed(0)}
-                          </span>
+                          <div className="flex justify-between items-center mb-2">
+                            <div>
+                              <div className="font-mono font-bold text-lg text-red-700 dark:text-red-400">
+                                ${zone.strike.toLocaleString()}
+                              </div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                                {upside >= 0 ? "↑" : "↓"} {Math.abs(upside).toFixed(1)}%
+                              </div>
+                            </div>
+                            <Badge variant="destructive" className="text-sm">
+                              Score: {zone.score.toFixed(0)}
+                            </Badge>
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            💡 {zone.reason}
+                          </div>
                         </div>
-                      ))}
-                  </CardContent>
-                </Card>
-
-                {/* IV Regime */}
-                <Card className="border-2 border-indigo-200 dark:border-indigo-800">
-                  <CardHeader className="p-3">
-                    <CardTitle className="text-xs sm:text-sm flex items-center gap-2">
-                      📊 IV Regime
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-3 space-y-2">
-                    <div>
-                      <div className="text-[10px] sm:text-xs text-muted-foreground mb-1">
-                        Current State
-                      </div>
-                      <Badge
-                        variant={
-                          optionsData.ivRegime?.regime === "HIGH" ||
-                          optionsData.ivRegime?.regime === "ELEVATED"
-                            ? "destructive"
-                            : optionsData.ivRegime?.regime === "LOW" ||
-                              optionsData.ivRegime?.regime === "COMPRESSED"
-                            ? "default"
-                            : "secondary"
-                        }
-                        className="text-[10px] sm:text-xs"
-                      >
-                        {optionsData.ivRegime?.regime}
-                      </Badge>
-                    </div>
-                    <div>
-                      <div className="text-[10px] sm:text-xs text-muted-foreground mb-1">
-                        Strategy
-                      </div>
-                      <div className="text-[10px] sm:text-xs font-medium">
-                        {optionsData.ivRegime?.tradingImplication?.slice(0, 50)}
-                        ...
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-[10px] sm:text-xs text-muted-foreground mb-1">
-                        Max Pain
-                      </div>
-                      <div className="font-mono font-semibold text-xs sm:text-sm">
-                        ${optionsData.maxPain?.maxPainStrike.toLocaleString()}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </>
+                      );
+                    })}
+                </CardContent>
+              </Card>
+            </div>
           )}
         </div>
 
@@ -561,7 +293,7 @@ export default function DashboardPage() {
                   <VolumeProfileEnhanced
                     klines={klines || []}
                     currentPrice={klines?.[klines.length - 1]?.close}
-                    height={window.innerWidth < 640 ? 250 : 400}
+                    height={chartHeight}
                   />
                 )}
               </CardContent>
@@ -992,6 +724,7 @@ function TimeframeAnalysis({
 }) {
   const { data: klines } = useKlines(symbol, interval, 200);
   const { data: oiData } = useOpenInterest(symbol, interval, 200);
+  const { chartHeight } = useResponsive();
 
   if (!klines || !oiData) {
     return (
@@ -1006,7 +739,7 @@ function TimeframeAnalysis({
       <PriceOIChart
         klines={klines}
         oiData={oiData}
-        height={window.innerWidth < 640 ? 200 : 300}
+        height={chartHeight - 100}
         symbol={symbol}
         interval={interval}
       />

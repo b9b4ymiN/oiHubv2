@@ -5,7 +5,7 @@ import { OptionsVolumeIVData } from '@/lib/features/options-volume-iv'
 
 interface OptionsAPIResponse {
   success: boolean
-  data?: OptionsVolumeIVData
+  data?: any
   meta?: {
     underlying: string
     expiry: string
@@ -16,6 +16,222 @@ interface OptionsAPIResponse {
   error?: string
   details?: string
   availableExpiries?: string[]
+}
+
+interface VolumeData {
+  totalCallVolume: number
+  totalPutVolume: number
+  callPutRatio: number
+  volumeWeightedAvgStrike: number
+  lastUpdate: number
+  flowData: Array<{
+    timestamp: number
+    callFlow: number
+    putFlow: number
+    netFlow: number
+  }>
+  volumeData: Array<{
+    strike: number
+    callVolume: number
+    putVolume: number
+    totalVolume: number
+    callOI?: number
+    putOI?: number
+  }>
+}
+
+interface VolumeDeltaData {
+  delta: number
+  deltaType: string
+  timeframe: string
+  analysis: string
+}
+
+interface SmartMoneyFlowData {
+  flowBias: string
+  pressureLevel: string
+  accumulation: string
+  signal: string
+}
+
+interface VWAPData {
+  vwapStrike: number
+  vwapPrice: number
+  timeframe: string
+}
+
+interface StrikeDistributionData {
+  strike: number
+  callVolume: number
+  putVolume: number
+  totalVolume: number
+}
+
+interface OICorrelationData {
+  correlation: number
+  significance: string
+  timeframe: string
+}
+
+/**
+ * Fetch options volume data
+ */
+export function useOptionsVolume(symbol: string, interval: string, timeframe: string, limit: number) {
+  return useQuery<VolumeData | null>({
+    queryKey: ['options-volume', symbol, interval, timeframe, limit],
+    queryFn: async () => {
+      const response = await fetch(`/api/options/volume?symbol=${symbol}&interval=${interval}&timeframe=${timeframe}&limit=${limit}`)
+      const json: OptionsAPIResponse = await response.json()
+
+      if (!json.success) {
+        console.error('[useOptionsVolume] Error:', json.error, json.details)
+        return null
+      }
+
+      return json.data || null
+    },
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    retry: 1,
+  })
+}
+
+/**
+ * Fetch options volume history
+ */
+export function useOptionsVolumeHistory(symbol: string, timeframe: string, limit: number) {
+  return useQuery<any[]>({
+    queryKey: ['options-volume-history', symbol, timeframe, limit],
+    queryFn: async () => {
+      const response = await fetch(`/api/options/volume/history?symbol=${symbol}&timeframe=${timeframe}&limit=${limit}`)
+      const json: OptionsAPIResponse = await response.json()
+
+      if (!json.success) {
+        console.error('[useOptionsVolumeHistory] Error:', json.error, json.details)
+        return []
+      }
+
+      return json.data || []
+    },
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    retry: 1,
+  })
+}
+
+/**
+ * Fetch options volume delta
+ */
+export function useOptionsVolumeDelta(symbol: string, interval: string, timeframe: string, limit: number) {
+  return useQuery<VolumeDeltaData | null>({
+    queryKey: ['options-volume-delta', symbol, interval, timeframe, limit],
+    queryFn: async () => {
+      const response = await fetch(`/api/options/volume/delta?symbol=${symbol}&interval=${interval}&timeframe=${timeframe}&limit=${limit}`)
+      const json: OptionsAPIResponse = await response.json()
+
+      if (!json.success) {
+        console.error('[useOptionsVolumeDelta] Error:', json.error, json.details)
+        return null
+      }
+
+      return json.data || null
+    },
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    retry: 1,
+  })
+}
+
+/**
+ * Fetch smart money flow data
+ */
+export function useSmartMoneyFlow(symbol: string, interval: string, timeframe: string, limit: number) {
+  return useQuery<SmartMoneyFlowData | null>({
+    queryKey: ['smart-money-flow', symbol, interval, timeframe, limit],
+    queryFn: async () => {
+      const response = await fetch(`/api/options/smart-money?symbol=${symbol}&interval=${interval}&timeframe=${timeframe}&limit=${limit}`)
+      const json: OptionsAPIResponse = await response.json()
+
+      if (!json.success) {
+        console.error('[useSmartMoneyFlow] Error:', json.error, json.details)
+        return null
+      }
+
+      return json.data || null
+    },
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    retry: 1,
+  })
+}
+
+/**
+ * Fetch options VWAP data
+ */
+export function useOptionsVWAP(symbol: string, interval: string, timeframe: string, limit: number) {
+  return useQuery<VWAPData | null>({
+    queryKey: ['options-vwap', symbol, interval, timeframe, limit],
+    queryFn: async () => {
+      const response = await fetch(`/api/options/vwap?symbol=${symbol}&interval=${interval}&timeframe=${timeframe}&limit=${limit}`)
+      const json: OptionsAPIResponse = await response.json()
+
+      if (!json.success) {
+        console.error('[useOptionsVWAP] Error:', json.error, json.details)
+        return null
+      }
+
+      return json.data || null
+    },
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    retry: 1,
+  })
+}
+
+/**
+ * Fetch volume strike distribution
+ */
+export function useVolumeStrikeDistribution(symbol: string, interval: string, timeframe: string, limit: number) {
+  return useQuery<StrikeDistributionData[]>({
+    queryKey: ['volume-strike-distribution', symbol, interval, timeframe, limit],
+    queryFn: async () => {
+      const response = await fetch(`/api/options/strike-distribution?symbol=${symbol}&interval=${interval}&timeframe=${timeframe}&limit=${limit}`)
+      const json: OptionsAPIResponse = await response.json()
+
+      if (!json.success) {
+        console.error('[useVolumeStrikeDistribution] Error:', json.error, json.details)
+        return []
+      }
+
+      return json.data || []
+    },
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    retry: 1,
+  })
+}
+
+/**
+ * Fetch OI options correlation
+ */
+export function useOIOptionsCorrelation(symbol: string, interval: string, timeframe: string, limit: number) {
+  return useQuery<OICorrelationData | null>({
+    queryKey: ['oi-options-correlation', symbol, interval, timeframe, limit],
+    queryFn: async () => {
+      const response = await fetch(`/api/options/oi-correlation?symbol=${symbol}&interval=${interval}&timeframe=${timeframe}&limit=${limit}`)
+      const json: OptionsAPIResponse = await response.json()
+
+      if (!json.success) {
+        console.error('[useOIOptionsCorrelation] Error:', json.error, json.details)
+        return null
+      }
+
+      return json.data || null
+    },
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    retry: 1,
+  })
 }
 
 /**

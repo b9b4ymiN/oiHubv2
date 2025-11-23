@@ -18,6 +18,51 @@ export function ChatModal() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+  const [touchStart, setTouchStart] = useState(0)
+  const [touchEnd, setTouchEnd] = useState(0)
+  const [swipeProgress, setSwipeProgress] = useState(0)
+
+  // Detect mobile on client-side only
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // Handle swipe down to close on mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!isMobile) return
+    setTouchStart(e.targetTouches[0].clientY)
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isMobile) return
+    const currentY = e.targetTouches[0].clientY
+    setTouchEnd(currentY)
+
+    // Calculate swipe progress (0-100%)
+    const distance = currentY - touchStart
+    if (distance > 0) {
+      const progress = Math.min((distance / 150) * 100, 100)
+      setSwipeProgress(progress)
+    }
+  }
+
+  const handleTouchEnd = () => {
+    if (!isMobile) return
+    const swipeDistance = touchEnd - touchStart
+    // If swiped down more than 100px, close modal
+    if (swipeDistance > 100) {
+      setIsOpen(false)
+    }
+    setTouchStart(0)
+    setTouchEnd(0)
+    setSwipeProgress(0)
+  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -26,6 +71,43 @@ export function ChatModal() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // Auto-scroll when textarea is focused on mobile (keyboard appears)
+  useEffect(() => {
+    if (!isMobile) return
+
+    const handleFocus = () => {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+      }, 300) // Delay to wait for keyboard animation
+    }
+
+    const textarea = textareaRef.current
+    textarea?.addEventListener('focus', handleFocus)
+
+    return () => {
+      textarea?.removeEventListener('focus', handleFocus)
+    }
+  }, [isMobile])
+
+  // Prevent body scroll when modal is open (mobile)
+  useEffect(() => {
+    if (isOpen && isMobile) {
+      document.body.style.overflow = 'hidden'
+      document.body.style.position = 'fixed'
+      document.body.style.width = '100%'
+    } else {
+      document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.width = ''
+    }
+
+    return () => {
+      document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.width = ''
+    }
+  }, [isOpen, isMobile])
 
   // Listen for openChatWithContext event
   useEffect(() => {
@@ -45,6 +127,15 @@ export function ChatModal() {
       sendMessage(question)
     }
   }, [isOpen, pendingQuestion, context])
+
+  // Auto-focus textarea on desktop when modal opens
+  useEffect(() => {
+    if (isOpen && !isMobile && textareaRef.current) {
+      setTimeout(() => {
+        textareaRef.current?.focus()
+      }, 100)
+    }
+  }, [isOpen, isMobile])
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault()
@@ -114,34 +205,62 @@ export function ChatModal() {
 
   return (
     <>
-      {/* Floating Chat Button */}
+      {/* Floating Chat Button - Mobile optimized with safe area insets */}
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-8 right-8  chat-floating-button h-14 w-14 sm:h-16 sm:w-16 rounded-full shadow-2xl bg-gradient-to-br from-[var(--blur-orange)] to-[var(--blur-orange-bright)] hover:shadow-[0_0_40px_rgba(255,135,0,0.6)] hover:scale-110 active:scale-95 z-50 group transition-all duration-300 border-2 border-white/20 backdrop-blur-sm"
-        //style={{ bottom: 'calc(env(safe-area-inset-bottom, 1rem) + 0.5rem)', right: 'calc(env(safe-area-inset-right, 1rem) + 0.5rem)' }}
+        className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 chat-floating-button h-14 w-14 sm:h-16 sm:w-16 rounded-full shadow-2xl bg-gradient-to-br from-[var(--blur-orange)] to-[var(--blur-orange-bright)] hover:shadow-[0_0_40px_rgba(255,135,0,0.6)] hover:scale-110 active:scale-95 z-50 group transition-all duration-300 border-2 border-white/20 backdrop-blur-sm touch-manipulation"
         size="icon"
+        aria-label="Open AI Chat"
       >
         <MessageSquare className="h-6 w-6 sm:h-7 sm:w-7 text-white group-hover:rotate-12 transition-transform duration-300" />
-        <span className="absolute -top-1 -right-1 h-3.5 w-3.5 sm:h-4 sm:w-4 bg-[#22c55e] rounded-full animate-pulse shadow-lg border-2 border-white"></span>
+        <span className="absolute -top-1 -right-1 h-3.5 w-3.5 sm:h-4 sm:w-4 bg-[#22c55e] rounded-full animate-pulse shadow-lg border-2 border-white" aria-hidden="true"></span>
         {messages.length > 0 && (
-          <span className="absolute -top-2 -left-2 h-5 w-5 sm:h-6 sm:w-6 bg-[var(--blur-orange-bright)] rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold text-white border-2 border-white shadow-lg">
+          <span className="absolute -top-2 -left-2 h-5 w-5 sm:h-6 sm:w-6 bg-[var(--blur-orange-bright)] rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold text-white border-2 border-white shadow-lg" aria-label={`${messages.filter(m => m.role === 'assistant').length} messages`}>
             {messages.filter(m => m.role === 'assistant').length}
           </span>
         )}
       </Button>
 
-      {/* Modal */}
+      {/* Modal - Mobile optimized with dynamic viewport height */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-[var(--blur-bg-primary)]/80 backdrop-blur-md animate-in fade-in duration-200">
-          <Card className="w-full max-w-3xl h-[100dvh] sm:h-[85vh] sm:max-h-[700px] flex flex-col shadow-2xl border-0 sm:border-2 border-[var(--blur-orange)]/30 animate-in slide-in-from-bottom sm:zoom-in duration-200 bg-[var(--blur-bg-secondary)] sm:rounded-lg overflow-hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between p-3 sm:p-4 border-b border-[var(--blur-orange)]/30 bg-gradient-to-r from-[var(--blur-orange)] to-[var(--blur-orange-bright)] text-white shadow-lg">
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-[var(--blur-bg-primary)]/80 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={(e) => {
+            // Close modal when clicking backdrop (not on mobile)
+            if (e.target === e.currentTarget && !isMobile) {
+              setIsOpen(false)
+            }
+          }}
+        >
+          <Card className="w-full max-w-3xl h-[100dvh] sm:h-[85vh] sm:max-h-[700px] flex flex-col shadow-2xl border-0 sm:border-2 border-[var(--blur-orange)]/30 animate-in slide-in-from-bottom sm:zoom-in duration-200 bg-[var(--blur-bg-secondary)] sm:rounded-lg overflow-hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="chat-modal-title"
+          >
+            {/* Header - Swipeable on mobile */}
+            <div
+              className="flex items-center justify-between p-3 sm:p-4 border-b border-[var(--blur-orange)]/30 bg-gradient-to-r from-[var(--blur-orange)] to-[var(--blur-orange-bright)] text-white shadow-lg relative"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
+              {/* Swipe indicator for mobile */}
+              {isMobile && (
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-white/40 rounded-full overflow-hidden" aria-hidden="true">
+                  {swipeProgress > 0 && (
+                    <div
+                      className="h-full bg-white rounded-full transition-all duration-100"
+                      style={{ width: `${swipeProgress}%` }}
+                    />
+                  )}
+                </div>
+              )}
               <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                 <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white/20 backdrop-blur flex items-center justify-center ring-2 ring-white/40 shadow-xl flex-shrink-0">
                   <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 animate-pulse" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-bold text-base sm:text-xl truncate">OI Trader AI</h3>
+                  <h3 id="chat-modal-title" className="font-bold text-base sm:text-xl truncate">OI Trader AI</h3>
                   <p className="text-[10px] sm:text-xs text-white/90 font-medium truncate">
                     ⚡ {messages.length} messages
                   </p>
@@ -210,8 +329,14 @@ export function ChatModal() {
               </div>
             )}
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-[var(--blur-bg-primary)] scrollbar-thin scrollbar-thumb-[var(--blur-orange)]/20 scrollbar-track-transparent">
+            {/* Messages - Optimized scrolling for mobile */}
+            <div
+              className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-[var(--blur-bg-primary)] scrollbar-thin scrollbar-thumb-[var(--blur-orange)]/20 scrollbar-track-transparent"
+              style={{
+                WebkitOverflowScrolling: 'touch',
+                overscrollBehavior: 'contain'
+              }}
+            >
               {messages.length === 0 && (
                 <div className="text-center py-8 sm:py-12 px-4">
                   <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-[var(--blur-orange)] to-[var(--blur-orange-bright)] mb-3 sm:mb-4 shadow-xl">
@@ -347,11 +472,17 @@ export function ChatModal() {
                     value={input}
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
-                    placeholder="Ask about OI trading... (Shift+Enter for new line)"
-                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-10 sm:pr-12 border border-[var(--blur-orange)]/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--blur-orange)] focus:border-transparent bg-[var(--blur-bg-tertiary)] text-[var(--blur-text-primary)] placeholder:text-[var(--blur-text-muted)] resize-none transition-all duration-200 min-h-[44px] sm:min-h-[48px] max-h-[120px] sm:max-h-[150px] text-sm sm:text-base touch-manipulation"
+                    placeholder={isMobile ? "Ask about OI trading..." : "Ask about OI trading... (Shift+Enter for new line)"}
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-10 sm:pr-12 border border-[var(--blur-orange)]/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--blur-orange)] focus:border-transparent bg-[var(--blur-bg-tertiary)] text-[var(--blur-text-primary)] placeholder:text-[var(--blur-text-muted)] resize-none transition-all duration-200 min-h-[44px] sm:min-h-[48px] max-h-[120px] sm:max-h-[150px] text-base touch-manipulation"
                     disabled={isLoading}
                     rows={1}
                     style={{ height: 'auto' }}
+                    aria-label="Message input"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck="true"
+                    inputMode="text"
                   />
                   {input.trim() && (
                     <button
@@ -372,11 +503,12 @@ export function ChatModal() {
                   type="submit"
                   disabled={!input.trim() || isLoading}
                   className="h-11 sm:h-12 px-4 sm:px-5 bg-gradient-to-br from-[var(--blur-orange)] to-[var(--blur-orange-bright)] hover:shadow-xl hover:shadow-[var(--blur-orange)]/20 active:scale-95 hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 touch-manipulation"
+                  aria-label="Send message"
                 >
                   {isLoading ? (
-                    <RotateCcw className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                    <RotateCcw className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" aria-hidden="true" />
                   ) : (
-                    <Send className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <Send className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
                   )}
                 </Button>
               </div>
