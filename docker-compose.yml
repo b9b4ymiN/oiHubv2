@@ -1,7 +1,6 @@
 # Docker Compose Configuration - Optimized for Oracle Cloud Free Tier
 # Free Tier Specs: 1-4 OCPU, 1-24 GB RAM (แบ่งใช้กับ containers อื่น)
-version: '3.8'
-
+ 
 services:
   oi-trader-hub:
     build:

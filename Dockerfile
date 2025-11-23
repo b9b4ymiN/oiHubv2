@@ -12,10 +12,10 @@ WORKDIR /app
 # Copy package files
 COPY package.json package-lock.json* ./
 
-# Install dependencies with production optimizations
-RUN npm ci --only=production --no-audit --no-fund --prefer-offline && \
+# Install dependencies - ใช้ npm install แทน npm ci เพื่อหลีกเลี่ยงปัญหา lock file sync
+RUN npm install --production --no-audit --no-fund && \
     cp -R node_modules prod_node_modules && \
-    npm ci --no-audit --no-fund --prefer-offline
+    npm install --no-audit --no-fund
 
 # ---------- Builder ----------
 FROM base AS builder
