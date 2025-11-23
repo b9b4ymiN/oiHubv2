@@ -1,42 +1,81 @@
+# Docker Compose Configuration - Optimized for Oracle Cloud Free Tier
+# Free Tier Specs: 1-4 OCPU, 1-24 GB RAM (แบ่งใช้กับ containers อื่น)
+version: '3.8'
+
 services:
   oi-trader-hub:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
+    image: oi-trader-hub:latest
     container_name: oi-trader-hub
-    # Map host 3500 -> container 3000 (Next.js app listens on 3000 in the image)
+    
+    # Port mapping: host 3500 -> container 3000
     ports:
       - "3500:3000"
+    
+    # Environment variables
     environment:
       # Binance API Configuration
       - NEXT_PUBLIC_BINANCE_API_URL=https://fapi.binance.com
       - NEXT_PUBLIC_BINANCE_WS_URL=wss://fstream.binance.com
-
-      # Optional: Add Binance API keys for higher rate limits
+      
+      # Optional: Binance API keys for higher rate limits
       # - BINANCE_API_KEY=your_api_key_here
       # - BINANCE_API_SECRET=your_api_secret_here
-
-      # Node environment
+      
+      # Node.js Configuration
       - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+      
+      # Chat API (ใช้ mini-agi backend ที่รันอยู่แล้ว)
       - CHAT_API_URL=http://bf-gai.duckdns.org/chat
+      
+      # Timezone
+      - TZ=Asia/Bangkok
+    
+    # ใช้ external network web-net (เชื่อมกับ nginx-proxy-manager)
     networks:
       - web-net
+    
+    # Restart policy
     restart: unless-stopped
-    # Optional: Limit resources
+    
+    # Resource limits - ปรับให้เหมาะสมกับ Oracle Cloud Free Tier
+    # จัดสรร ~512MB RAM และ 0.5 CPU (เหลือไว้ให้ services อื่น)
     deploy:
       resources:
         limits:
-          cpus: '1.0'
-          memory: 1G
+          cpus: '0.75'
+          memory: 768M
         reservations:
-          cpus: '0.5'
-          memory: 512M
+          cpus: '0.25'
+          memory: 384M
+    
+    # Health check - ใช้ curl ตาม Dockerfile
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000')"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
       interval: 30s
-      timeout: 10s
+      timeout: 5s
       retries: 3
-      start_period: 20s
+      start_period: 30s
+    
+    # Logging configuration - จำกัดขนาด log files
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Labels สำหรับ management
+    labels:
+      - "com.docker.compose.project=oihub"
+      - "app.name=oi-trader-hub"
+      - "app.version=1.0"
+
+# External network - ต้องสร้างก่อนด้วยคำสั่ง: docker network create web-net
 networks:
   web-net:
     external: true
