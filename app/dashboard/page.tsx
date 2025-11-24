@@ -23,7 +23,7 @@ import { SummaryCards } from "@/components/widgets/SummaryCards";
 import { DashboardSummary } from "@/components/widgets/DashboardSummary";
 import { BlurNav } from "@/components/navigation/blur-nav";
 import { TakerFlowOverlay } from "@/components/widgets/TakerFlowOverlay";
-import { useTakerFlow, useOptionsIVAnalysis } from "@/lib/hooks/useMarketData";
+import { useTakerFlow, useOptionsIVAnalysis, useOIMomentum } from "@/lib/hooks/useMarketData";
 import { OptionsVolumeIVChart } from "@/components/charts/OptionsVolumeIVChart";
 import { OIDivergenceCard } from "@/components/widgets/OIDivergenceCard";
 import { MarketRegimeIndicator } from "@/components/widgets/MarketRegimeIndicator";
@@ -38,11 +38,15 @@ import { CollapsibleSection } from "@/components/ui/collapsible-section";
 import { AskAIButton } from "@/components/ui/AskAIButton";
 import { useChatContext, ChartContext } from "@/lib/contexts/ChatContextProvider";
 import { ExecutiveSummary } from "@/components/intelligence/ExecutiveSummary";
-import { 
-  Activity, 
-  TrendingUp, 
-  TrendingDown, 
-  Target, 
+import { OIMomentumCard } from "@/components/widgets/OIMomentumCard";
+import { OIMomentumChart } from "@/components/charts/OIMomentumChart";
+import { OIGuideModal } from "@/components/guide/OIGuideModal";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Activity,
+  TrendingUp,
+  TrendingDown,
+  Target,
   AlertTriangle,
   Shield,
   Brain,
@@ -50,9 +54,13 @@ import {
   BarChart3
 } from "lucide-react";
  
+// Constants
+const MOMENTUM_CHART_OFFSET = 100;
+
 export default function DashboardPage() {
   const [symbol, setSymbol] = useState("BTCUSDT");
-  const [interval, setInterval] = useState("5m");
+  const [interval, setInterval] = useState("1d");
+  const [showGuide, setShowGuide] = useState(false);
   const { isMobile, chartHeight } = useResponsive();
   const { addContextAndOpenChat } = useChatContext();
 
@@ -78,6 +86,7 @@ export default function DashboardPage() {
   const { data: takerFlowData } = useTakerFlow(symbol, interval, 100);
   const { data: optionsData, isLoading: optionsLoading } =
     useOptionsIVAnalysis(symbol);
+  const { data: oiMomentumData } = useOIMomentum(symbol, interval, 200);
 
   const isLoading = klinesLoading || oiLoading || fundingLoading || lsLoading;
 
@@ -126,19 +135,75 @@ export default function DashboardPage() {
             />
           </div>
         </div>
-
+        {showGuide && (
+          <OIGuideModal onClose={() => setShowGuide(false)} />
+        )}
         {/* Executive Summary - Always on Top */}
         <div className="space-y-3 animate-fade-in-up animation-delay-200">
-          <div className="flex items-center gap-2 pb-2 border-b-2 border-gray-200 dark:border-gray-800">
-            <span className="text-base sm:text-xl animate-float">🎯</span>
-            <h2 className="text-sm sm:text-xl font-bold text-gray-900 dark:text-gray-100">
-              Executive Summary
-            </h2>
-            <Badge variant="destructive" className="text-[10px] sm:text-xs ml-2">
-              Critical
-            </Badge>
-          </div>
+          <SectionHeader
+            icon="🎯"
+            title="Executive Summary"
+            badge="Critical"
+            badgeVariant="destructive"
+            accent="gray"
+          />
           <ExecutiveSummary symbol={symbol} interval={interval} />
+        </div>
+
+        {/* 🔥 OI MOMENTUM & ACCELERATION - Core Feature (Priority #1) */}
+        <div className="space-y-3 animate-fade-in-up animation-delay-300">
+          <div className="flex items-start justify-between gap-3">
+            <SectionHeader
+              icon="⚡"
+              title="OI Momentum & Acceleration"
+              badge="Core Feature"
+              badgeVariant="default"
+              badgeClass="bg-purple-600"
+              accent="purple"
+              animate
+            />
+            <div className="ml-auto">
+              <button
+                onClick={() => setShowGuide(true)}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-600 text-white text-xs sm:text-sm hover:bg-purple-700 transition"
+                aria-label="Read OI Momentum Guide"
+              >
+                อ่านคู่มือ
+              </button>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-1">
+              <OIMomentumCard symbol={symbol} interval={interval} />
+            </div>
+            <div className="lg:col-span-2">
+              {!oiMomentumData ? (
+                <Card className="border-2 border-purple-200 dark:border-purple-800 glass-card">
+                  <CardHeader className="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30">
+                    <Skeleton className="h-6 w-48" />
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <Skeleton className="w-full h-[300px]" />
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="border-2 border-purple-200 dark:border-purple-800 glass-card">
+                  <CardHeader className="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30">
+                    <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-purple-600" />
+                      OI Momentum Timeline
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      Real-time OI derivatives • Signal detection • Fake OI filtering
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <OIMomentumChart data={oiMomentumData} height={chartHeight - MOMENTUM_CHART_OFFSET} interval={interval} />
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Main Intelligence Tabs */}
@@ -401,24 +466,45 @@ export default function DashboardPage() {
   );
 }
 
+ 
+
 // 🎨 Section Header Component (Mobile-friendly)
 function SectionHeader({
   icon,
   title,
   badge,
+  badgeVariant = 'destructive',
+  badgeClass = '',
+  accent = 'gray',
+  animate = false
 }: {
   icon: string;
   title: string;
   badge?: string;
+  badgeVariant?: 'default' | 'secondary' | 'destructive' | 'outline';
+  badgeClass?: string;
+  accent?: 'purple' | 'blue' | 'green' | 'red' | 'orange' | 'gray';
+  animate?: boolean;
 }) {
+  const styles = {
+    purple: { border: 'border-purple-200 dark:border-purple-800', text: 'text-purple-900 dark:text-purple-100' },
+    blue: { border: 'border-blue-200 dark:border-blue-800', text: 'text-blue-900 dark:text-blue-100' },
+    green: { border: 'border-green-200 dark:border-green-800', text: 'text-green-900 dark:text-green-100' },
+    red: { border: 'border-red-200 dark:border-red-800', text: 'text-red-900 dark:text-red-100' },
+    orange: { border: 'border-orange-200 dark:border-orange-800', text: 'text-orange-900 dark:text-orange-100' },
+    gray: { border: 'border-gray-200 dark:border-gray-800', text: 'text-gray-900 dark:text-gray-100' }
+  };
+
   return (
-    <div className="flex items-center gap-2 pb-2 border-b-2 border-gray-200 dark:border-gray-800">
-      <span className="text-base sm:text-xl">{icon}</span>
-      <h2 className="text-sm sm:text-xl font-bold text-gray-900 dark:text-gray-100">
+    <div className={`flex items-center gap-2 pb-2 border-b-2 ${styles[accent].border}`}>
+      <span className={`text-base sm:text-xl ${animate ? 'animate-pulse' : 'animate-float'}`}>
+        {icon}
+      </span>
+      <h2 className={`text-sm sm:text-xl font-bold ${styles[accent].text}`}>
         {title}
       </h2>
       {badge && (
-        <Badge variant="destructive" className="text-[10px] sm:text-xs ml-2">
+        <Badge variant={badgeVariant} className={`text-[10px] sm:text-xs ml-2 ${badgeClass}`}>
           {badge}
         </Badge>
       )}

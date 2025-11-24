@@ -96,6 +96,22 @@ export function useOISnapshot(symbol: string) {
   })
 }
 
+export function useOIMomentum(symbol: string, period: string = '5m', limit: number = 200) {
+  return useQuery({
+    queryKey: ['oi-momentum', symbol, period, limit],
+    queryFn: async () => {
+      const response = await fetch(
+        `/api/analysis/oi-momentum?symbol=${symbol}&period=${period}&limit=${limit}`
+      )
+      const data = await response.json()
+      if (!data.success) throw new Error(data.error)
+      return data.data
+    },
+    refetchInterval: 30000,
+    staleTime: 15000,
+  })
+}
+
 export function useOptionsIVAnalysis(underlying: string, expiryDate?: number) {
   return useQuery({
     queryKey: ['optionsIV', underlying, expiryDate],
