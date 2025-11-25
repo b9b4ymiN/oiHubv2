@@ -41,6 +41,7 @@ import { ExecutiveSummary } from "@/components/intelligence/ExecutiveSummary";
 import { OIMomentumCard } from "@/components/widgets/OIMomentumCard";
 import { OIMomentumChart } from "@/components/charts/OIMomentumChart";
 import { OIGuideModal } from "@/components/guide/OIGuideModal";
+import { VolatilityRegimeCardCompact } from "@/components/widgets/VolatilityRegimeCardCompact";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Activity,
@@ -172,11 +173,28 @@ export default function DashboardPage() {
               </button>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-1">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+            <div className="lg:col-span-2">
               <OIMomentumCard symbol={symbol} interval={interval} />
             </div>
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-1">
+              <VolatilityRegimeCardCompact symbol={symbol} interval={interval} />
+            </div>
+          </div>
+          {/* OI Timeline Tab */}
+          <Tabs defaultValue="summary" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 max-w-md">
+              <TabsTrigger value="summary" className="text-xs">Summary</TabsTrigger>
+              <TabsTrigger value="timeline" className="text-xs">Timeline</TabsTrigger>
+            </TabsList>
+            <TabsContent value="summary" className="mt-4">
+              <div className="p-4 rounded-lg bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20 border border-purple-200 dark:border-purple-800">
+                <p className="text-sm text-muted-foreground">
+                  All key metrics displayed above. Switch to Timeline tab to see historical OI momentum chart.
+                </p>
+              </div>
+            </TabsContent>
+            <TabsContent value="timeline" className="mt-4">
               {!oiMomentumData ? (
                 <Card className="border-2 border-purple-200 dark:border-purple-800 glass-card">
                   <CardHeader className="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30">
@@ -202,8 +220,8 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
               )}
-            </div>
-          </div>
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Main Intelligence Tabs */}

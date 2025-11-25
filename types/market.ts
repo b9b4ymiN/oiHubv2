@@ -326,3 +326,44 @@ export interface IVRegime {
   tradingImplication: string
 }
 
+// ============================================
+// PERP-SPOT PREMIUM TYPES
+// ============================================
+
+export interface PerpSpotPremium {
+  symbol: string
+  perpPrice: number
+  spotPrice: number
+  premium: number              // % difference
+  annualizedPremium: number    // APR %
+  fundingRate: number          // Current funding rate %
+  timestamp: number
+  interpretation: {
+    signal: 'NEUTRAL' | 'OVERBOUGHT' | 'OVERSOLD'
+    action: string
+  }
+}
+
+// ============================================
+// LIQUIDATION CLUSTER TYPES
+// ============================================
+
+export interface LiquidationClusterPoint {
+  priceLevel: number
+  totalVolume: number          // Total liquidated volume at this level
+  count: number                // Number of liquidations
+  side: 'LONG' | 'SHORT'
+  strength: 'WEAK' | 'MODERATE' | 'STRONG' | 'EXTREME'
+  distance: number             // % distance from current price
+}
+
+export interface LiquidationClusterAnalysis {
+  symbol: string
+  currentPrice: number
+  clusters: LiquidationClusterPoint[]
+  longClusters: LiquidationClusterPoint[]
+  shortClusters: LiquidationClusterPoint[]
+  nearestCluster: LiquidationClusterPoint | null
+  timestamp: number
+}
+

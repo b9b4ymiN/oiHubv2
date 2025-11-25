@@ -287,6 +287,71 @@ export class BinanceClient {
       timestamp: Date.now()
     }
   }
+
+  // Spot Price (from Spot API, not Futures)
+  async getSpotPrice(symbol: string): Promise<number> {
+    const spotBaseUrl = 'https://api.binance.com'
+    const url = `${spotBaseUrl}/api/v3/ticker/price?symbol=${symbol}`
+
+    const response = await fetch(url)
+
+    if (!response.ok) {
+      const errorBody = await response.text()
+      console.error(`Binance Spot API error [/api/v3/ticker/price]:`, {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorBody,
+        url
+      })
+      throw new Error(`Binance Spot API error (${response.status}): ${errorBody || response.statusText}`)
+    }
+
+    const data = await response.json()
+    return parseFloat(data.price)
+  }
+
+  // Perp-Spot Premium Analysis
+  async getPerpSpotPremium(symbol: string) {
+    // 1. Get Perp price (mark price from funding rate endpoint)
+    const funding = await this.getFundingRate(symbol, 1)
+    const perpPrice = funding[0].markPrice
+
+    // 2. Get Spot price
+    const spotPrice = await this.getSpotPrice(symbol)
+
+    // 3. Calculate premium
+    const premium = ((perpPrice - spotPrice) / spotPrice) * 100
+    const annualizedPremium = premium * (365 * 24 * 3) // 3 funding rates per day (every 8h)
+
+    // 4. Interpretation
+    let signal: 'NEUTRAL' | 'OVERBOUGHT' | 'OVERSOLD' = 'NEUTRAL'
+    let action = ''
+
+    if (premium > 0.5) {
+      signal = 'OVERBOUGHT'
+      action = 'High premium indicates long crowding - Potential funding arb or mean reversion setup'
+    } else if (premium < -0.3) {
+      signal = 'OVERSOLD'
+      action = 'Negative premium indicates short crowding - Watch for short squeeze'
+    } else {
+      signal = 'NEUTRAL'
+      action = 'Premium within normal range - No significant arbitrage opportunity'
+    }
+
+    return {
+      symbol,
+      perpPrice,
+      spotPrice,
+      premium, // %
+      annualizedPremium, // APR %
+      fundingRate: funding[0].fundingRate * 100, // Convert to %
+      timestamp: Date.now(),
+      interpretation: {
+        signal,
+        action
+      }
+    }
+  }
 }
 
 export const binanceClient = new BinanceClient()

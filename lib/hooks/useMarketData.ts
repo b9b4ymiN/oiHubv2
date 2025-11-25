@@ -13,6 +13,8 @@ import {
   OIHeatmap,
   LiquidationHeatmap,
   CombinedHeatmap,
+  PerpSpotPremium,
+  LiquidationClusterAnalysis,
   APIResponse
 } from '@/types/market'
 
@@ -253,6 +255,40 @@ export function useCombinedHeatmap(
     },
     refetchInterval: 60000,
     staleTime: 30000,
+  })
+}
+
+export function usePerpSpotPremium(symbol: string) {
+  return useQuery({
+    queryKey: ['perp-spot-premium', symbol],
+    queryFn: async () => {
+      const response = await fetch(`/api/market/perp-spot-premium?symbol=${symbol}`)
+      const data: APIResponse<PerpSpotPremium> = await response.json()
+      if (!data.success) throw new Error(data.error)
+      return data.data
+    },
+    refetchInterval: 30000, // 30 seconds
+    staleTime: 15000,
+  })
+}
+
+export function useLiquidationClusters(
+  symbol: string,
+  limit: number = 500,
+  priceStep: number = 0.1
+) {
+  return useQuery({
+    queryKey: ['liquidation-cluster', symbol, limit, priceStep],
+    queryFn: async () => {
+      const response = await fetch(
+        `/api/market/liquidation-cluster?symbol=${symbol}&limit=${limit}&priceStep=${priceStep}`
+      )
+      const data: APIResponse<LiquidationClusterAnalysis> = await response.json()
+      if (!data.success) throw new Error(data.error)
+      return data.data
+    },
+    refetchInterval: 30000, // 30 seconds
+    staleTime: 15000,
   })
 }
 
