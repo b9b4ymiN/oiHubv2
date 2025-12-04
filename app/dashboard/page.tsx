@@ -129,7 +129,7 @@ export default function DashboardPage() {
             <IntervalSelector interval={interval} onIntervalChange={setInterval} />
             <AskAIButton
               context={createFullContext()}
-              question="Analyze the current dashboard state and provide comprehensive trading insights"
+              question="Analyze current dashboard state and provide comprehensive trading insights"
               variant="default"
               size="sm"
               className="animate-pulse-slow"
@@ -141,28 +141,30 @@ export default function DashboardPage() {
         )}
         {/* Executive Summary - Always on Top */}
         <div className="space-y-3 animate-fade-in-up animation-delay-200">
-          <SectionHeader
-            icon="🎯"
-            title="Executive Summary"
-            badge="Critical"
-            badgeVariant="destructive"
-            accent="gray"
-          />
+          <div className="flex items-center gap-2 pb-2 border-b-2 border-gray-200 dark:border-gray-800">
+            <span className="text-base sm:text-xl">🎯</span>
+            <h2 className="text-sm sm:text-xl font-bold text-gray-900 dark:text-gray-100">
+              สรุปผู้บริหาร
+            </h2>
+            <Badge variant="destructive" className="text-[10px] sm:text-xs ml-2">
+              สำคัญ
+            </Badge>
+          </div>
           <ExecutiveSummary symbol={symbol} interval={interval} />
         </div>
 
         {/* 🔥 OI MOMENTUM & ACCELERATION - Core Feature (Priority #1) */}
         <div className="space-y-3 animate-fade-in-up animation-delay-300">
           <div className="flex items-start justify-between gap-3">
-            <SectionHeader
-              icon="⚡"
-              title="OI Momentum & Acceleration"
-              badge="Core Feature"
-              badgeVariant="default"
-              badgeClass="bg-purple-600"
-              accent="purple"
-              animate
-            />
+            <div className="flex items-center gap-2 pb-2 border-b-2 border-purple-200 dark:border-purple-800">
+              <span className="text-base sm:text-xl animate-pulse">⚡</span>
+              <h2 className="text-sm sm:text-xl font-bold text-purple-900 dark:text-purple-100">
+                OI Momentum & Acceleration
+              </h2>
+              <Badge className="bg-purple-600 text-white text-[10px] sm:text-xs ml-2">
+                Core Feature
+              </Badge>
+            </div>
             <div className="ml-auto">
               <button
                 onClick={() => setShowGuide(true)}
@@ -446,7 +448,7 @@ export default function DashboardPage() {
               <QuickActionCard
                 title="Market Analysis"
                 description="Complete market overview"
-                question="Provide a comprehensive analysis of the current market state including all indicators, signals, and potential trading opportunities"
+                question="Provide a comprehensive analysis of current market state including all indicators, signals, and potential trading opportunities"
                 symbol={symbol}
                 interval={interval}
                 icon={<BarChart3 className="h-4 w-4" />}
@@ -454,7 +456,7 @@ export default function DashboardPage() {
               <QuickActionCard
                 title="Entry Points"
                 description="Optimal entry/exit levels"
-                question="Identify the best entry and exit points for {symbol} based on current technical and options data"
+                question="Identify best entry and exit points for {symbol} based on current technical and options data"
                 symbol={symbol}
                 interval={interval}
                 icon={<Target className="h-4 w-4" />}
@@ -462,7 +464,7 @@ export default function DashboardPage() {
               <QuickActionCard
                 title="Risk Assessment"
                 description="Current risk analysis"
-                question="Analyze the current risk levels for trading {symbol} and provide risk management strategies"
+                question="Analyze current risk levels for trading {symbol} and provide risk management strategies"
                 symbol={symbol}
                 interval={interval}
                 icon={<AlertTriangle className="h-4 w-4" />}
@@ -480,52 +482,6 @@ export default function DashboardPage() {
         </Card>
 
       </div>
-    </div>
-  );
-}
-
- 
-
-// 🎨 Section Header Component (Mobile-friendly)
-function SectionHeader({
-  icon,
-  title,
-  badge,
-  badgeVariant = 'destructive',
-  badgeClass = '',
-  accent = 'gray',
-  animate = false
-}: {
-  icon: string;
-  title: string;
-  badge?: string;
-  badgeVariant?: 'default' | 'secondary' | 'destructive' | 'outline';
-  badgeClass?: string;
-  accent?: 'purple' | 'blue' | 'green' | 'red' | 'orange' | 'gray';
-  animate?: boolean;
-}) {
-  const styles = {
-    purple: { border: 'border-purple-200 dark:border-purple-800', text: 'text-purple-900 dark:text-purple-100' },
-    blue: { border: 'border-blue-200 dark:border-blue-800', text: 'text-blue-900 dark:text-blue-100' },
-    green: { border: 'border-green-200 dark:border-green-800', text: 'text-green-900 dark:text-green-100' },
-    red: { border: 'border-red-200 dark:border-red-800', text: 'text-red-900 dark:text-red-100' },
-    orange: { border: 'border-orange-200 dark:border-orange-800', text: 'text-orange-900 dark:text-orange-100' },
-    gray: { border: 'border-gray-200 dark:border-gray-800', text: 'text-gray-900 dark:text-gray-100' }
-  };
-
-  return (
-    <div className={`flex items-center gap-2 pb-2 border-b-2 ${styles[accent].border}`}>
-      <span className={`text-base sm:text-xl ${animate ? 'animate-pulse' : 'animate-float'}`}>
-        {icon}
-      </span>
-      <h2 className={`text-sm sm:text-xl font-bold ${styles[accent].text}`}>
-        {title}
-      </h2>
-      {badge && (
-        <Badge variant={badgeVariant} className={`text-[10px] sm:text-xs ml-2 ${badgeClass}`}>
-          {badge}
-        </Badge>
-      )}
     </div>
   );
 }

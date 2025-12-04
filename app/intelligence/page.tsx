@@ -14,6 +14,13 @@ import { SmartQuestionHub } from "@/components/intelligence/SmartQuestionHub";
 import { DecisionDashboard } from "@/components/intelligence/DecisionDashboard";
 import { AskAIButton } from "@/components/ui/AskAIButton";
 import { useChatContext, ChartContext } from "@/lib/contexts/ChatContextProvider";
+import {
+  useKlines,
+  useOpenInterest,
+  useFundingRate,
+  useLongShortRatio,
+  useOIMomentum
+} from "@/lib/hooks/useMarketData";
 
 export default function IntelligencePage() {
   const [symbol, setSymbol] = useState("BTCUSDT");
@@ -243,7 +250,7 @@ function IntervalSelector({
   );
 }
 
-// Quick Action Card Component
+// Quick Action Card Component with OI Data
 function QuickActionCard({
   title,
   description,
@@ -259,6 +266,82 @@ function QuickActionCard({
 }) {
   const { addContextAndOpenChat } = useChatContext();
 
+  // Fetch comprehensive market data
+  const { data: klines } = useKlines(symbol, interval, 100);
+  const { data: oiData } = useOpenInterest(symbol, interval, 100);
+  const { data: fundingData } = useFundingRate(symbol, 50);
+  const { data: lsRatio } = useLongShortRatio(symbol, interval, 50);
+  const { data: oiMomentum } = useOIMomentum(symbol, interval, 100);
+
+  // Calculate OI statistics
+  const getOIStats = () => {
+    if (!oiData || oiData.length === 0) return null;
+
+    const latest = oiData[oiData.length - 1];
+    const previous = oiData[oiData.length - 2];
+    const oiChange = previous ? ((latest.value - previous.value) / previous.value) * 100 : 0;
+
+    return {
+      currentOI: latest.value,
+      oiChange: oiChange.toFixed(3),
+      timestamp: latest.timestamp
+    };
+  };
+
+  // Calculate price statistics
+  const getPriceStats = () => {
+    if (!klines || klines.length === 0) return null;
+
+    const latest = klines[klines.length - 1];
+    const previous = klines[klines.length - 2];
+    const priceChange = previous ? ((latest.close - previous.close) / previous.close) * 100 : 0;
+
+    return {
+      currentPrice: latest.close,
+      priceChange: priceChange.toFixed(3),
+      volume: latest.volume,
+      high: latest.high,
+      low: latest.low
+    };
+  };
+
+  // Get funding rate
+  const getFundingStats = () => {
+    if (!fundingData || fundingData.length === 0) return null;
+
+    const latest = fundingData[fundingData.length - 1];
+    return {
+      fundingRate: (latest.fundingRate * 100).toFixed(4),
+      fundingTime: latest.fundingTime
+    };
+  };
+
+  // Get long/short ratio
+  const getLSRatioStats = () => {
+    if (!lsRatio || lsRatio.length === 0) return null;
+
+    const latest = lsRatio[lsRatio.length - 1];
+    return {
+      longShortRatio: latest.longShortRatio.toFixed(2),
+      longAccount: latest.longAccount.toFixed(2),
+      shortAccount: latest.shortAccount.toFixed(2)
+    };
+  };
+
+  // Get OI Momentum stats
+  const getOIMomentumStats = () => {
+    if (!oiMomentum || oiMomentum.length === 0) return null;
+
+    const latest = oiMomentum[oiMomentum.length - 1];
+    if (!latest) return null;
+
+    return {
+      momentum: latest.momentum != null ? latest.momentum.toFixed(4) : 'N/A',
+      acceleration: latest.acceleration != null ? latest.acceleration.toFixed(6) : 'N/A',
+      signal: latest.signal || 'NEUTRAL'
+    };
+  };
+
   const context: ChartContext = {
     type: 'general',
     data: {
@@ -266,7 +349,15 @@ function QuickActionCard({
       interval,
       page: 'intelligence',
       actionType: title.toLowerCase().replace(' ', '-'),
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      // Include comprehensive market data
+      marketData: {
+        oi: getOIStats(),
+        price: getPriceStats(),
+        funding: getFundingStats(),
+        longShortRatio: getLSRatioStats(),
+        oiMomentum: getOIMomentumStats()
+      }
     },
     metadata: {
       symbol,

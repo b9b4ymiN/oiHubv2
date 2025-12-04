@@ -11,8 +11,11 @@ export function OIGuideModal({ onClose }: { onClose: () => void }) {
       >
         <div className="flex items-start justify-between gap-4 mb-4">
           <div>
-            <h3 className="text-lg sm:text-xl font-semibold text-purple-700 dark:text-purple-300">OI Momentum &amp; Acceleration — Quick Guide</h3>
-            <p className="text-xs text-muted-foreground">วิธีอ่านแรงตลาดแบบเร็วที่สุดใน 10 วินาที</p>
+            <h3 className="text-lg sm:text-xl font-semibold text-purple-700 dark:text-purple-300">คู่มือเทรด OI ทำกำไรง่ายๆ</h3>
+            <p className="text-xs text-muted-foreground">อ่านทีเดียว เทรดทันที ตัดสินใจได้ใน 30 วินาที</p>
+            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+              📖 <a href="https://github.com/b9b4ymiN/oiHubv2/blob/main/docs/OI-MOMENTUM-GUIDE.md" target="_blank" rel="noopener" className="underline hover:text-blue-800">Complete English Guide</a> • <a href="https://github.com/b9b4ymiN/oiHubv2/blob/main/docs/OI-MOMENTUM-CHEATSHEET.md" target="_blank" rel="noopener" className="underline hover:text-blue-800">Cheat Sheet</a>
+            </p>
           </div>
 
           <div className="flex items-center gap-2">
@@ -26,99 +29,86 @@ export function OIGuideModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="space-y-4 text-sm text-gray-800 dark:text-gray-200">
-          <div className="bg-purple-50 dark:bg-purple-900/30 border border-purple-100 dark:border-purple-800 p-3 rounded">
-            <strong className="text-sm text-purple-800 dark:text-purple-200">🔹 1) Current Signal</strong>
-            <p className="mt-1 text-xs text-muted-foreground">ตลาดอยู่โหมดไหน — ไฟเขียว / ไฟเหลือง / ไฟแดง</p>
-            <ul className="mt-2 space-y-1">
-              <li className="flex items-center gap-2"><span className="w-3 h-3 rounded bg-emerald-500 inline-block"/> <strong>TREND CONTINUATION</strong> — เทรนด์กำลังไปต่อ</li>
-              <li className="flex items-center gap-2"><span className="w-3 h-3 rounded bg-amber-500 inline-block"/> <strong>DISTRIBUTION</strong> — Smart Money อาจกำลังออกของ</li>
-              <li className="flex items-center gap-2"><span className="w-3 h-3 rounded bg-sky-500 inline-block"/> <strong>NEUTRAL</strong> — ไม่มีแรงชัดเจน (หลีกเลี่ยงเทรด)</li>
-            </ul>
-          </div>
-
-          <div className="p-3 border rounded bg-white dark:bg-slate-800 border-gray-100 dark:border-gray-800">
-            <strong className="text-sm">🔹 2) Trading Action</strong>
-            <p className="mt-1 text-xs text-muted-foreground">สรุปการตัดสินใจทันที: เพิ่ม / ลด / งด Position • รอคอนเฟิร์ม หรือ เข้าเลย • ตลาดเหมาะกับกลยุทธ์แบบไหน</p>
-          </div>
-
-          <div className="p-3 border rounded bg-white dark:bg-slate-800 border-gray-100 dark:border-gray-800">
-            <strong className="text-sm">🔹 3) Position Size</strong>
-            <p className="mt-1 text-xs text-muted-foreground">คำแนะนำไซส์โดยย่อ (ช่วยคุมความเสี่ยง)</p>
-            <ul className="mt-2 space-y-1">
-              <li><strong>1.0R</strong> — เทรนด์แข็งแรง</li>
-              <li><strong>0.7R</strong> — ตลาดมีความเสี่ยงระดับกลาง</li>
-              <li><strong>0.3R</strong> — ตลาดแผ่ว / ไม่น่าเล่น</li>
-              <li><strong>0.0R</strong> — ห้ามเข้า</li>
-            </ul>
-          </div>
-
-          <div className="p-3 border rounded bg-white dark:bg-slate-800 border-gray-100 dark:border-gray-800">
-            <strong className="text-sm">🔹 4) Summary — Last 30 Bars</strong>
-            <p className="mt-1 text-xs text-muted-foreground">ดู 3 ค่า: Trend (OI เพิ่ม), Dist (OI ลด), Neutral. Trend Ratio (%) เป็นตัวชี้วัด</p>
-            <div className="mt-2 text-xs">
-              <div>&gt;60% = เทรนด์จริง</div>
-              <div>40–60% = Mixed</div>
-              <div>&lt;40% = Distribution</div>
+          <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 p-3 rounded">
+            <strong className="text-sm text-green-800 dark:text-green-200">🚀 สัญญาณซื้อขายทันที (ปุ่มเร่งด่วน)</strong>
+            <div className="mt-2 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="w-4 h-4 rounded bg-emerald-500 inline-block"/> 
+                <span className="font-semibold">ไฟเขียว = เปิด Long ทันที</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-4 h-4 rounded bg-amber-500 inline-block"/> 
+                <span className="font-semibold">ไฟเหลือง = ปิดสถานี รอจังหวะใหม่</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-4 h-4 rounded bg-sky-500 inline-block"/> 
+                <span className="font-semibold">ไฟฟ้า = ห้ามเทรด นั่งดู</span>
+              </div>
             </div>
           </div>
 
-          <div className="p-3 border rounded bg-white dark:bg-slate-800 border-gray-100 dark:border-gray-800">
-            <strong className="text-sm">🔹 5) Momentum / Accel</strong>
-            <p className="mt-1 text-xs text-muted-foreground">ตีความสั้น ๆ</p>
-            <table className="w-full text-xs mt-2 table-fixed">
-              <thead>
-                <tr className="text-left text-muted-foreground">
-                  <th className="w-1/3">Momentum</th>
-                  <th className="w-1/3">Accel</th>
-                  <th>ความหมาย</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>+</td>
-                  <td>+</td>
-                  <td>เทรนด์กำลังเร่ง</td>
-                </tr>
-                <tr>
-                  <td>+</td>
-                  <td>-</td>
-                  <td>แรงเริ่มชะลอ</td>
-                </tr>
-                <tr>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>Smart Money กำลังออกของ</td>
-                </tr>
-                <tr>
-                  <td>-</td>
-                  <td>+</td>
-                  <td>มีโอกาสเด้งสั้น</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div className="p-3 border rounded bg-white dark:bg-slate-800 border-gray-100 dark:border-gray-800">
-            <strong className="text-sm">🔹 6) Signal Timeline</strong>
-            <p className="mt-1 text-xs text-muted-foreground">สีและไอคอนช่วยให้เห็นว่าใครคุมตลาด</p>
+          <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 p-3 rounded">
+            <strong className="text-sm text-blue-800 dark:text-blue-200">💰 จัดการเงินให้ปลอดภัย</strong>
             <div className="mt-2 text-xs space-y-1">
-              <div className="flex items-center gap-2"><span className="w-3 h-3 rounded bg-emerald-500 inline-block"/> <strong>เขียว</strong> = Trend</div>
-              <div className="flex items-center gap-2"><span className="w-3 h-3 rounded bg-yellow-800 inline-block"/> <strong>น้ำตาล</strong> = Distribution</div>
-              <div className="flex items-center gap-2"><span className="w-3 h-3 rounded bg-sky-500 inline-block"/> <strong>ฟ้า</strong> = Neutral</div>
-              <div className="mt-2">🚀 <strong>Rocket</strong> = จุดแรงสุดของตลาด</div>
+              <div>🟢 <strong>ไฟเขียวแรงๆ</strong> → เปิด 1R (ทุนเต็ม)</div>
+              <div>🟡 <strong>ไฟเหลือง</strong> → 0.5R (ครึ่งทุน) หรือปิดทั้งหมด</div>
+              <div>🔵 <strong>ไฟฟ้า</strong> → 0R (ห้ามเข้า) ถ้ามีสถานีให้ปิดทันที</div>
             </div>
+          </div>
+
+          <div className="p-3 border rounded bg-white dark:bg-slate-800 border-gray-100 dark:border-gray-800">
+            <strong className="text-sm">📊 อ่านกราฟง่ายๆ 3 ขั้นตอน</strong>
+            <ol className="mt-2 text-xs space-y-2">
+              <li><strong>1. ดูสีปัจจุบัน</strong> - อยู่บรรทัดล่างสุด</li>
+              <li><strong>2. ดูแรงเทรนด์</strong> - Trend Ratio {">"} 60% = แน่นอน</li>
+              <li><strong>3. ดูไทม์ไลน์</strong> - สีเดียวกันต่อเนื่อง = แรงจริง</li>
+            </ol>
+          </div>
+
+          <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 p-3 rounded">
+            <strong className="text-sm text-yellow-800 dark:text-yellow-200">⚡ เทคนิคเทรดเด็ด</strong>
+            <div className="mt-2 text-xs space-y-2">
+              <div>🔥 <strong>จังหวะเด็ดที่สุด</strong>: ไฟเขียว + Trend Ratio {">"} 70% + Rocket ปรากฏ</div>
+              <div>⚠️ <strong>อันตราย</strong>: ไฟเหลือง 3 ครั้งติด = ตลาดกำลังจะลง</div>
+              <div>🎯 <strong>จุดเข้าออก</strong>: ดูการเปลี่ยนสีจากฟ้า→เขียว = จุดเข้าทอดถอน</div>
+            </div>
+          </div>
+
+          <div className="p-3 border rounded bg-white dark:bg-slate-800 border-gray-100 dark:border-gray-800">
+            <strong className="text-sm">🧠 สูตรคำนวณความแม่นยำ</strong>
+            <div className="mt-2 text-xs space-y-1">
+              <div>✅ <strong>เทรดได้</strong>: ตรงกัน 4-5 ข้อ</div>
+              <div>⚠️ <strong>ระวัง</strong>: ตรงกัน 2-3 ข้อ</div>
+              <div>❌ <strong>ห้ามเข้า</strong>: ตรงกัน 0-1 ข้อ</div>
+            </div>
+            
+            <div className="mt-3 p-2 bg-gray-50 dark:bg-gray-900 rounded text-xs">
+              <strong>เช็คลิสต์ก่อนเปิดออเดอร์:</strong>
+              <ul className="mt-1 space-y-1">
+                <li>□ สีปัจจุบันเป็นอะไร?</li>
+                <li>□ Trend Ratio เกิน 60% ไหม?</li>
+                <li>□ ไทม์ไลน์สีเดียวกันต่อเนื่องไหม?</li>
+                <li>□ Position Size เหมาะสมไหม?</li>
+                <li>□ มี Rocket หรือสัญญานพิเศษไหม?</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="p-3 border rounded bg-white dark:bg-slate-800 border-gray-100 dark:border-gray-800">
+            <strong className="text-sm">🎖️ กฎเหล็ก OI Trader</strong>
+            <ul className="mt-2 text-xs space-y-1">
+              <li>• <strong>ไฟเขียว</strong> = เทรนด์ขึ้นจริง • <strong>ซื้อ</strong> แล้วรอกำไร</li>
+              <li>• <strong>ไฟเหลือง</strong> = Smart Money กำลังขาย • <strong>ปิดสถานี</strong> หรือ Short</li>
+              <li>• <strong>ไฟฟ้า</strong> = ตลาดไม่มีทิศทาง • <strong>นั่งดู</strong> อย่าเสี่ยง</li>
+            </ul>
           </div>
 
           <div className="pt-2 border-t mt-2 text-sm">
-            <strong className="block">Workflow แนะนำ (สั้น)</strong>
-            <ol className="mt-2 text-xs space-y-1">
-              <li>1) ดู Current Signal</li>
-              <li>2) อ่าน Trading Action</li>
-              <li>3) ดู Position Size</li>
-              <li>4) เช็ก Summary (30 Bars)</li>
-              <li>5) ดู Timeline ประกอบ</li>
-            </ol>
-            <p className="mt-2 text-xs text-muted-foreground">ตรงกัน ≥ 4 ข้อ = จังหวะดี • ตรงกัน ≤ 2 ข้อ = ไม่ควรเทรด</p>
+            <strong className="block text-red-600 dark:text-red-400">⚠️ ข้อความเตือนสำคัญ</strong>
+            <p className="mt-2 text-xs text-muted-foreground">
+              ระบบนี้ช่วยตัดสินใจได้เร็วขึ้น แต่ไม่รับประกับผลกำไร 100% 
+              ควรใช้ร่วมกับการวิเคราะห์ตัวเองและจัดการความเสี่ยงให้ดี
+            </p>
           </div>
         </div>
       </div>

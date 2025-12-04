@@ -96,6 +96,11 @@
 }
 
 @layer utilities {
+  /* Blur.io transitions */
+  * {
+    transition: all 0.2s ease-in-out;
+  }
+
   /* Animation utilities */
   @keyframes fade-in {
     from {
@@ -114,6 +119,39 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-in-left {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
     }
   }
 
@@ -159,6 +197,15 @@
     }
   }
 
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(255, 135, 0, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 40px rgba(255, 135, 0, 0.6);
+    }
+  }
+
   @keyframes bounce-slow {
     0%, 100% {
       transform: translateY(0);
@@ -168,12 +215,33 @@
     }
   }
 
+  @keyframes text-glow {
+    0%, 100% {
+      text-shadow: 0 0 1px #FF8700, 0 0 5px rgba(249, 82, 0, 0.6);
+    }
+    50% {
+      text-shadow: 0 0 2px #FF8700, 0 0 10px rgba(249, 82, 0, 0.8), 0 0 20px rgba(249, 82, 0, 0.4);
+    }
+  }
+
   .animate-fade-in {
     animation: fade-in 0.8s ease-out;
   }
 
   .animate-fade-in-up {
     animation: fade-in-up 0.8s ease-out;
+  }
+
+  .animate-slide-in-left {
+    animation: slide-in-left 0.6s ease-out;
+  }
+
+  .animate-slide-in-right {
+    animation: slide-in-right 0.6s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.4s ease-out;
   }
 
   .animate-float {
@@ -194,6 +262,42 @@
     animation: blob 7s infinite;
   }
 
+  .animate-pulse-slow {
+    animation: pulse-slow 3s ease-in-out infinite;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .animate-bounce-slow {
+    animation: bounce-slow 2s ease-in-out infinite;
+  }
+
+  .animate-text-glow {
+    animation: text-glow 2s ease-in-out infinite;
+  }
+
+  .animation-delay-100 {
+    animation-delay: 0.1s;
+  }
+
+  .animation-delay-200 {
+    animation-delay: 0.2s;
+  }
+
+  .animation-delay-300 {
+    animation-delay: 0.3s;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 0.4s;
+  }
+
+  .animation-delay-500 {
+    animation-delay: 0.5s;
+  }
+
   .animation-delay-2000 {
     animation-delay: 2s;
   }
@@ -202,12 +306,22 @@
     animation-delay: 4s;
   }
 
-  .animate-pulse-slow {
-    animation: pulse-slow 3s ease-in-out infinite;
+  /* Hover effects - Blur.io style */
+  .hover-lift {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   }
 
-  .animate-bounce-slow {
-    animation: bounce-slow 2s ease-in-out infinite;
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 0 30px rgba(255, 135, 0, 0.5);
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.02);
   }
 
   /* Floating chat button helpers */
@@ -215,7 +329,34 @@
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     will-change: transform;
-    /* Ensure the button stays on top of any local stacking contexts */
     z-index: 99999;
+  }
+
+  /* Blur.io gradient overlays */
+  .gradient-fade-bottom {
+    background: linear-gradient(180deg, rgba(8, 4, 4, 0) 50%, #080404 90%);
+  }
+
+  .gradient-fade-top {
+    background: linear-gradient(180deg, #080404 10%, rgba(8, 4, 4, 0) 50%);
+  }
+
+  /* Scrollbar styling - Blur.io style */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(255, 135, 0, 0.3);
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 135, 0, 0.5);
   }
 }

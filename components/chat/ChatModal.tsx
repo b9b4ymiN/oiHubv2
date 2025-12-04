@@ -410,20 +410,61 @@ export function ChatModal() {
                     </button>
 
                     {message.role === 'assistant' ? (
-                      <div className="prose prose-sm max-w-none text-[var(--blur-text-primary)]">
+                      <div className="prose prose-sm max-w-none prose-invert">
                         <ReactMarkdown
                           components={{
+                            // Headings
+                            h1: ({ children }) => <h1 className="text-xl sm:text-2xl font-bold mb-3 text-blur-orange uppercase tracking-wide">{children}</h1>,
+                            h2: ({ children }) => <h2 className="text-lg sm:text-xl font-bold mb-2 mt-4 text-blur-text-primary border-b border-blur-orange/30 pb-2">{children}</h2>,
+                            h3: ({ children }) => <h3 className="text-base sm:text-lg font-bold mb-2 mt-3 text-blur-text-primary">{children}</h3>,
+                            h4: ({ children }) => <h4 className="text-sm sm:text-base font-bold mb-1 mt-2 text-blur-text-secondary">{children}</h4>,
+
+                            // Paragraphs
+                            p: ({ children }) => <p className="text-xs sm:text-sm mb-3 leading-relaxed text-blur-text-primary">{children}</p>,
+
+                            // Lists
+                            ul: ({ children }) => <ul className="list-disc list-inside mb-3 space-y-1 text-xs sm:text-sm text-blur-text-primary">{children}</ul>,
+                            ol: ({ children }) => <ol className="list-decimal list-inside mb-3 space-y-1 text-xs sm:text-sm text-blur-text-primary">{children}</ol>,
+                            li: ({ children }) => <li className="ml-2 text-blur-text-primary">{children}</li>,
+
+                            // Strong/Bold
+                            strong: ({ children }) => <strong className="font-bold text-blur-orange">{children}</strong>,
+
+                            // Em/Italic
+                            em: ({ children }) => <em className="italic text-blur-text-secondary">{children}</em>,
+
+                            // Blockquote
+                            blockquote: ({ children }) => <blockquote className="border-l-4 border-blur-orange pl-3 italic my-3 text-blur-text-secondary">{children}</blockquote>,
+
+                            // Horizontal Rule
+                            hr: () => <hr className="border-blur-orange/30 my-4" />,
+
+                            // Code blocks
                             code: ({ node, inline, className, children, ...props }: any) => (
                               inline ? (
-                                <code className="bg-[var(--blur-orange)]/10 text-[var(--blur-orange)] px-1.5 py-0.5 rounded text-xs font-mono" {...props}>
+                                <code className="bg-blur-orange/10 text-blur-orange px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-mono font-bold" {...props}>
                                   {children}
                                 </code>
                               ) : (
-                                <code className="block bg-[var(--blur-bg-primary)] text-[var(--blur-text-primary)] p-2 sm:p-3 rounded-lg overflow-x-auto text-[10px] sm:text-xs font-mono border border-[var(--blur-orange)]/20" {...props}>
-                                  {children}
-                                </code>
+                                <pre className="bg-blur-bg-primary border border-blur-orange/20 rounded-lg p-2 sm:p-3 my-3 overflow-x-auto">
+                                  <code className="text-blur-text-primary text-[10px] sm:text-xs font-mono leading-relaxed" {...props}>
+                                    {children}
+                                  </code>
+                                </pre>
                               )
                             ),
+
+                            // Tables
+                            table: ({ children }) => (
+                              <div className="overflow-x-auto my-3">
+                                <table className="min-w-full border border-blur-orange/20 text-xs">{children}</table>
+                              </div>
+                            ),
+                            thead: ({ children }) => <thead className="bg-blur-orange/10">{children}</thead>,
+                            tbody: ({ children }) => <tbody>{children}</tbody>,
+                            tr: ({ children }) => <tr className="border-b border-blur-orange/10">{children}</tr>,
+                            th: ({ children }) => <th className="px-3 py-2 text-left font-bold text-blur-orange">{children}</th>,
+                            td: ({ children }) => <td className="px-3 py-2 text-blur-text-primary">{children}</td>,
                           }}
                         >
                           {message.content}
