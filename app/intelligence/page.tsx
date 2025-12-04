@@ -24,7 +24,7 @@ import {
 
 export default function IntelligencePage() {
   const [symbol, setSymbol] = useState("BTCUSDT");
-  const [interval, setInterval] = useState("5m");
+  const [interval, setInterval] = useState("1d");
   const { isMobile, chartHeight } = useResponsive();
   const { addContextAndOpenChat } = useChatContext();
 
@@ -50,14 +50,14 @@ export default function IntelligencePage() {
     <div className="min-h-screen bg-blur-bg-primary">
       <BlurNav />
 
-      <div className="max-w-[1800px] mt-12 mx-auto space-y-4 pt-[80px] p-2 sm:p-4 md:p-6">
+      <div className="max-w-[1800px] mx-auto space-y-2 sm:space-y-4 pt-[64px] sm:pt-[80px] p-2 sm:p-4 md:p-6">
         {/* Header */}
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-1 sm:gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-blur-text-primary uppercase">
+            <h1 className="text-base sm:text-2xl font-bold tracking-tight text-blur-text-primary uppercase">
               🧠 ศูนย์ข่าวกรองการเทรด
             </h1>
-            <p className="text-[10px] sm:text-sm text-blur-text-secondary mt-0.5">
+            <p className="text-[9px] sm:text-sm text-blur-text-secondary mt-0.5 hidden sm:block">
               การวิเคราะห์การเทรดโดย AI • ข้อมูลเชิงลึกแบบเรียลไทม์ • การตัดสินใจอัจฉริยะ
             </p>
           </div>
@@ -74,13 +74,13 @@ export default function IntelligencePage() {
         </div>
 
         {/* Executive Summary - Always on Top */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 pb-2 border-b-2 border-gray-200 dark:border-gray-800">
-            <span className="text-base sm:text-xl">🎯</span>
-            <h2 className="text-sm sm:text-xl font-bold text-gray-900 dark:text-gray-100">
+        <div className="space-y-2 sm:space-y-3">
+          <div className="flex items-center gap-1 sm:gap-2 pb-1 sm:pb-2 border-b-2 border-blur-orange/30">
+            <span className="text-sm sm:text-xl">🎯</span>
+            <h2 className="text-xs sm:text-xl font-bold text-blur-text-primary">
               สรุปผู้บริหาร
             </h2>
-            <Badge variant="destructive" className="text-[10px] sm:text-xs ml-2">
+            <Badge variant="destructive" className="text-[9px] sm:text-xs ml-1 sm:ml-2 bg-blur-orange border-blur-orange-bright px-1 sm:px-2 py-0">
               สำคัญ
             </Badge>
           </div>
@@ -88,8 +88,8 @@ export default function IntelligencePage() {
         </div>
 
         {/* Main Intelligence Tabs */}
-        <Tabs defaultValue="signals" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 text-[10px] sm:text-xs">
+        <Tabs defaultValue="signals" className="w-full relative z-10 mt-4 sm:mt-6">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 text-[9px] sm:text-xs h-8 sm:h-10 relative z-20">
             <TabsTrigger value="signals">📊 สัญญาณ</TabsTrigger>
             <TabsTrigger value="risk">⚠️ ความเสี่ยง</TabsTrigger>
             <TabsTrigger value="opportunities">🎯 โอกาส</TabsTrigger>
@@ -97,8 +97,8 @@ export default function IntelligencePage() {
           </TabsList>
 
           {/* Signals Intelligence */}
-          <TabsContent value="signals" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <TabsContent value="signals" className="space-y-2 sm:space-y-4 mt-6 sm:mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4">
               <SignalIntelligenceCard symbol={symbol} interval={interval} />
               <SignalIntelligenceCard 
                 symbol={symbol} 
@@ -112,8 +112,8 @@ export default function IntelligencePage() {
           </TabsContent>
 
           {/* Risk Intelligence */}
-          <TabsContent value="risk" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <TabsContent value="risk" className="space-y-2 sm:space-y-4 mt-2 sm:mt-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4">
               <RiskIntelligenceCard symbol={symbol} interval={interval} />
               <RiskIntelligenceCard 
                 symbol={symbol} 
@@ -127,8 +127,8 @@ export default function IntelligencePage() {
           </TabsContent>
 
           {/* Opportunities Intelligence */}
-          <TabsContent value="opportunities" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <TabsContent value="opportunities" className="space-y-2 sm:space-y-4 mt-2 sm:mt-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4">
               <OpportunityIntelligenceCard symbol={symbol} interval={interval} />
               <OpportunityIntelligenceCard 
                 symbol={symbol} 
@@ -142,7 +142,7 @@ export default function IntelligencePage() {
           </TabsContent>
 
           {/* Decision Dashboard */}
-          <TabsContent value="decisions" className="space-y-4">
+          <TabsContent value="decisions" className="space-y-2 sm:space-y-4 mt-2 sm:mt-4">
             <DecisionDashboard symbol={symbol} interval={interval} />
             <SmartQuestionHub 
               symbol={symbol} 
@@ -153,17 +153,17 @@ export default function IntelligencePage() {
 
         {/* Quick Actions */}
         <Card className="border-2 border-blur-orange/30 shadow-blur-glow">
-          <CardHeader className="p-3 sm:p-6 bg-blur-orange/10 border-b border-blur-orange/20">
-            <CardTitle className="text-base sm:text-xl font-bold mb-1 flex items-center gap-2 text-blur-text-primary uppercase">
-              <span className="text-lg sm:text-2xl">🚀</span>
+          <CardHeader className="p-2 sm:p-6 bg-blur-orange/10 border-b border-blur-orange/20">
+            <CardTitle className="text-sm sm:text-xl font-bold mb-0 sm:mb-1 flex items-center gap-1 sm:gap-2 text-blur-text-primary uppercase">
+              <span className="text-base sm:text-2xl">🚀</span>
               <span>การทำงานด่วน AI</span>
             </CardTitle>
-            <p className="text-blur-text-secondary text-[10px] sm:text-sm">
+            <p className="text-blur-text-secondary text-[9px] sm:text-sm hidden sm:block">
               วิเคราะห์ด้วยคลิกเดียว • คำถามตามบริบท • ข้อมูลเชิงลึกทันที
             </p>
           </CardHeader>
-          <CardContent className="p-3 sm:p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <CardContent className="p-2 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
               <QuickActionCard
                 title="วิเคราะห์ตลาด"
                 description="การวิเคราะห์ตลาดทั้งหมด"
@@ -214,10 +214,10 @@ function SymbolSelector({
     <select
       value={symbol}
       onChange={(e) => onSymbolChange(e.target.value)}
-      className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs sm:text-sm font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 transition-colors"
+      className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg border-2 border-blur-orange/30 bg-blur-bg-secondary/50 backdrop-blur-sm text-blur-text-primary text-xs sm:text-sm font-semibold hover:border-blur-orange hover:bg-blur-orange/5 focus:ring-2 focus:ring-blur-orange focus:border-blur-orange transition-all duration-200 shadow-sm hover:shadow-blur-glow cursor-pointer"
     >
       {symbols.map((s) => (
-        <option key={s} value={s}>
+        <option key={s} value={s} className="bg-blur-bg-secondary text-blur-text-primary">
           {s}
         </option>
       ))}
@@ -239,10 +239,10 @@ function IntervalSelector({
     <select
       value={interval}
       onChange={(e) => onIntervalChange(e.target.value)}
-      className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs sm:text-sm font-medium hover:border-gray-400 dark:hover:border-gray-500 focus:ring-2 focus:ring-blue-500 transition-colors"
+      className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg border-2 border-blur-orange/30 bg-blur-bg-secondary/50 backdrop-blur-sm text-blur-text-primary text-xs sm:text-sm font-semibold hover:border-blur-orange hover:bg-blur-orange/5 focus:ring-2 focus:ring-blur-orange focus:border-blur-orange transition-all duration-200 shadow-sm hover:shadow-blur-glow cursor-pointer"
     >
       {intervals.map((i) => (
-        <option key={i} value={i}>
+        <option key={i} value={i} className="bg-blur-bg-secondary text-blur-text-primary">
           {i.toUpperCase()}
         </option>
       ))}
@@ -367,27 +367,48 @@ function QuickActionCard({
     }
   };
 
+  const oiStats = getOIStats();
+  const priceStats = getPriceStats();
+  const isDataLoading = !oiStats || !priceStats;
+
   return (
-    <Card className="border-2 border-transparent hover:border-blur-orange/50 transition-all duration-300 cursor-pointer group"
+    <Card className="border-2 border-blur-orange/20 hover:border-blur-orange/60 transition-all duration-300 cursor-pointer group bg-blur-bg-secondary/50 backdrop-blur-sm hover:shadow-blur-glow"
           onClick={() => addContextAndOpenChat(context, question.replace('{symbol}', symbol))}>
       <CardHeader className="p-4">
-        <CardTitle className="text-sm font-semibold group-hover:text-blur-orange transition-colors">
+        <CardTitle className="text-sm font-semibold group-hover:text-blur-orange transition-colors text-blur-text-primary">
           {title}
         </CardTitle>
-        <CardDescription className="text-xs">
+        <CardDescription className="text-xs text-blur-text-secondary">
           {description}
         </CardDescription>
       </CardHeader>
       <CardContent className="p-4 pt-0">
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] text-muted-foreground">คลิกเพื่อวิเคราะห์</span>
-          <AskAIButton
-            context={context}
-            question={question.replace('{symbol}', symbol)}
-            variant="icon"
-            size="icon"
-          />
-        </div>
+        {isDataLoading ? (
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 bg-blur-orange rounded-full animate-bounce"></div>
+            <div className="h-2 w-2 bg-blur-orange-bright rounded-full animate-bounce" style={{ animationDelay: '0.15s' }}></div>
+            <div className="h-2 w-2 bg-blur-orange rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
+            <span className="text-[10px] text-blur-text-muted ml-1">กำลังโหลดข้อมูล...</span>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-blur-text-muted">คลิกเพื่อวิเคราะห์</span>
+              <AskAIButton
+                context={context}
+                question={question.replace('{symbol}', symbol)}
+                variant="icon"
+                size="icon"
+              />
+            </div>
+            <div className="flex items-center gap-2 text-[10px]">
+              <Badge variant="outline" className="border-blur-orange/30 text-blur-orange">
+                ข้อมูลพร้อม
+              </Badge>
+              <span className="text-blur-text-muted">OI • Price • Funding</span>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

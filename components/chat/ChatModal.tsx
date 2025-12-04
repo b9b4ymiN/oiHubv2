@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { X, Send, MessageSquare, Sparkles, Copy, Check, Trash2, RotateCcw, Database, XCircle } from 'lucide-react'
+import { X, Send, MessageSquare, Sparkles, Copy, Check, Trash2, RotateCcw, Database, XCircle, ArrowDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -22,6 +22,10 @@ export function ChatModal() {
   const [touchStart, setTouchStart] = useState(0)
   const [touchEnd, setTouchEnd] = useState(0)
   const [swipeProgress, setSwipeProgress] = useState(0)
+  const [showScrollButton, setShowScrollButton] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
+  const lastReadMessageCount = useRef(0)
 
   // Detect mobile on client-side only
   useEffect(() => {
@@ -68,9 +72,51 @@ export function ChatModal() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  // Check scroll position to show/hide scroll button
+  const handleScroll = () => {
+    if (!messagesContainerRef.current) return
+
+    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100
+
+    if (isNearBottom) {
+      // User scrolled to bottom, mark all messages as read
+      lastReadMessageCount.current = messages.length
+      setUnreadCount(0)
+    }
+
+    setShowScrollButton(!isNearBottom && messages.length > 0)
+  }
+
   useEffect(() => {
-    scrollToBottom()
+    // Auto-scroll and mark as read when new messages arrive and user is near bottom
+    const container = messagesContainerRef.current
+    if (!container) return
+
+    const { scrollTop, scrollHeight, clientHeight } = container
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100
+
+    if (isNearBottom) {
+      scrollToBottom()
+      lastReadMessageCount.current = messages.length
+      setUnreadCount(0)
+    } else {
+      // User is scrolled up, count unread messages
+      const newMessages = messages.length - lastReadMessageCount.current
+      if (newMessages > 0) {
+        setUnreadCount(newMessages)
+      }
+    }
   }, [messages])
+
+  // Add scroll listener
+  useEffect(() => {
+    const container = messagesContainerRef.current
+    if (!container) return
+
+    container.addEventListener('scroll', handleScroll)
+    return () => container.removeEventListener('scroll', handleScroll)
+  }, [messages.length])
 
   // Auto-scroll when textarea is focused on mobile (keyboard appears)
   useEffect(() => {
@@ -205,21 +251,24 @@ export function ChatModal() {
 
   return (
     <>
-      {/* Floating Chat Button - Mobile optimized with safe area insets */}
-      <Button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 chat-floating-button h-14 w-14 sm:h-16 sm:w-16 rounded-full shadow-2xl bg-gradient-to-br from-[var(--blur-orange)] to-[var(--blur-orange-bright)] hover:shadow-[0_0_40px_rgba(255,135,0,0.6)] hover:scale-110 active:scale-95 z-50 group transition-all duration-300 border-2 border-white/20 backdrop-blur-sm touch-manipulation"
-        size="icon"
-        aria-label="Open AI Chat"
-      >
-        <MessageSquare className="h-6 w-6 sm:h-7 sm:w-7 text-white group-hover:rotate-12 transition-transform duration-300" />
-        <span className="absolute -top-1 -right-1 h-3.5 w-3.5 sm:h-4 sm:w-4 bg-[#22c55e] rounded-full animate-pulse shadow-lg border-2 border-white" aria-hidden="true"></span>
-        {messages.length > 0 && (
-          <span className="absolute -top-2 -left-2 h-5 w-5 sm:h-6 sm:w-6 bg-[var(--blur-orange-bright)] rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold text-white border-2 border-white shadow-lg" aria-label={`${messages.filter(m => m.role === 'assistant').length} messages`}>
-            {messages.filter(m => m.role === 'assistant').length}
-          </span>
-        )}
-      </Button>
+      {/* Floating Chat Button - Mobile optimized with safe area insets - Hidden when chat is open */}
+      {!isOpen && (
+        <Button
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 chat-floating-button h-14 w-14 sm:h-16 sm:w-16 rounded-full shadow-2xl bg-gradient-to-br from-[var(--blur-orange)] to-[var(--blur-orange-bright)] hover:shadow-[0_0_40px_rgba(255,135,0,0.6)] hover:scale-110 active:scale-95 group transition-all duration-300 border-2 border-white/20 backdrop-blur-sm touch-manipulation"
+          style={{ zIndex: 9999 }}
+          size="icon"
+          aria-label="Open AI Chat"
+        >
+          <MessageSquare className="h-6 w-6 sm:h-7 sm:w-7 text-white group-hover:rotate-12 transition-transform duration-300" />
+          <span className="absolute -top-1 -right-1 h-3.5 w-3.5 sm:h-4 sm:w-4 bg-[#22c55e] rounded-full animate-pulse shadow-lg border-2 border-white" aria-hidden="true"></span>
+          {messages.length > 0 && (
+            <span className="absolute -top-2 -left-2 h-5 w-5 sm:h-6 sm:w-6 bg-[var(--blur-orange-bright)] rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold text-white border-2 border-white shadow-lg" aria-label={`${messages.filter(m => m.role === 'assistant').length} messages`}>
+              {messages.filter(m => m.role === 'assistant').length}
+            </span>
+          )}
+        </Button>
+      )}
 
       {/* Modal - Mobile optimized with dynamic viewport height */}
       {isOpen && (
@@ -331,7 +380,8 @@ export function ChatModal() {
 
             {/* Messages - Optimized scrolling for mobile */}
             <div
-              className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-[var(--blur-bg-primary)] scrollbar-thin scrollbar-thumb-[var(--blur-orange)]/20 scrollbar-track-transparent"
+              ref={messagesContainerRef}
+              className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-[var(--blur-bg-primary)] scrollbar-thin scrollbar-thumb-[var(--blur-orange)]/20 scrollbar-track-transparent relative"
               style={{
                 WebkitOverflowScrolling: 'touch',
                 overscrollBehavior: 'contain'
@@ -499,6 +549,23 @@ export function ChatModal() {
               )}
 
               <div ref={messagesEndRef} />
+
+              {/* Scroll to Bottom Button */}
+              {showScrollButton && (
+                <Button
+                  onClick={scrollToBottom}
+                  className="absolute bottom-4 right-4 h-10 w-10 sm:h-12 sm:w-12 rounded-full shadow-xl bg-gradient-to-br from-[var(--blur-orange)] to-[var(--blur-orange-bright)] hover:shadow-[0_0_30px_rgba(255,135,0,0.5)] hover:scale-110 active:scale-95 z-10 transition-all duration-300 border-2 border-white/30 backdrop-blur-sm touch-manipulation"
+                  size="icon"
+                  aria-label="Scroll to bottom"
+                >
+                  <ArrowDown className="h-5 w-5 sm:h-6 sm:w-6 text-white animate-bounce" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white border-2 border-white shadow-lg">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </Button>
+              )}
             </div>
 
             {/* Input */}

@@ -199,7 +199,7 @@ export function ExecutiveSummary({ symbol, interval }: ExecutiveSummaryProps) {
   return (
     <div className="space-y-4">
       {/* Main Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Market Regime */}
         <Card className="border-2 border-transparent hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300">
           <CardHeader className="pb-3">
@@ -210,7 +210,7 @@ export function ExecutiveSummary({ symbol, interval }: ExecutiveSummaryProps) {
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="text-center">
-              <Badge className={`${marketAnalysis.regimeColor} text-lg px-4 py-2 mb-2`}>
+              <Badge className={`${marketAnalysis.regimeColor} text-lg px-4 py-2 mb-2 text-white`}>
                 {marketAnalysis.marketRegime.replace('_', ' ')}
               </Badge>
               <div className="text-xs text-muted-foreground">
@@ -233,7 +233,7 @@ export function ExecutiveSummary({ symbol, interval }: ExecutiveSummaryProps) {
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="text-center">
-              <Badge className={`${marketAnalysis.riskColor} text-lg px-4 py-2 mb-2`}>
+              <Badge className={`${marketAnalysis.riskColor} text-lg px-4 py-2 mb-2 text-white`}>
                 {marketAnalysis.riskLevel}
               </Badge>
             </div>
@@ -316,7 +316,7 @@ export function ExecutiveSummary({ symbol, interval }: ExecutiveSummaryProps) {
       </div>
 
       {/* Bias Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {/* Smart Money Bias */}
         <Card className="border-2 border-orange-200 dark:border-orange-800">
           <CardHeader className="pb-3">
@@ -368,7 +368,7 @@ export function ExecutiveSummary({ symbol, interval }: ExecutiveSummaryProps) {
         </Card>
 
         {/* AI Analysis */}
-        <Card className="border-2 border-blur-orange/30 hover:border-blur-orange/50 transition-all duration-300">
+        <Card className="border-2 col-span-2 border-blur-orange/30 hover:border-blur-orange/50 transition-all duration-300">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
               🤖 AI Analysis
