@@ -139,7 +139,7 @@ async function executeBatchUpsert(
   columns: string[],
   pkColumns: string[],
   rows: (string | number | boolean | null)[][],
-  batchSize: number = 500
+  batchSize: number = 100
 ): Promise<void> {
   if (rows.length === 0) {
     return
@@ -156,7 +156,8 @@ async function executeBatchUpsert(
     const params: (string | number | boolean | null)[] = batch.flat()
 
     await new Promise<void>((resolve, reject) => {
-      db.run(sql, params, (err: Error | null) => {
+      // DuckDB 1.1.0 requires spread args, not array
+      db.run(sql, ...params, (err: Error | null) => {
         if (err) {
           reject(err)
         } else {

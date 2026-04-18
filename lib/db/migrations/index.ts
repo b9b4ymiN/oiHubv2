@@ -65,8 +65,7 @@ function createMigrationsTable(db: DuckDB.Database): Promise<void> {
 function isMigrationApplied(db: DuckDB.Database, migrationId: number): Promise<boolean> {
   return new Promise<boolean>((resolve, reject) => {
     db.all(
-      'SELECT id FROM _migrations WHERE id = ?',
-      [migrationId],
+      `SELECT id FROM _migrations WHERE id = ${migrationId}`,
       (err: Error | null, rows: unknown[]) => {
         if (err) {
           logger.error({ error: err, migrationId }, 'Failed to check migration status')
@@ -98,9 +97,8 @@ function applyMigration(db: DuckDB.Database, migration: Migration): Promise<void
       }
 
       // Record the migration as applied
-      db.run(
-        'INSERT INTO _migrations (id, name) VALUES (?, ?)',
-        [migration.id, migration.name],
+      db.exec(
+        `INSERT INTO _migrations (id, name) VALUES (${migration.id}, '${migration.name}')`,
         (insertErr: Error | null) => {
           if (insertErr) {
             logger.error(
@@ -173,7 +171,6 @@ export function getMigrationHistory(): Promise<MigrationRecord[]> {
     const db = getDuckDBClient()
     db.all(
       'SELECT id, name, applied_at FROM _migrations ORDER BY id ASC',
-      [],
       (err: Error | null, rows: unknown[]) => {
         if (err) {
           logger.error({ error: err }, 'Failed to fetch migration history')
