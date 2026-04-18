@@ -42,3 +42,7 @@ CLAUDE.md
 .claude/*
 .claude-logs/
 .omx/
+
+# Database files (DuckDB)
+data/db/*.duckdb
+data/db/*.duckdb.wal

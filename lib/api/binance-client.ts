@@ -23,13 +23,17 @@ export class BinanceClient {
     return this.fetcher.fetchPublic(endpoint, params)
   }
 
-  async getKlines(symbol: string, interval: string, limit: number = 500): Promise<OHLCV[]> {
+  async getKlines(symbol: string, interval: string, limit: number = 500, startTime?: number, endTime?: number): Promise<OHLCV[]> {
     try {
-      const data = await this.fetchPublic('/fapi/v1/klines', {
+      const params: Record<string, string> = {
         symbol,
         interval,
         limit: limit.toString()
-      })
+      }
+      if (startTime !== undefined) params.startTime = startTime.toString()
+      if (endTime !== undefined) params.endTime = endTime.toString()
+
+      const data = await this.fetchPublic('/fapi/v1/klines', params)
 
       return data.map((k: any[]) => ({
         timestamp: k[0],
@@ -63,13 +67,19 @@ export class BinanceClient {
   async getOpenInterestHistory(
     symbol: string,
     period: string = '5m',
-    limit: number = 500
+    limit: number = 500,
+    startTime?: number,
+    endTime?: number
   ): Promise<OIPoint[]> {
-    const data = await this.fetchPublic('/futures/data/openInterestHist', {
+    const params: Record<string, string> = {
       symbol,
       period,
       limit: limit.toString()
-    })
+    }
+    if (startTime !== undefined) params.startTime = startTime.toString()
+    if (endTime !== undefined) params.endTime = endTime.toString()
+
+    const data = await this.fetchPublic('/futures/data/openInterestHist', params)
 
     return data.map((item: any) => ({
       timestamp: item.timestamp,
@@ -78,11 +88,20 @@ export class BinanceClient {
     }))
   }
 
-  async getFundingRate(symbol: string, limit: number = 100): Promise<FundingRate[]> {
-    const data = await this.fetchPublic('/fapi/v1/fundingRate', {
+  async getFundingRate(
+    symbol: string,
+    limit: number = 100,
+    startTime?: number,
+    endTime?: number
+  ): Promise<FundingRate[]> {
+    const params: Record<string, string> = {
       symbol,
       limit: limit.toString()
-    })
+    }
+    if (startTime !== undefined) params.startTime = startTime.toString()
+    if (endTime !== undefined) params.endTime = endTime.toString()
+
+    const data = await this.fetchPublic('/fapi/v1/fundingRate', params)
 
     return data.map((item: any) => ({
       symbol: item.symbol,
@@ -95,13 +114,19 @@ export class BinanceClient {
   async getLongShortRatio(
     symbol: string,
     period: string = '5m',
-    limit: number = 100
+    limit: number = 100,
+    startTime?: number,
+    endTime?: number
   ): Promise<LongShortRatio[]> {
-    const data = await this.fetchPublic('/futures/data/globalLongShortAccountRatio', {
+    const params: Record<string, string> = {
       symbol,
       period,
       limit: limit.toString()
-    })
+    }
+    if (startTime !== undefined) params.startTime = startTime.toString()
+    if (endTime !== undefined) params.endTime = endTime.toString()
+
+    const data = await this.fetchPublic('/futures/data/globalLongShortAccountRatio', params)
 
     return data.map((item: any) => ({
       symbol,
@@ -115,13 +140,19 @@ export class BinanceClient {
   async getTakerBuySellVolume(
     symbol: string,
     period: string = '5m',
-    limit: number = 100
+    limit: number = 100,
+    startTime?: number,
+    endTime?: number
   ): Promise<TakerBuySellVolume[]> {
-    const data = await this.fetchPublic('/futures/data/takerlongshortRatio', {
+    const params: Record<string, string> = {
       symbol,
       period,
       limit: limit.toString()
-    })
+    }
+    if (startTime !== undefined) params.startTime = startTime.toString()
+    if (endTime !== undefined) params.endTime = endTime.toString()
+
+    const data = await this.fetchPublic('/futures/data/takerlongshortRatio', params)
 
     return data.map((item: any) => ({
       symbol,

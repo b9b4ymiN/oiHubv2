@@ -1,0 +1,2 @@
+# This directory persists DuckDB database files across container restarts
+# The actual database files are ignored by git

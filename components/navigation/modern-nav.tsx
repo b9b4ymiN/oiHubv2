@@ -7,16 +7,17 @@ import { cn } from '@/lib/utils'
 import { BlurButton } from '@/components/ui/blur-button'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Menu, 
-  X, 
-  Search, 
-  Bell, 
-  Settings, 
+import {
+  Menu,
+  X,
+  Search,
+  Bell,
+  Settings,
   TrendingUp,
   BarChart3,
   Brain,
   BookOpen,
+  FlaskConical,
   User
 } from 'lucide-react'
 
@@ -30,6 +31,8 @@ export function ModernNav() {
     { href: '/intelligence', label: 'Intelligence', icon: Brain },
     { href: '/options-volume', label: 'Options', icon: BarChart3 },
     { href: '/options-pro', label: 'Pro Flow', icon: TrendingUp },
+    { href: '/alerts', label: 'Alerts', icon: Bell },
+    { href: '/paper-trading', label: 'Paper', icon: FlaskConical },
     { href: '/learn', label: 'Learn', icon: BookOpen },
   ]
 

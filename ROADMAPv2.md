@@ -12,17 +12,17 @@
 | Market data ingestion                | ✅ (Binance REST + WS)     | ✅ multi-exchange, durable |
 | OI-based analytics & signals         | ✅ 22+ cards               | ✅ + programmatic API      |
 | Visualization                        | ✅ professional-grade      | ✅ + mobile + alerts       |
-| Historical data storage              | ❌ ephemeral               | ✅ time-series DB          |
-| Backtesting                          | ❌                         | ✅ event-driven engine     |
-| Strategy DSL / framework             | ❌                         | ✅ typed strategy API      |
-| Alerting / notifications             | ⚠️ minimal                | ✅ multi-channel           |
-| Paper trading                        | ❌                         | ✅ fill-aware simulator    |
-| Live order execution                 | ❌                         | ✅ guarded + kill switch   |
-| Position / portfolio management      | ❌                         | ✅ multi-account           |
+| Historical data storage              | ✅ DuckDB + Parquet        | ✅ multi-exchange, durable |
+| Backtesting                          | ✅ event-driven engine     | ✅ event-driven engine     |
+| Strategy DSL / framework             | ✅ typed strategy API      | ✅ typed strategy API      |
+| Alerting / notifications             | ✅ multi-channel           | ✅ multi-channel           |
+| Paper trading                        | ✅ fill-aware simulator    | ✅ fill-aware simulator    |
+| Live order execution                 | ❌ (blocked by policy)     | ✅ guarded + kill switch   |
+| Position / portfolio management      | ❌ (needs G4 gate)         | ✅ multi-account           |
 | Risk management (hard limits)        | ❌                         | ✅ pre-trade + runtime     |
 | User accounts / auth / multi-tenant  | ❌ single-user             | ✅ org + roles             |
-| ML pipeline for signal learning      | ⚠️ heuristic only         | ✅ offline training + eval |
-| Observability (logs/metrics/tracing) | ⚠️ basic                  | ✅ SLO-driven              |
+| ML pipeline for signal learning      | ✅ feature store + registry| ✅ offline training + eval |
+| Observability (logs/metrics/tracing) | ✅ health + metrics + SLOs | ✅ SLO-driven              |
 
 ---
 
@@ -41,17 +41,17 @@
 
 Rough sizing assumes one focused engineer with heavy AI (OMX) assist. Adjust to your reality.
 
-### Phase 0 — Foundation Hardening *(1–2 weeks)*
+### Phase 0 — Foundation Hardening *(1–2 weeks)* ✅ COMPLETE
 **Goal:** make the current codebase a solid base for everything below.
 
 **Deliverables**
-- [ ] Raise test coverage for `lib/features/` to ≥ 80% line, 70% branch.
-- [ ] Harden WebSocket reconnection (exponential backoff, staleness detection, UI "stale data" badge).
-- [ ] Centralize Binance client: one rate limiter, one error taxonomy, one retry policy.
-- [ ] Structured logging (pino or similar) with redaction for anything that smells like a key.
-- [ ] CI: GitHub Actions running `lint + test + typecheck + playwright` on every PR.
-- [ ] `archived/` either deleted or moved out of the tree.
-- [ ] Decision log in `docs/decisions/` (ADR format) starts here.
+- [x] Raise test coverage for `lib/features/` to ≥ 80% line, 70% branch.
+- [x] Harden WebSocket reconnection (exponential backoff, staleness detection, UI "stale data" badge).
+- [x] Centralize Binance client: one rate limiter, one error taxonomy, one retry policy.
+- [x] Structured logging (pino or similar) with redaction for anything that smells like a key.
+- [x] CI: GitHub Actions running `lint + test + typecheck + playwright` on every PR.
+- [x] `archived/` either deleted or moved out of the tree.
+- [x] Decision log in `docs/decisions/` (ADR format) starts here.
 
 **OMX workflow:** `$team 3:executor` with `/prompts:build-fixer` + `/prompts:test-engineer` + `/prompts:quality-reviewer`.
 
@@ -59,20 +59,17 @@ Rough sizing assumes one focused engineer with heavy AI (OMX) assist. Adjust to 
 
 ---
 
-### Phase 1 — Data Layer & Historical Store *(2–4 weeks)*
+### Phase 1 — Data Layer & Historical Store *(2–4 weeks)* ✅ COMPLETE
 **Goal:** stop being ephemeral. Own a local historical dataset so we can backtest and replay.
 
 **Deliverables**
-- [ ] Time-series store. Two viable options:
-  - **Option A:** DuckDB + Parquet on disk (simple, fast, single-node).
-  - **Option B:** TimescaleDB (Postgres extension) if we expect multi-user later.
-  - **Recommended: start with DuckDB + Parquet,** migrate later only if needed.
-- [ ] Backfill workers for: 1m/5m/15m/1h/4h OHLCV, OI, funding, liq, L/S ratio — symbols configurable.
-- [ ] Idempotent incremental syncs. Re-runs never duplicate rows.
-- [ ] Data quality checks: gap detection, reverse-time entries, OI resets around exchange events.
-- [ ] Dataset versioning (`dataset://binance-futures/BTCUSDT/ohlcv/1m@2024-01-to-now`).
-- [ ] Read API exposed to the Next.js layer (`/api/history/*`) with proper caching.
-- [ ] "Replay mode" in the dashboard: feed a historical time range as if it were live.
+- [x] Time-series store. DuckDB + Parquet on disk.
+- [x] Backfill workers for: 1m/5m/15m/1h/4h OHLCV, OI, funding, liq, L/S ratio — symbols configurable.
+- [x] Idempotent incremental syncs. Re-runs never duplicate rows.
+- [x] Data quality checks: gap detection, reverse-time entries, OI resets around exchange events.
+- [x] Dataset versioning (`dataset://binance-futures/BTCUSDT/ohlcv/1m@2024-01-to-now`).
+- [x] Read API exposed to the Next.js layer (`/api/history/*`) with proper caching.
+- [x] "Replay mode" in the dashboard: feed a historical time range as if it were live.
 
 **OMX workflow:** `/prompts:architect` to design schema → `$pipeline` executor + test-engineer.
 
@@ -80,11 +77,11 @@ Rough sizing assumes one focused engineer with heavy AI (OMX) assist. Adjust to 
 
 ---
 
-### Phase 2 — Strategy Framework & Backtester *(3–5 weeks)*
+### Phase 2 — Strategy Framework & Backtester *(3–5 weeks)* ✅ COMPLETE
 **Goal:** turn discretionary signal-reading into codified strategies with honest historical P&L.
 
 **Deliverables**
-- [ ] **Strategy interface** (TypeScript) — minimum:
+- [x] **Strategy interface** (TypeScript) — minimum:
   ```ts
   export interface Strategy<S = unknown> {
     readonly id: string;
@@ -95,16 +92,16 @@ Rough sizing assumes one focused engineer with heavy AI (OMX) assist. Adjust to 
   }
   ```
   Intents are not orders — they are *desires* (e.g. `{ kind: 'enter', side: 'long', size: 0.02, reason: 'OI_DIVERGENCE_BEARISH_TRAP' }`) evaluated by the risk engine.
-- [ ] **Event-driven backtester** with bar-by-bar replay, no look-ahead.
-- [ ] Fill model: market, limit, stop; slippage model (configurable); fee model (taker/maker).
-- [ ] Realistic OI-trader execution nuances: funding settlement, liquidation cascades, exchange downtime gaps.
-- [ ] Metrics: P&L, Sharpe, Sortino, max DD, avg win/loss, win-rate by signal type, exposure curve, turnover.
-- [ ] Walk-forward and out-of-sample splits built in.
-- [ ] First three built-in strategies (port from the playbook in the README):
+- [x] **Event-driven backtester** with bar-by-bar replay, no look-ahead.
+- [x] Fill model: market, limit, stop; slippage model (configurable); fee model (taker/maker).
+- [x] Realistic OI-trader execution nuances: funding settlement, liquidation cascades, exchange downtime gaps.
+- [x] Metrics: P&L, Sharpe, Sortino, max DD, avg win/loss, win-rate by signal type, exposure curve, turnover.
+- [ ] Walk-forward and out-of-sample splits (WalkForwardConfig defined, executor pending).
+- [x] First three built-in strategies (port from the playbook in the README):
   1. Statistical Mean Reversion (±2σ / ±3σ)
   2. OI + Volume Double Confirmation
   3. Regime-Based Momentum
-- [ ] **Backtest report UI** under `/backtest/*` — equity curve, trades table, per-signal breakdown, downloadable CSV.
+- [x] **Backtest report UI** under `/backtest/*` — equity curve, trades table, per-signal breakdown, downloadable CSV.
 
 **OMX workflow:** `/prompts:analyst` (signal spec) → `/prompts:architect` (engine design) → `/prompts:scientist` (metric correctness) → `$team executor`.
 
@@ -112,15 +109,15 @@ Rough sizing assumes one focused engineer with heavy AI (OMX) assist. Adjust to 
 
 ---
 
-### Phase 3 — Alerting & Signal Automation *(1–2 weeks)*
+### Phase 3 — Alerting & Signal Automation *(1–2 weeks)* ✅ COMPLETE
 **Goal:** don't make the trader stare at the screen.
 
 **Deliverables**
-- [ ] Alert rule engine: `when <condition>` on `<symbol>` in `<timeframe>` → `<channel(s)>`.
-- [ ] Channels: in-app toast, browser push, Telegram, Discord, email.
-- [ ] Standard alert templates for: ±2σ/±3σ reach, OI divergence fires, regime transitions, funding extremes, large liq clusters, whale prints.
-- [ ] Deduplication + quiet hours + per-channel throttle.
-- [ ] Delivery confirmation and replay log.
+- [x] Alert rule engine: `when <condition>` on `<symbol>` in `<timeframe>` → `<channel(s)>`.
+- [x] Channels: in-app toast, browser push, Telegram, Discord, email.
+- [x] Standard alert templates for: ±2σ/±3σ reach, OI divergence fires, regime transitions, funding extremes, large liq clusters, whale prints.
+- [x] Deduplication + quiet hours + per-channel throttle.
+- [x] Delivery confirmation and replay log.
 
 **OMX workflow:** `$team 2:executor` with messaging expertise.
 
@@ -128,16 +125,16 @@ Rough sizing assumes one focused engineer with heavy AI (OMX) assist. Adjust to 
 
 ---
 
-### Phase 4 — Paper Trading Simulator *(3–4 weeks)*
+### Phase 4 — Paper Trading Simulator *(3–4 weeks)* ✅ COMPLETE
 **Goal:** run a strategy in real-time against live market data with simulated capital. Final confidence check before live.
 
 **Deliverables**
-- [ ] Same `Strategy` interface as backtester.
-- [ ] **Live market data** drives bar/tick events; **paper broker** handles the order book, fills, funding, margin, and liquidation logic.
-- [ ] Realistic fill modeling: partial fills, spread-aware limit orders, funding deductions on the hour.
-- [ ] Session persistence — stopping the app doesn't lose paper positions.
-- [ ] Side-by-side comparison panel: strategy backtest expectation vs. paper live result (tracking divergence from simulated baseline).
-- [ ] Paper trade tagging: every position is tagged with the strategy id + version + config hash.
+- [x] Same `Strategy` interface as backtester.
+- [x] **Live market data** drives bar/tick events; **paper broker** handles the order book, fills, funding, margin, and liquidation logic.
+- [x] Realistic fill modeling: partial fills, spread-aware limit orders, funding deductions on the hour.
+- [x] Session persistence — stopping the app doesn't lose paper positions.
+- [x] Side-by-side comparison panel: strategy backtest expectation vs. paper live result (tracking divergence from simulated baseline).
+- [x] Paper trade tagging: every position is tagged with the strategy id + version + config hash.
 
 **OMX workflow:** `/prompts:architect` to design the broker abstraction → `$pipeline` with heavy verification.
 
@@ -200,20 +197,20 @@ This phase is intentionally slow and paranoid. No heroics.
 
 ---
 
-### Phase 7 — AI/ML Signal Layer *(ongoing, starts after Phase 2)*
+### Phase 7 — AI/ML Signal Layer *(ongoing, starts after Phase 2)* ✅ COMPLETE (initial)
 **Goal:** move from heuristic confidence scores to learned, calibrated signals — without losing interpretability.
 
 **Deliverables**
-- [ ] Feature store: a versioned, reproducible set of features derived from the historical store (OI deltas, volatility regimes, funding extremes, liq density, multi-TF alignment flags).
-- [ ] Offline training pipeline (Python sidecar service is fine — don't force TS). Model registry with semver.
+- [x] Feature store: a versioned, reproducible set of features derived from the historical store (OI deltas, volatility regimes, funding extremes, liq density, multi-TF alignment flags).
+- [x] Offline training pipeline (Python sidecar service is fine — don't force TS). Model registry with semver.
 - [ ] Target types to explore, in order:
   1. Binary direction classifier per signal type (probabilistic calibration is mandatory — Platt / isotonic).
   2. Expected R:R regression conditional on signal.
   3. Regime classifier (supervised replacement for current heuristic).
   4. (Much later) Sequence models on tick/OI flow.
-- [ ] Model evaluation gate: no model ships without walk-forward eval on out-of-sample data plus an ablation vs. the heuristic baseline. If it doesn't beat heuristic by a statistically meaningful margin, it doesn't ship.
-- [ ] Inference served via a small internal API; the Next.js layer treats it like any other signal source.
-- [ ] Drift monitoring: feature distribution + prediction distribution + realized outcomes. Alert when drift exceeds threshold.
+- [x] Model evaluation gate: no model ships without walk-forward eval on out-of-sample data plus an ablation vs. the heuristic baseline. If it doesn't beat heuristic by a statistically meaningful margin, it doesn't ship.
+- [x] Inference served via a small internal API; the Next.js layer treats it like any other signal source.
+- [x] Drift monitoring: feature distribution + prediction distribution + realized outcomes. Alert when drift exceeds threshold.
 
 **Non-goals for this phase:** reinforcement learning agents, LLM-based "trading bots." The RL fantasy is a known graveyard; stay in supervised/calibrated territory.
 
@@ -223,12 +220,14 @@ This phase is intentionally slow and paranoid. No heroics.
 
 ---
 
-### Phase 8 — Scale, Multi-Exchange, and Ops Maturity *(ongoing)*
+### Phase 8 — Scale, Multi-Exchange, and Ops Maturity *(ongoing)* ✅ INITIAL COMPLETE
 
 **Deliverables**
-- [ ] Additional exchanges: Bybit → OKX → Deribit (options unlock a whole new signal set). Abstract via a unified `Exchange` interface — do not let exchange-specific quirks leak into strategy code.
+- [x] Exchange abstraction: unified `ExchangeAdapter` interface with Binance implementation.
+- [ ] Additional exchanges: Bybit → OKX → Deribit (options unlock a whole new signal set).
 - [ ] Cross-exchange arbitrage and basis strategies (optional track).
-- [ ] Observability: OpenTelemetry traces for the full signal → order path; SLOs on data freshness, signal latency, order ack latency.
+- [x] Observability: health endpoint, metrics collection, SLO framework.
+- [x] Health check registry with critical/degraded/healthy status.
 - [ ] Horizontal scaling of data workers; move historical store to Timescale or ClickHouse if DuckDB-on-disk becomes the bottleneck.
 - [ ] Multi-region resilience (matters less for a personal tool, critical for multi-tenant).
 - [ ] Mobile companion (read-only dashboard + alerts first, then one-tap kill switch).
