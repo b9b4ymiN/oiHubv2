@@ -148,7 +148,7 @@ export default function LearnPage() {
           {/* Learning Path Preview */}
           <Card>
             <CardHeader>
-              <CardTitle>What You'll Learn</CardTitle>
+              <CardTitle>What You’ll Learn</CardTitle>
               <CardDescription>
                 This tutorial covers the essential concepts for analyzing options markets
               </CardDescription>
@@ -228,7 +228,7 @@ export default function LearnPage() {
                     Ready to Trade with Real Data?
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    Apply what you've learned on the live trading dashboard
+                    Apply what you’ve learned on the live trading dashboard
                   </p>
                 </div>
                 <div className="flex gap-3">

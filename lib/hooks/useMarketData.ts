@@ -292,3 +292,6 @@ export function useLiquidationClusters(
   })
 }
 
+// Re-export data health hooks from useDataHealth
+export { useDataHealth, useQueryHealth } from './useDataHealth'
+

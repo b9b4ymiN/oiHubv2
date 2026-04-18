@@ -11,6 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useOIHeatmap } from "@/lib/hooks/useMarketData";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { ConnectionStatusIndicator } from "@/components/ui/connection-status";
 import {
   ArrowLeft,
   TrendingUp,
@@ -27,7 +28,7 @@ export default function OIHeatmapPage() {
   const [interval, setInterval] = useState("5m");
   const [priceStep, setPriceStep] = useState(10);
 
-  const { data: heatmapResponse, isLoading } = useOIHeatmap(
+  const { data: heatmapResponse, isLoading, dataUpdatedAt } = useOIHeatmap(
     symbol,
     interval,
     288,
@@ -35,9 +36,9 @@ export default function OIHeatmapPage() {
   );
 
   // Extract data from response
-  const heatmapData = heatmapResponse?.cells || [];
-  const priceBuckets = heatmapResponse?.priceBuckets || [];
-  const timeBuckets = heatmapResponse?.timeBuckets || [];
+  const heatmapData = useMemo(() => heatmapResponse?.cells || [], [heatmapResponse]);
+  const priceBuckets = useMemo(() => heatmapResponse?.priceBuckets || [], [heatmapResponse]);
+  const timeBuckets = useMemo(() => heatmapResponse?.timeBuckets || [], [heatmapResponse]);
 
   // Professional analytics for OI traders
   const analytics = useMemo(() => {
@@ -441,12 +442,10 @@ export default function OIHeatmapPage() {
                   </span>
                 </CardDescription>
               </div>
-              <Badge
-                variant="default"
-                className="bg-green-600 hover:bg-green-700 w-fit"
-              >
-                🟢 Live Data
-              </Badge>
+              <ConnectionStatusIndicator
+                restDataUpdatedAt={dataUpdatedAt}
+                sourceType="oiHeatmap"
+              />
             </div>
           </CardHeader>
           <CardContent>
@@ -965,7 +964,7 @@ export default function OIHeatmapPage() {
                   </h4>
                   <ul className="space-y-1 text-muted-foreground">
                     <li>
-                      <strong>Step 1:</strong> Check the "Key Trading Zones"
+                      <strong>Step 1:</strong> Check the &quot;Key Trading Zones&quot;
                       section above
                     </li>
                     <li>

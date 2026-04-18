@@ -43,6 +43,7 @@ import { OIMomentumChart } from "@/components/charts/OIMomentumChart";
 import { OIGuideModal } from "@/components/guide/OIGuideModal";
 import { VolatilityRegimeCardCompact } from "@/components/widgets/VolatilityRegimeCardCompact";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ConnectionStatusIndicator } from "@/components/ui/connection-status";
 import {
   Activity,
   TrendingUp,
@@ -127,6 +128,10 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2 flex-wrap">
             <SymbolSelector symbol={symbol} onSymbolChange={setSymbol} />
             <IntervalSelector interval={interval} onIntervalChange={setInterval} />
+            <ConnectionStatusIndicator
+              restDataUpdatedAt={oiData?.[oiData.length - 1]?.timestamp || Date.now()}
+              sourceType="openInterest"
+            />
             <AskAIButton
               context={createFullContext()}
               question="Analyze current dashboard state and provide comprehensive trading insights"

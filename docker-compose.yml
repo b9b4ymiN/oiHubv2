@@ -30,7 +30,7 @@ services:
       - NEXT_TELEMETRY_DISABLED=1
       
       # Chat API (ใช้ mini-agi backend ที่รันอยู่แล้ว)
-      - CHAT_API_URL=http://bf-gai.duckdns.org/chat
+      - CHAT_API_URL=http://myzai.duckdns.org/chat
       
       # Timezone
       - TZ=Asia/Bangkok

@@ -1,23 +1,38 @@
 // lib/websocket/manager.ts
 
+import type { WebSocketHealth, ConnectionState } from './types'
+
 type StreamCallback = (data: any) => void
+type HealthCallback = (health: WebSocketHealth) => void
 
 export class WebSocketManager {
   private ws: WebSocket | null = null
   private subscriptions = new Map<string, Set<StreamCallback>>()
   private reconnectAttempts = 0
-  private maxReconnectAttempts = 5
   private reconnectDelay = 1000
   private baseUrl: string
+
+  // Health tracking properties
+  private lastMessageTime = Date.now()
+  private connectionState: ConnectionState = 'disconnected'
+  private maxReconnectDelay = 30000
+  private maxReconnectAttempts = 10
+  private isReconnecting = false
+  private healthSubscribers = new Set<HealthCallback>()
 
   constructor() {
     this.baseUrl = process.env.NEXT_PUBLIC_BINANCE_WS_URL || 'wss://fstream.binance.com'
   }
 
   private connect() {
-    if (this.ws?.readyState === WebSocket.OPEN) {
+    // Reconnect guard: prevent multiple simultaneous connection attempts
+    if (this.ws?.readyState === WebSocket.OPEN || this.isReconnecting) {
       return
     }
+
+    this.isReconnecting = true
+    this.connectionState = 'connecting'
+    this.emitHealth()
 
     const streams = Array.from(this.subscriptions.keys()).join('/')
     if (!streams) return
@@ -29,17 +44,22 @@ export class WebSocketManager {
 
       this.ws.onopen = () => {
         console.log('WebSocket connected')
+        this.connectionState = 'connected'
+        this.isReconnecting = false
         this.reconnectAttempts = 0
+        this.emitHealth()
       }
 
       this.ws.onmessage = (event) => {
         try {
           const message = JSON.parse(event.data)
           if (message.stream && message.data) {
+            this.lastMessageTime = Date.now()
             const callbacks = this.subscriptions.get(message.stream)
             if (callbacks) {
               callbacks.forEach(callback => callback(message.data))
             }
+            this.emitHealth()
           }
         } catch (error) {
           console.error('WebSocket message parse error:', error)
@@ -48,23 +68,31 @@ export class WebSocketManager {
 
       this.ws.onerror = (error) => {
         console.error('WebSocket error:', error)
+        this.emitHealth()
       }
 
       this.ws.onclose = () => {
         console.log('WebSocket closed')
+        this.connectionState = 'disconnected'
+        this.emitHealth()
         this.handleReconnect()
       }
     } catch (error) {
       console.error('WebSocket connection error:', error)
+      this.isReconnecting = false
       this.handleReconnect()
     }
   }
 
   private handleReconnect() {
+    this.isReconnecting = false
+
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++
-      const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1)
+      this.connectionState = 'reconnecting'
+      this.emitHealth()
 
+      const delay = this.getNextReconnectDelay()
       console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`)
 
       setTimeout(() => {
@@ -72,7 +100,17 @@ export class WebSocketManager {
       }, delay)
     } else {
       console.error('Max reconnection attempts reached')
+      this.connectionState = 'disconnected'
+      this.emitHealth()
     }
+  }
+
+  private getNextReconnectDelay(): number {
+    const baseDelay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts)
+    const cappedDelay = Math.min(baseDelay, this.maxReconnectDelay)
+    // Add ±20% jitter
+    const jitter = 0.8 + Math.random() * 0.4
+    return Math.floor(cappedDelay * jitter)
   }
 
   subscribe(stream: string, callback: StreamCallback): () => void {
@@ -109,6 +147,37 @@ export class WebSocketManager {
     if (this.ws) {
       this.ws.close()
       this.ws = null
+    }
+    this.connectionState = 'disconnected'
+    this.isReconnecting = false
+    this.emitHealth()
+  }
+
+  // Health management methods
+  subscribeHealth(callback: HealthCallback): () => void {
+    this.healthSubscribers.add(callback)
+    // Immediately emit current health state
+    callback(this.getHealth())
+    return () => this.healthSubscribers.delete(callback)
+  }
+
+  private emitHealth() {
+    const health = this.getHealth()
+    this.healthSubscribers.forEach(callback => {
+      try {
+        callback(health)
+      } catch (error) {
+        console.error('Health subscriber error:', error)
+      }
+    })
+  }
+
+  getHealth(): WebSocketHealth {
+    return {
+      state: this.connectionState,
+      lastMessageTime: this.lastMessageTime,
+      reconnectAttempts: this.reconnectAttempts,
+      isReconnecting: this.isReconnecting,
     }
   }
 
