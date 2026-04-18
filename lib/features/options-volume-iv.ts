@@ -8,7 +8,7 @@ import {
   OptionTicker,
   OptionMarkPrice,
   parseOptionSymbol,
-} from '@/lib/api/binance-options'
+} from '@/lib/api/binance-options-enhanced'
 
 export interface StrikeVolumeIV {
   strike: number

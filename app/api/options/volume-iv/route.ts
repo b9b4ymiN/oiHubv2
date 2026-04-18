@@ -5,7 +5,7 @@ import {
   getOptionMarkPrices,
   getUnderlyingIndex,
   formatExpiryDate,
-} from '@/lib/api/binance-options'
+} from '@/lib/api/binance-options-enhanced'
 import { generateOptionsVolumeIVData } from '@/lib/features/options-volume-iv'
 
 export const runtime = 'edge'

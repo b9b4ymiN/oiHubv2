@@ -24,8 +24,33 @@ All original questions resolved in Iteration 1 revision:
 - [x] **Missing reconnect guard (Critic feedback):** Race condition from multiple `connect()` calls.
   - **Resolution:** `isReconnecting` flag prevents duplicate connections.
 
-## No Current Open Questions
+## Phase 0 Tranche C - Binance Client Consolidation (REVISED) - 2026-04-18
 
-The revised plan (Iteration 1) addresses all Architect and Critic feedback. Ready for Architect/Critic re-review.
+All Architect/Critic feedback addressed in Iteration 1 revision:
+
+- [x] **Edge runtime cache failure (CRITICAL)** — `/api/options/professional` uses `runtime = 'edge'` which cannot use class-based module state
+  - **Resolution:** Two-file split: `binance-options-client.ts` (class, Node.js) + `binance-options-enhanced.ts` (functional, edge)
+
+- [x] **TimeoutError missing (MAJOR)** — Timeouts != network failures (different retry semantics)
+  - **Resolution:** Added `TimeoutError` as separate variant from `NetworkError` in error taxonomy
+
+- [x] **All 23 import sites must be audited (MAJOR)** — Plan only listed 3 route updates
+  - **Resolution:** Complete audit with file list: 5 options routes, 14 market routes, 2 feature files, 1 analysis route, 1 heatmap route
+
+- [x] **Dual-cache problem (MAJOR)** — `binance-options-enhanced.ts` cache vs `lib/cache/options-memory-cache.ts`
+  - **Resolution:** Keep both - documented distinction: API response cache (15min/30s TTL) vs rolling delta cache (IV change, volume change)
+
+- [x] **Binance-specific error codes (MAJOR)** — Codes like -1021 (timestamp), -1100 (illegal chars) not handled
+  - **Resolution:** Added Binance error code mapping to error taxonomy
+
+- [x] **Secret redaction overstated (MINOR)** — Options clients only use public endpoints
+  - **Resolution:** Clarified that secret redaction is mainly for `binance-client.ts`, not a consolidation benefit for options
+
+Remaining deferrals (acceptable):
+
+- [ ] [Retry configuration per method] — Should retry be configurable per method? (e.g., more retries for critical market data)
+  - **Recommendation:** Start with global policy; make configurable if needed
+- [ ] [HTTP client library] — Should we migrate to a formal HTTP client library (e.g., `ky`, `got`)?
+  - **Recommendation:** No - native fetch is sufficient; adding dependency for retry alone is overkill
 
 ---

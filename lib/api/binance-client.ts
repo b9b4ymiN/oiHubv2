@@ -1,95 +1,25 @@
 // lib/api/binance-client.ts
-import crypto from 'crypto'
 import { OHLCV, OIPoint, OISnapshot, FundingRate, LongShortRatio, TakerBuySellVolume, TopTraderPosition, Liquidation } from '@/types/market'
+import { BinanceFetcher } from './binance-fetcher'
+import { fetchWithRetry } from './binance-fetch-helpers'
 
 export class BinanceClient {
-  private apiKey: string | undefined
-  private apiSecret: string | undefined
-  private baseUrl: string
+  private fetcher: BinanceFetcher
 
   constructor() {
-    // Only use API keys server-side
-    if (typeof window === 'undefined') {
-      this.apiKey = process.env.BINANCE_API_KEY
-      this.apiSecret = process.env.BINANCE_API_SECRET
-    }
-    this.baseUrl = process.env.NEXT_PUBLIC_BINANCE_API_URL || 'https://fapi.binance.com'
-  }
-
-  private signRequest(params: Record<string, any>): string {
-    if (!this.apiSecret) return ''
-
-    // Convert all values to strings for URLSearchParams
-    const stringParams = Object.entries(params).reduce((acc, [key, value]) => {
-      acc[key] = String(value)
-      return acc
-    }, {} as Record<string, string>)
-
-    const queryString = new URLSearchParams(stringParams).toString()
-    return crypto
-      .createHmac('sha256', this.apiSecret)
-      .update(queryString)
-      .digest('hex')
+    this.fetcher = new BinanceFetcher({
+      baseUrl: process.env.NEXT_PUBLIC_BINANCE_API_URL || 'https://fapi.binance.com',
+      apiKey: typeof window === 'undefined' ? process.env.BINANCE_API_KEY : undefined,
+      apiSecret: typeof window === 'undefined' ? process.env.BINANCE_API_SECRET : undefined,
+    })
   }
 
   async fetchWithAuth(endpoint: string, params: Record<string, any> = {}) {
-    // Add timestamp and signature for authenticated requests
-    const timestamp = Date.now()
-    const signedParams = {
-      ...params,
-      timestamp,
-      signature: this.signRequest({ ...params, timestamp })
-    }
-
-    // Convert all values to strings for URLSearchParams
-    const stringParams = Object.entries(signedParams).reduce((acc, [key, value]) => {
-      acc[key] = String(value)
-      return acc
-    }, {} as Record<string, string>)
-
-    const url = `${this.baseUrl}${endpoint}?${new URLSearchParams(stringParams)}`
-    const response = await fetch(url, {
-      headers: this.apiKey ? { 'X-MBX-APIKEY': this.apiKey } : {}
-    })
-
-    if (!response.ok) {
-      const errorBody = await response.text()
-      console.error(`Binance API error [${endpoint}]:`, {
-        status: response.status,
-        statusText: response.statusText,
-        body: errorBody,
-        url: url.replace(/signature=[^&]+/, 'signature=***')
-      })
-      throw new Error(`Binance API error (${response.status}): ${errorBody || response.statusText}`)
-    }
-
-    return response.json()
+    return this.fetcher.fetchAuth(endpoint, params)
   }
 
   async fetchPublic(endpoint: string, params: Record<string, any> = {}) {
-    // Convert all values to strings for URLSearchParams
-    const stringParams = Object.entries(params).reduce((acc, [key, value]) => {
-      acc[key] = String(value)
-      return acc
-    }, {} as Record<string, string>)
-
-    const queryString = new URLSearchParams(stringParams).toString()
-    const url = `${this.baseUrl}${endpoint}${queryString ? `?${queryString}` : ''}`
-
-    const response = await fetch(url)
-
-    if (!response.ok) {
-      const errorBody = await response.text()
-      console.error(`Binance API error [${endpoint}]:`, {
-        status: response.status,
-        statusText: response.statusText,
-        body: errorBody,
-        url
-      })
-      throw new Error(`Binance API error (${response.status}): ${errorBody || response.statusText}`)
-    }
-
-    return response.json()
+    return this.fetcher.fetchPublic(endpoint, params)
   }
 
   async getKlines(symbol: string, interval: string, limit: number = 500): Promise<OHLCV[]> {
@@ -290,23 +220,9 @@ export class BinanceClient {
 
   // Spot Price (from Spot API, not Futures)
   async getSpotPrice(symbol: string): Promise<number> {
-    const spotBaseUrl = 'https://api.binance.com'
-    const url = `${spotBaseUrl}/api/v3/ticker/price?symbol=${symbol}`
-
-    const response = await fetch(url)
-
-    if (!response.ok) {
-      const errorBody = await response.text()
-      console.error(`Binance Spot API error [/api/v3/ticker/price]:`, {
-        status: response.status,
-        statusText: response.statusText,
-        body: errorBody,
-        url
-      })
-      throw new Error(`Binance Spot API error (${response.status}): ${errorBody || response.statusText}`)
-    }
-
-    const data = await response.json()
+    const url = `https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`
+    // Use fetchWithRetry directly for the spot API (different base URL)
+    const data = await fetchWithRetry(url)
     return parseFloat(data.price)
   }
 

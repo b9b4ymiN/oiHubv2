@@ -11,7 +11,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getProOptionsSnapshot } from '@/lib/api/binance-options-pro'
+import { getProOptionsSnapshot } from '@/lib/api/binance-options-enhanced'
 import { calculateProMetrics } from '@/lib/features/options-pro-metrics'
 import { updateCache, needsUpdate } from '@/lib/cache/options-memory-cache'
 
