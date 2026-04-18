@@ -2,6 +2,7 @@
 import { OHLCV, OIPoint, OISnapshot, FundingRate, LongShortRatio, TakerBuySellVolume, TopTraderPosition, Liquidation } from '@/types/market'
 import { BinanceFetcher } from './binance-fetcher'
 import { fetchWithRetry } from './binance-fetch-helpers'
+import logger from '@/lib/logger'
 
 export class BinanceClient {
   private fetcher: BinanceFetcher
@@ -23,29 +24,39 @@ export class BinanceClient {
   }
 
   async getKlines(symbol: string, interval: string, limit: number = 500): Promise<OHLCV[]> {
-    const data = await this.fetchPublic('/fapi/v1/klines', {
-      symbol,
-      interval,
-      limit: limit.toString()
-    })
+    try {
+      const data = await this.fetchPublic('/fapi/v1/klines', {
+        symbol,
+        interval,
+        limit: limit.toString()
+      })
 
-    return data.map((k: any[]) => ({
-      timestamp: k[0],
-      open: parseFloat(k[1]),
-      high: parseFloat(k[2]),
-      low: parseFloat(k[3]),
-      close: parseFloat(k[4]),
-      volume: parseFloat(k[5])
-    }))
+      return data.map((k: any[]) => ({
+        timestamp: k[0],
+        open: parseFloat(k[1]),
+        high: parseFloat(k[2]),
+        low: parseFloat(k[3]),
+        close: parseFloat(k[4]),
+        volume: parseFloat(k[5])
+      }))
+    } catch (error) {
+      logger.error({ symbol, interval, limit, error }, 'Failed to fetch klines')
+      throw error
+    }
   }
 
   async getOpenInterest(symbol: string): Promise<OIPoint> {
-    const data = await this.fetchPublic('/fapi/v1/openInterest', { symbol })
+    try {
+      const data = await this.fetchPublic('/fapi/v1/openInterest', { symbol })
 
-    return {
-      timestamp: data.time,
-      value: parseFloat(data.openInterest),
-      symbol
+      return {
+        timestamp: data.time,
+        value: parseFloat(data.openInterest),
+        symbol
+      }
+    } catch (error) {
+      logger.error({ symbol, error }, 'Failed to fetch open interest')
+      throw error
     }
   }
 
@@ -221,9 +232,14 @@ export class BinanceClient {
   // Spot Price (from Spot API, not Futures)
   async getSpotPrice(symbol: string): Promise<number> {
     const url = `https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`
-    // Use fetchWithRetry directly for the spot API (different base URL)
-    const data = await fetchWithRetry(url)
-    return parseFloat(data.price)
+    try {
+      // Use fetchWithRetry directly for the spot API (different base URL)
+      const data = await fetchWithRetry(url)
+      return parseFloat(data.price)
+    } catch (error) {
+      logger.error({ symbol, error }, 'Failed to fetch spot price')
+      throw error
+    }
   }
 
   // Perp-Spot Premium Analysis

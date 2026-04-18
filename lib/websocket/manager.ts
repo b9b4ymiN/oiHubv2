@@ -1,6 +1,7 @@
 // lib/websocket/manager.ts
 
 import type { WebSocketHealth, ConnectionState } from './types'
+import logger from '@/lib/logger'
 
 type StreamCallback = (data: any) => void
 type HealthCallback = (health: WebSocketHealth) => void
@@ -43,7 +44,7 @@ export class WebSocketManager {
       this.ws = new WebSocket(url)
 
       this.ws.onopen = () => {
-        console.log('WebSocket connected')
+        logger.info('WebSocket connected')
         this.connectionState = 'connected'
         this.isReconnecting = false
         this.reconnectAttempts = 0
@@ -62,23 +63,23 @@ export class WebSocketManager {
             this.emitHealth()
           }
         } catch (error) {
-          console.error('WebSocket message parse error:', error)
+          logger.error({ error }, 'WebSocket message parse error')
         }
       }
 
       this.ws.onerror = (error) => {
-        console.error('WebSocket error:', error)
+        logger.error({ error }, 'WebSocket error')
         this.emitHealth()
       }
 
       this.ws.onclose = () => {
-        console.log('WebSocket closed')
+        logger.info('WebSocket closed')
         this.connectionState = 'disconnected'
         this.emitHealth()
         this.handleReconnect()
       }
     } catch (error) {
-      console.error('WebSocket connection error:', error)
+      logger.error({ error }, 'WebSocket connection error')
       this.isReconnecting = false
       this.handleReconnect()
     }
@@ -93,13 +94,13 @@ export class WebSocketManager {
       this.emitHealth()
 
       const delay = this.getNextReconnectDelay()
-      console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`)
+      logger.info({ delay, attempt: this.reconnectAttempts }, 'Reconnecting')
 
       setTimeout(() => {
         this.connect()
       }, delay)
     } else {
-      console.error('Max reconnection attempts reached')
+      logger.error({ attempts: this.reconnectAttempts }, 'Max reconnection attempts reached')
       this.connectionState = 'disconnected'
       this.emitHealth()
     }
@@ -167,7 +168,7 @@ export class WebSocketManager {
       try {
         callback(health)
       } catch (error) {
-        console.error('Health subscriber error:', error)
+        logger.error({ error }, 'Health subscriber error')
       }
     })
   }
