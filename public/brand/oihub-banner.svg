@@ -1,0 +1,72 @@
+<svg width="1600" height="560" viewBox="0 0 1600 560" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="bannerTitle bannerDesc">
+  <title id="bannerTitle">oiHubv2 project banner</title>
+  <desc id="bannerDesc">Professional project banner for oiHubv2 with a trading intelligence theme, logo motif, and roadmap-oriented messaging.</desc>
+  <defs>
+    <linearGradient id="bg" x1="80" y1="40" x2="1480" y2="520" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#050B14"/>
+      <stop offset="0.55" stop-color="#0A1727"/>
+      <stop offset="1" stop-color="#0F2941"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="176" y1="180" x2="540" y2="390" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7CF7D4"/>
+      <stop offset="0.45" stop-color="#32D6FF"/>
+      <stop offset="1" stop-color="#A78BFA"/>
+    </linearGradient>
+    <linearGradient id="line" x1="180" y1="350" x2="560" y2="210" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7CF7D4"/>
+      <stop offset="1" stop-color="#C084FC"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(355 280) rotate(90) scale(240 240)">
+      <stop stop-color="#32D6FF" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#32D6FF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1600" height="560" rx="32" fill="url(#bg)"/>
+  <circle cx="355" cy="280" r="240" fill="url(#glow)"/>
+
+  <g opacity="0.12">
+    <path d="M0 140H1600" stroke="#93C5FD" stroke-width="1" stroke-dasharray="7 12"/>
+    <path d="M0 280H1600" stroke="#93C5FD" stroke-width="1" stroke-dasharray="7 12"/>
+    <path d="M0 420H1600" stroke="#93C5FD" stroke-width="1" stroke-dasharray="7 12"/>
+    <path d="M160 0V560" stroke="#93C5FD" stroke-width="1" stroke-dasharray="7 12"/>
+    <path d="M320 0V560" stroke="#93C5FD" stroke-width="1" stroke-dasharray="7 12"/>
+    <path d="M480 0V560" stroke="#93C5FD" stroke-width="1" stroke-dasharray="7 12"/>
+    <path d="M640 0V560" stroke="#93C5FD" stroke-width="1" stroke-dasharray="7 12"/>
+  </g>
+
+  <g>
+    <circle cx="350" cy="278" r="152" stroke="url(#accent)" stroke-width="22"/>
+    <path d="M218 328L278 292L326 312L382 228L472 258L532 218" stroke="url(#line)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="532" cy="218" r="12" fill="#C084FC"/>
+    <rect x="338" y="168" width="28" height="206" rx="14" fill="#E2E8F0"/>
+    <rect x="324" y="146" width="56" height="22" rx="11" fill="#E2E8F0" opacity="0.94"/>
+    <rect x="324" y="374" width="56" height="22" rx="11" fill="#E2E8F0" opacity="0.94"/>
+    <path d="M218 278C218 205.099 277.099 146 350 146" stroke="#F8FAFC" stroke-width="24" stroke-linecap="round"/>
+    <path d="M350 410C277.099 410 218 350.901 218 278" stroke="#F8FAFC" stroke-width="24" stroke-linecap="round"/>
+  </g>
+
+  <g opacity="0.92">
+    <text x="680" y="220" fill="#F8FAFC" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="92" font-weight="800" letter-spacing="-2">oiHubv2</text>
+    <text x="684" y="272" fill="#7DD3FC" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="26" font-weight="600">Professional Open Interest Intelligence for Crypto Futures</text>
+    <text x="684" y="330" fill="#CBD5E1" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="500">Read-only trading cockpit today • Historical data, backtesting, paper trading,</text>
+    <text x="684" y="366" fill="#CBD5E1" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="500">and guarded live execution ship in stages through ROADMAPv2.</text>
+  </g>
+
+  <g>
+    <rect x="684" y="410" width="184" height="46" rx="23" fill="#0F172A" stroke="#1E293B"/>
+    <text x="722" y="440" fill="#7CF7D4" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700">OI Momentum</text>
+
+    <rect x="882" y="410" width="172" height="46" rx="23" fill="#0F172A" stroke="#1E293B"/>
+    <text x="918" y="440" fill="#67E8F9" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700">Divergence</text>
+
+    <rect x="1068" y="410" width="150" height="46" rx="23" fill="#0F172A" stroke="#1E293B"/>
+    <text x="1111" y="440" fill="#C4B5FD" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700">Heatmaps</text>
+
+    <rect x="1232" y="410" width="166" height="46" rx="23" fill="#0F172A" stroke="#1E293B"/>
+    <text x="1272" y="440" fill="#F8FAFC" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700">Roadmap v2</text>
+  </g>
+
+  <rect x="680" y="112" width="116" height="34" rx="17" fill="#0B1220" stroke="#17324A"/>
+  <text x="710" y="134" fill="#7CF7D4" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">PRO BUILD</text>
+</svg>

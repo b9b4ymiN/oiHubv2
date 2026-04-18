@@ -1,0 +1,54 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="logoTitle logoDesc">
+  <title id="logoTitle">oiHubv2 logo</title>
+  <desc id="logoDesc">A professional dark logo featuring an open-interest ring, chart pulse, and OI monogram.</desc>
+  <defs>
+    <linearGradient id="bg" x1="72" y1="48" x2="440" y2="472" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#07111E"/>
+      <stop offset="1" stop-color="#0E2A43"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="132" y1="144" x2="380" y2="368" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7CF7D4"/>
+      <stop offset="0.5" stop-color="#32D6FF"/>
+      <stop offset="1" stop-color="#8B5CF6"/>
+    </linearGradient>
+    <linearGradient id="pulse" x1="148" y1="310" x2="364" y2="210" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7CF7D4"/>
+      <stop offset="1" stop-color="#C084FC"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(252 246) rotate(90) scale(182)">
+      <stop stop-color="#32D6FF" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#32D6FF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="52" y="52" width="408" height="408" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="20" stdDeviation="22" flood-color="#020817" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <rect x="32" y="32" width="448" height="448" rx="108" fill="url(#bg)"/>
+  <rect x="32" y="32" width="448" height="448" rx="108" stroke="rgba(148,163,184,0.18)" stroke-width="2"/>
+  <circle cx="256" cy="256" r="170" fill="url(#glow)"/>
+
+  <g opacity="0.2">
+    <path d="M96 168H416" stroke="#93C5FD" stroke-width="1" stroke-dasharray="6 10"/>
+    <path d="M96 256H416" stroke="#93C5FD" stroke-width="1" stroke-dasharray="6 10"/>
+    <path d="M96 344H416" stroke="#93C5FD" stroke-width="1" stroke-dasharray="6 10"/>
+    <path d="M168 96V416" stroke="#93C5FD" stroke-width="1" stroke-dasharray="6 10"/>
+    <path d="M256 96V416" stroke="#93C5FD" stroke-width="1" stroke-dasharray="6 10"/>
+    <path d="M344 96V416" stroke="#93C5FD" stroke-width="1" stroke-dasharray="6 10"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <circle cx="256" cy="248" r="122" stroke="url(#ring)" stroke-width="20"/>
+    <path d="M160 280L208 246L244 264L294 204L352 226" stroke="url(#pulse)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="352" cy="226" r="12" fill="#C084FC"/>
+  </g>
+
+  <rect x="241" y="146" width="30" height="204" rx="15" fill="#E2E8F0"/>
+  <rect x="228" y="126" width="56" height="20" rx="10" fill="#E2E8F0" opacity="0.9"/>
+  <rect x="228" y="350" width="56" height="20" rx="10" fill="#E2E8F0" opacity="0.9"/>
+
+  <path d="M150 248C150 188.353 198.353 140 258 140" stroke="#F8FAFC" stroke-width="22" stroke-linecap="round"/>
+  <path d="M258 356C198.353 356 150 307.647 150 248" stroke="#F8FAFC" stroke-width="22" stroke-linecap="round"/>
+
+  <circle cx="256" cy="248" r="168" stroke="rgba(124,247,212,0.14)" stroke-width="2"/>
+</svg>
