@@ -70,10 +70,10 @@ The repository is intentionally staged from a trading cockpit into a full OI-Tra
    Durable historical storage, backfills, incremental syncs, replay mode, and history APIs.
 3. **Phase 2 — Strategy Framework & Backtester**  
    Shared strategy interface, event-driven backtesting, fills/slippage/fees, and report UI.
-4. **Phase 3 — Alerting & Signal Automation**  
-   Signal-driven alerts across app, browser, Telegram, Discord, and email.
-5. **Phase 4 — Paper Trading Simulator**  
-   Live market data + simulated broker with persistence and comparison to backtest expectations.
+4. **Phase 3 — Alerting & Signal Automation**
+   Signal-driven alerts across app, browser, Telegram, Discord, and email. **Signal Runner daemon** operational — polls Binance REST, runs OI momentum strategies, sends Discord webhook alerts with full trading context.
+5. **Phase 4 — Paper Trading Simulator**
+   Live market data + simulated broker with persistence and comparison to backtest expectations. **Atomic file persistence** and crash recovery implemented.
 6. **Phase 5 — Guarded Live Execution**  
    Only after kill switches, pre-trade controls, audit logs, reconciliation, and paper-proof maturity.
 
@@ -119,7 +119,47 @@ Replaces static split with rolling 60-day in-sample / 20-day out-of-sample windo
 | Strategy combos passing WR>=55% & PF>=1.5 (static) | 13 / 42 |
 | Walk-forward windows (volatility regime) | 30 (6 combos x 5 windows) |
 | OI strategies in walk-forward | Deferred (30-day data insufficient) |
-| Test suite | 974 / 974 passing |
+| Test suite | 1001 / 1001 passing |
+
+---
+
+## Signal Runner (Real-time Discord Alerts)
+
+A 24/7 Node.js daemon that polls Binance REST for OHLCV + OI data, runs signal strategies, and sends Discord webhook alerts with full trading context.
+
+### Active strategies
+
+| Strategy | Symbol | Interval | Static WR | Static PF |
+|----------|--------|----------|-----------|-----------|
+| signal-oi-momentum-vol | SOLUSDT | 1h | 71.4% | 10.25 |
+| signal-oi-momentum | SOLUSDT | 1h | 62.5% | 9.86 |
+| signal-oi-momentum-vol | ETHUSDT | 1h | 80.0% | 8.57 |
+| signal-oi-momentum | ETHUSDT | 1h | 57.1% | 6.21 |
+| signal-oi-momentum | BTCUSDT | 4h | 50.0% | 4.19 |
+| signal-oi-momentum-vol | BTCUSDT | 4h | 50.0% | 4.19 |
+
+### Alert format
+
+Discord embeds include: direction (LONG/SHORT/EXIT), price, size, P&L, equity, drawdown, backtest metrics (WR/PF), and signal reason. Daily summary reports sent at 00:00 UTC.
+
+### Architecture
+
+- **Polling loop**: Fetches OHLCV + OI every bar interval, merges by timestamp
+- **Paper trading**: Virtual portfolio via `processBar()` with fills, slippage, and fees
+- **Dedup**: Session + barTimestamp + intentKind — prevents duplicate alerts within the same bar
+- **Persistence**: Atomic write-to-temp + `fs.rename` for crash safety
+- **Process manager**: pm2 with auto-restart, 512M memory limit
+
+### Running the daemon
+
+```bash
+# Set webhook URL in .env.local
+echo "DISCORD_SIGNAL_WEBHOOK_URL=https://discord.com/api/webhooks/..." >> .env.local
+
+# Start with pm2
+pm2 start ecosystem.config.cjs
+pm2 logs signal-daemon
+```
 
 ---
 
@@ -171,6 +211,11 @@ components/          Charts, widgets, intelligence components, UI primitives
 lib/features/        Pure trading/domain logic
 lib/api/             Binance REST/WS clients and related data access
 lib/hooks/           Stateful hooks for data + UI integration
+lib/signal-runner/   Real-time signal daemon (polling, dedup, Discord alerts)
+lib/paper-trading/   Virtual portfolio engine with atomic persistence
+lib/backtest/        Strategy framework, backtester, walk-forward validation
+lib/strategies/      Trading strategy implementations
+scripts/             CLI tools (backtest runner, signal daemon, walk-forward)
 types/               Shared domain types
 docs/                Card docs, strategy docs, roadmap, and project references
 public/brand/        README/logo/banner brand assets
