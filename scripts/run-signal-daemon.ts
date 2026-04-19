@@ -7,6 +7,7 @@
 import { SignalRunner } from '@/lib/signal-runner/runner'
 import type { RunnerConfig, RunnerCombo } from '@/lib/signal-runner/types'
 import logger from '@/lib/logger'
+import '@/lib/strategies' // Register all strategies in the registry
 
 function loadConfig(): RunnerConfig {
   const webhookUrl = process.env.DISCORD_SIGNAL_WEBHOOK_URL

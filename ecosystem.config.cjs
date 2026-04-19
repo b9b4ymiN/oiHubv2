@@ -10,7 +10,7 @@ module.exports = {
   apps: [{
     name: 'signal-daemon',
     script: 'npx',
-    args: 'ts-node --project tsconfig.json scripts/run-signal-daemon.ts',
+    args: 'tsx scripts/run-signal-daemon.ts',
     cwd: '/home/opc/oiHubv2',
     env: {
       NODE_ENV: 'production',
