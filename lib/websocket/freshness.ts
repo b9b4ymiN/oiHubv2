@@ -26,6 +26,21 @@ export function calculateFreshness(
   }
 }
 
+export function getPreferredStatusTimestamp(
+  queryUpdatedAt?: number,
+  marketDataTimestamp?: number
+): number {
+  if (queryUpdatedAt && queryUpdatedAt > 0) {
+    return queryUpdatedAt
+  }
+
+  if (marketDataTimestamp && marketDataTimestamp > 0) {
+    return marketDataTimestamp
+  }
+
+  return 0
+}
+
 export function getFreshnessColor(freshness: DataFreshness): string {
   switch (freshness) {
     case 'fresh':

@@ -5,6 +5,7 @@ import { renderHook, waitFor, act } from '@testing-library/react'
 import { WebSocketManager } from '@/lib/websocket/manager'
 import {
   calculateFreshness,
+  getPreferredStatusTimestamp,
   getFreshnessColor,
   getFreshnessLabel,
   getThresholdForDataSource,
@@ -444,6 +445,22 @@ describe('Data freshness calculation', () => {
     expect(getFreshnessLabel('fresh')).toBe('LIVE')
     expect(getFreshnessLabel('stale')).toBe('STALE')
     expect(getFreshnessLabel('disconnected')).toBe('OFFLINE')
+  })
+
+  it('prefers query update time over stale market data timestamps for status checks', () => {
+    const queryUpdatedAt = Date.now()
+    const staleMarketTimestamp = queryUpdatedAt - 12 * 60 * 60 * 1000
+
+    expect(
+      getPreferredStatusTimestamp(queryUpdatedAt, staleMarketTimestamp)
+    ).toBe(queryUpdatedAt)
+  })
+
+  it('falls back to market data timestamp when query update time is unavailable', () => {
+    const marketTimestamp = Date.now() - 5_000
+
+    expect(getPreferredStatusTimestamp(undefined, marketTimestamp)).toBe(marketTimestamp)
+    expect(getPreferredStatusTimestamp(0, marketTimestamp)).toBe(marketTimestamp)
   })
 })
 

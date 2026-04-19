@@ -44,6 +44,7 @@ import { OIGuideModal } from "@/components/guide/OIGuideModal";
 import { VolatilityRegimeCardCompact } from "@/components/widgets/VolatilityRegimeCardCompact";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConnectionStatusIndicator } from "@/components/ui/connection-status";
+import { getPreferredStatusTimestamp } from "@/lib/websocket/freshness";
 import {
   Activity,
   TrendingUp,
@@ -71,7 +72,7 @@ export default function DashboardPage() {
     interval,
     500
   );
-  const { data: oiData, isLoading: oiLoading } = useOpenInterest(
+  const { data: oiData, isLoading: oiLoading, dataUpdatedAt: oiDataUpdatedAt } = useOpenInterest(
     symbol,
     interval,
     500
@@ -129,7 +130,10 @@ export default function DashboardPage() {
             <SymbolSelector symbol={symbol} onSymbolChange={setSymbol} />
             <IntervalSelector interval={interval} onIntervalChange={setInterval} />
             <ConnectionStatusIndicator
-              restDataUpdatedAt={oiData?.[oiData.length - 1]?.timestamp || Date.now()}
+              restDataUpdatedAt={getPreferredStatusTimestamp(
+                oiDataUpdatedAt,
+                oiData?.[oiData.length - 1]?.timestamp
+              )}
               sourceType="openInterest"
             />
             <AskAIButton
