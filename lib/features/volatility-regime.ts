@@ -64,9 +64,28 @@ export function calculateATR(candles: OHLCV[], period: number = 14): number {
 }
 
 /**
+ * Auto-detect candle interval from timestamps (in minutes)
+ * Uses median gap from first 10 consecutive pairs
+ */
+function detectIntervalMinutes(candles: OHLCV[]): number {
+  if (candles.length < 2) return 5 // Default to 5m
+  const gaps: number[] = []
+  for (let i = 1; i < Math.min(candles.length, 10); i++) {
+    gaps.push(candles[i].timestamp - candles[i - 1].timestamp)
+  }
+  gaps.sort((a, b) => a - b)
+  const median = gaps[Math.floor(gaps.length / 2)]!
+  return median / 60000
+}
+
+/**
  * Calculate Historical Volatility (Standard Deviation of Returns)
  */
-export function calculateHistoricalVolatility(candles: OHLCV[], period: number = 20): number {
+export function calculateHistoricalVolatility(
+  candles: OHLCV[],
+  period: number = 20,
+  intervalMinutes?: number
+): number {
   if (candles.length < period + 1) {
     return 0
   }
@@ -82,11 +101,10 @@ export function calculateHistoricalVolatility(candles: OHLCV[], period: number =
   const variance = returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / returns.length
   const stdDev = Math.sqrt(variance)
 
-  // Annualized volatility (assuming 24/7 crypto market)
-  // For 5m candles: sqrt(12 * 24 * 365) = sqrt(105120) ≈ 324
-  // For 15m candles: sqrt(4 * 24 * 365) = sqrt(35040) ≈ 187
-  // We'll return daily volatility: sqrt(288 for 5m) ≈ 17
-  const periodsPerDay = 24 * 60 / 5 // Assuming 5m candles by default
+  // Daily volatility: scale by sqrt(periods per day)
+  // Auto-detect interval from timestamps if not provided
+  const effectiveInterval = intervalMinutes ?? detectIntervalMinutes(candles)
+  const periodsPerDay = (24 * 60) / effectiveInterval
   const dailyVolatility = stdDev * Math.sqrt(periodsPerDay)
 
   return dailyVolatility * 100 // Convert to percentage
@@ -98,7 +116,8 @@ export function calculateHistoricalVolatility(candles: OHLCV[], period: number =
 export function calculateVolatilityPercentile(
   currentVolatility: number,
   historicalCandles: OHLCV[],
-  lookback: number = 30
+  lookback: number = 30,
+  intervalMinutes?: number
 ): number {
   if (historicalCandles.length < lookback + 20) {
     return 50 // Default to middle if insufficient data
@@ -109,7 +128,7 @@ export function calculateVolatilityPercentile(
   // Calculate rolling volatility for each period
   for (let i = 20; i < historicalCandles.length; i++) {
     const window = historicalCandles.slice(i - 20, i)
-    const vol = calculateHistoricalVolatility(window, 20)
+    const vol = calculateHistoricalVolatility(window, 20, intervalMinutes)
     volatilities.push(vol)
   }
 
@@ -124,7 +143,7 @@ export function calculateVolatilityPercentile(
 /**
  * Classify Volatility Regime
  */
-export function classifyVolatilityRegime(candles: OHLCV[]): VolatilityRegime {
+export function classifyVolatilityRegime(candles: OHLCV[], intervalMinutes?: number): VolatilityRegime {
   if (candles.length < 50) {
     return {
       mode: 'MEDIUM',
@@ -147,8 +166,8 @@ export function classifyVolatilityRegime(candles: OHLCV[]): VolatilityRegime {
   const currentPrice = candles[candles.length - 1].close
   const atr = calculateATR(candles, 14)
   const atrPercent = (atr / currentPrice) * 100
-  const volatility = calculateHistoricalVolatility(candles, 20)
-  const historicalPercentile = calculateVolatilityPercentile(volatility, candles, 30)
+  const volatility = calculateHistoricalVolatility(candles, 20, intervalMinutes)
+  const historicalPercentile = calculateVolatilityPercentile(volatility, candles, 30, intervalMinutes)
 
   // Classify into regime based on ATR% and Historical Percentile
   let mode: VolatilityMode

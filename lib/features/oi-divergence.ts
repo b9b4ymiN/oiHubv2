@@ -1,6 +1,18 @@
 // lib/features/oi-divergence.ts
 import { OHLCV, OIPoint, DivergenceSignal } from '@/types/market'
 
+export interface DivergenceThresholds {
+  priceChangeMin: number   // Minimum price change to trigger signal (default: 0.02 = 2%)
+  oiChangeMin: number      // Minimum OI increase to trigger trap signals (default: 0.05 = 5%)
+  oiDeclineMin: number     // Minimum OI decline for continuation signals (default: 0.03 = 3%)
+}
+
+export const DEFAULT_DIVERGENCE_THRESHOLDS: DivergenceThresholds = {
+  priceChangeMin: 0.02,
+  oiChangeMin: 0.05,
+  oiDeclineMin: 0.03,
+}
+
 /**
  * Calculate OI-Price divergence
  * Detects when price and OI are moving in opposite directions
@@ -8,9 +20,11 @@ import { OHLCV, OIPoint, DivergenceSignal } from '@/types/market'
 export function calculateOIDivergence(
   priceData: OHLCV[],
   oiData: OIPoint[],
-  lookbackPeriod: number = 20
+  lookbackPeriod: number = 20,
+  thresholds: DivergenceThresholds = DEFAULT_DIVERGENCE_THRESHOLDS
 ): DivergenceSignal[] {
   const signals: DivergenceSignal[] = []
+  const { priceChangeMin, oiChangeMin, oiDeclineMin } = thresholds
 
   // Ensure we have enough data
   if (priceData.length < lookbackPeriod || oiData.length < lookbackPeriod) {
@@ -24,7 +38,7 @@ export function calculateOIDivergence(
 
     // Bearish trap: OI increasing + Price decreasing
     // Indicates accumulation of shorts, potential for short squeeze
-    if (priceChange < -0.02 && oiChange > 0.05) {
+    if (priceChange < -priceChangeMin && oiChange > oiChangeMin) {
       signals.push({
         timestamp: priceData[i].timestamp,
         type: 'BEARISH_TRAP',
@@ -37,7 +51,7 @@ export function calculateOIDivergence(
 
     // Bullish trap: OI increasing + Price increasing
     // Indicates accumulation of longs, potential for long squeeze
-    else if (priceChange > 0.02 && oiChange > 0.05) {
+    else if (priceChange > priceChangeMin && oiChange > oiChangeMin) {
       signals.push({
         timestamp: priceData[i].timestamp,
         type: 'BULLISH_TRAP',
@@ -50,7 +64,7 @@ export function calculateOIDivergence(
 
     // Bullish continuation: OI decreasing + Price increasing
     // Shorts being closed, strong bullish signal
-    else if (priceChange > 0.02 && oiChange < -0.03) {
+    else if (priceChange > priceChangeMin && oiChange < -oiDeclineMin) {
       signals.push({
         timestamp: priceData[i].timestamp,
         type: 'BULLISH_CONTINUATION',
@@ -63,7 +77,7 @@ export function calculateOIDivergence(
 
     // Bearish continuation: OI decreasing + Price decreasing
     // Longs being closed, strong bearish signal
-    else if (priceChange < -0.02 && oiChange < -0.03) {
+    else if (priceChange < -priceChangeMin && oiChange < -oiDeclineMin) {
       signals.push({
         timestamp: priceData[i].timestamp,
         type: 'BEARISH_CONTINUATION',

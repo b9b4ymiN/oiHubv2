@@ -6,12 +6,15 @@
 import type { Strategy, StrategyContext, Bar, Intent, ParamDef } from '@/lib/backtest/types/strategy'
 import { BaseStrategy } from '@/lib/backtest/strategy-base'
 import { barsToOHLCV, barsToOIPoints } from '@/lib/backtest/feature-adapter'
-import { calculateOIDivergence } from '@/lib/features/oi-divergence'
+import { calculateOIDivergence, DEFAULT_DIVERGENCE_THRESHOLDS, type DivergenceThresholds } from '@/lib/features/oi-divergence'
 
 export interface OIDivergenceConfig {
   lookbackPeriod: number
   riskPercent: number
   stopMultiplier: number
+  priceChangeMin: number
+  oiChangeMin: number
+  oiDeclineMin: number
 }
 
 export interface OIDivergenceState {
@@ -27,6 +30,9 @@ export class SignalOIDivergence extends BaseStrategy<OIDivergenceState> implemen
     lookbackPeriod: { type: 'number', default: 20, description: 'Lookback period for divergence detection', min: 10, max: 50 },
     riskPercent: { type: 'number', default: 2, description: 'Risk percent per trade', min: 0.5, max: 5 },
     stopMultiplier: { type: 'number', default: 1.5, description: 'ATR multiplier for stop loss', min: 0.5, max: 5 },
+    priceChangeMin: { type: 'number', default: 0.02, description: 'Min price change % for signal (e.g. 0.02 = 2%)', min: 0.005, max: 0.05 },
+    oiChangeMin: { type: 'number', default: 0.05, description: 'Min OI increase % for trap signals (e.g. 0.05 = 5%)', min: 0.01, max: 0.10 },
+    oiDeclineMin: { type: 'number', default: 0.03, description: 'Min OI decline % for continuation signals (e.g. 0.03 = 3%)', min: 0.01, max: 0.05 },
   }
 
   private config: OIDivergenceConfig
@@ -37,6 +43,9 @@ export class SignalOIDivergence extends BaseStrategy<OIDivergenceState> implemen
       lookbackPeriod: config.lookbackPeriod ?? 20,
       riskPercent: config.riskPercent ?? 2,
       stopMultiplier: config.stopMultiplier ?? 1.5,
+      priceChangeMin: config.priceChangeMin ?? 0.02,
+      oiChangeMin: config.oiChangeMin ?? 0.05,
+      oiDeclineMin: config.oiDeclineMin ?? 0.03,
     }
   }
 
@@ -63,7 +72,12 @@ export class SignalOIDivergence extends BaseStrategy<OIDivergenceState> implemen
     if (oiPoints.length < this.config.lookbackPeriod) return intents
 
     // Get divergence signals
-    const signals = calculateOIDivergence(ohlcv, oiPoints, this.config.lookbackPeriod)
+    const thresholds: DivergenceThresholds = {
+      priceChangeMin: this.config.priceChangeMin,
+      oiChangeMin: this.config.oiChangeMin,
+      oiDeclineMin: this.config.oiDeclineMin,
+    }
+    const signals = calculateOIDivergence(ohlcv, oiPoints, this.config.lookbackPeriod, thresholds)
     if (signals.length === 0) return intents
 
     const latestSignal = signals[signals.length - 1]!

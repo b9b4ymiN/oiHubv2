@@ -133,22 +133,93 @@
 
 ---
 
-## Phase C: Signal Improvement — AFTER PHASE B
+## Phase C: Signal Improvement — COMPLETE
 
-**Goal:** Tune parameters of underperforming signals, re-validate.
+**Commit:** Pending
 
-### Approach
+### What Was Done
 
-1. Analyze Phase B validation reports — identify which signals underperform
-2. Parameter sweep on **train set only** for underperforming signals
-3. Re-validate tuned parameters on the **same test set**
-4. If still underperforming: consider signal redesign or combination strategies
-5. Document: what was tuned, what improved, what didn't
+| Task | Status | Details |
+|------|--------|---------|
+| Fix volatility interval bug | PASSED | `calculateHistoricalVolatility` now auto-detects interval from timestamps |
+| Make OI Divergence thresholds configurable | PASSED | `DivergenceThresholds` interface + `DEFAULT_DIVERGENCE_THRESHOLDS` constant |
+| Grid search (8 combos × 3 symbols) | PASSED | priceChange [0.5%, 1%, 1.5%, 2%] × oiChange [3%, 5%] |
+| Anti-overfitting check | PASSED | No threshold combo triggered the overfitting rule |
+| Re-validate pipeline | PASSED | B.1 + B.2 re-run with fixed code |
 
-### Dependencies
+### C.1 Bug Fix: Volatility Regime Interval Detection
 
-- Requires Phase B validation results to know what to improve
-- May need additional data backfill (taker_flow, ls_ratio) if signals require them
+**Bug:** `calculateHistoricalVolatility` hardcoded `periodsPerDay = 24 * 60 / 5` (5m assumption), inflating daily volatility by ~3.5x for 1h/4h candles.
+
+**Fix:** Added `detectIntervalMinutes()` helper that auto-detects interval from candle timestamps. Added optional `intervalMinutes` parameter to `calculateHistoricalVolatility`, `calculateVolatilityPercentile`, and `classifyVolatilityRegime`.
+
+**Impact:** The `volatility` field now reports correct daily volatility. However, regime classification is primarily driven by `atrPercent` (ATR/price), which is interval-independent. The regime classification didn't change because ATR% thresholds remain the same.
+
+### C.2 OI Divergence Threshold Grid Search
+
+**Grid:** 4 priceChange thresholds × 2 oiChange thresholds = 8 combinations, tested on all 3 symbols.
+
+**Key finding:** Loosening thresholds generates more signals but doesn't improve strategy-level results:
+
+| Finding | Details |
+|---------|---------|
+| BTC has plenty of signals | B.1: 78 signals (default 1h), 142 (pcm10 1h). BEARISH_TRAP hit rate 80-88% |
+| BTC generates 0 strategy trades | Even with pcm010/pct015, the strategy produces 0 trades for BTC |
+| Root cause: signal-to-trade gap | The issue isn't signal detection but the strategy's entry logic not converting signals to trades |
+| ETH/SOL not regressed | OI Momentum ETH/1h: WR=57.1%, SOL/1h: WR=62.5% — identical to Phase B |
+| Loosening dilutes quality | Lower thresholds = more signals but lower hit rates for most signal types |
+
+### C.3 Phase C Results (Strategy Backtests)
+
+| Strategy | Symbol | Interval | Test WR | Test PF | Test Trades | Pass? |
+|----------|--------|----------|---------|---------|-------------|-------|
+| signal-oi-momentum | ETHUSDT | 1h | 57.1% | 6.28 | 7 | PASS |
+| signal-oi-momentum | SOLUSDT | 1h | 62.5% | 9.86 | 8 | PASS |
+| signal-oi-divergence | ETHUSDT | 1h | 100% | Inf | 1 | PASS* |
+| signal-oi-divergence | ETHUSDT | 4h | 100% | Inf | 1 | PASS* |
+| signal-oi-divergence | SOLUSDT | 1h | 100% | Inf | 1 | PASS* |
+| signal-oi-momentum | ETHUSDT | 4h | 100% | Inf | 1 | PASS* |
+
+*Results with ≤1 trade are statistically unreliable. Most trustworthy: OI Momentum ETH/1h (7 trades) and SOL/1h (8 trades).*
+
+### Files Changed in Phase C
+
+| File | Change |
+|------|--------|
+| `lib/features/volatility-regime.ts` | MODIFIED — Auto-detect interval, optional intervalMinutes parameter |
+| `lib/features/oi-divergence.ts` | MODIFIED — Configurable thresholds via DivergenceThresholds interface |
+| `lib/strategies/signal-oi-divergence.ts` | MODIFIED — Exposed thresholds in paramSchema |
+| `scripts/validate-signals.ts` | MODIFIED — Grid search with 8 threshold combos |
+| `scripts/run-signal-strategies.ts` | MODIFIED — BTC threshold tuning runs + anti-overfitting check |
+| `__tests__/features/volatility-regime.test.ts` | MODIFIED — 6 new interval detection tests, 5m timestamps for backward compat |
+| `data/validation-report.json` | UPDATED — Phase C results with grid search |
+
+### Key Learnings
+
+1. **BTC's 0-trade problem is NOT a threshold issue** — Signals exist in B.1 (forward-return analysis) but the strategy doesn't convert them. Root cause is likely in how the backtest engine provides OI data to strategies, or in the strategy's additional entry filters (ATR, position sizing).
+2. **Volatility regime fix is correct but doesn't change classifications** — Regime is driven by ATR% (interval-independent), not the now-corrected volatility field.
+3. **Loosening thresholds trades quality for quantity** — More signals ≠ better trading. The default 2% threshold acts as an effective quality filter.
+4. **Auto-detecting interval from timestamps works well** — Zero caller changes needed; all existing callers get correct behavior automatically.
+5. **Grid search confirms: BEARISH_TRAP on BTC is robust** — 80-88% hit rate across all threshold variants on BTC/1h and BTC/4h.
+
+### Phase D Priorities
+
+1. Investigate BTC signal-to-trade conversion gap (why B.1 signals don't become strategy trades)
+2. Consider alternative BTC strategy parameters (not just threshold loosening)
+3. Increase OI data window beyond 30 days (alternative data source)
+4. Explore combination strategies (OI Momentum + Volatility Regime filter)
+
+---
+
+## Test & Build Status
+
+| Check | Status |
+|-------|--------|
+| npm test | 949/949 pass |
+| npm run type-check | 0 errors |
+| npm run lint | 0 errors (warnings only) |
+| DuckDB data loaded | 301,380 rows |
+| Git status | Clean (pending commit) |
 
 ---
 

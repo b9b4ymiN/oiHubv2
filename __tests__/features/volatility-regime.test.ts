@@ -15,7 +15,7 @@ describe('volatility regime', () => {
   describe('calculateATR', () => {
     it('returns 0 for insufficient data', () => {
       const candles: OHLCV[] = Array.from({ length: 10 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 91000,
         low: 89000,
@@ -30,7 +30,7 @@ describe('volatility regime', () => {
 
     it('calculates ATR for valid data series', () => {
       const candles: OHLCV[] = Array.from({ length: 20 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 91000 + i * 100,
         low: 89000 - i * 100,
@@ -46,7 +46,7 @@ describe('volatility regime', () => {
 
     it('uses high - low when that is the largest true range', () => {
       const candles: OHLCV[] = Array.from({ length: 20 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 92000,
         low: 89000,
@@ -74,7 +74,7 @@ describe('volatility regime', () => {
           }
         }
         return {
-          timestamp: 1000 + i * 1000,
+          timestamp: 1000 + i * 300000,
           open: 90000,
           high: 92000,
           low: 89800,
@@ -104,7 +104,7 @@ describe('volatility regime', () => {
           }
         }
         return {
-          timestamp: 1000 + i * 1000,
+          timestamp: 1000 + i * 300000,
           open: 90000,
           high: 90200,
           low: 87500,
@@ -123,7 +123,7 @@ describe('volatility regime', () => {
 
     it('calculates simple moving average of true ranges', () => {
       const candles: OHLCV[] = Array.from({ length: 20 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 91500,
         low: 88500,
@@ -139,7 +139,7 @@ describe('volatility regime', () => {
 
     it('respects custom period parameter', () => {
       const candles: OHLCV[] = Array.from({ length: 25 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 91500 + i * 100, // Increasing range
         low: 88500 - i * 100,
@@ -157,7 +157,7 @@ describe('volatility regime', () => {
   describe('calculateHistoricalVolatility', () => {
     it('returns 0 for insufficient data', () => {
       const candles: OHLCV[] = Array.from({ length: 10 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 91000,
         low: 89000,
@@ -172,7 +172,7 @@ describe('volatility regime', () => {
 
     it('calculates volatility for valid price series', () => {
       const candles: OHLCV[] = Array.from({ length: 30 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 91000,
         low: 89000,
@@ -188,7 +188,7 @@ describe('volatility regime', () => {
 
     it('returns 0 for constant prices (no volatility)', () => {
       const candles: OHLCV[] = Array.from({ length: 30 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 90000,
         low: 90000,
@@ -203,7 +203,7 @@ describe('volatility regime', () => {
 
     it('calculates higher volatility for larger price swings', () => {
       const lowVolCandles: OHLCV[] = Array.from({ length: 30 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 90100,
         low: 89900,
@@ -212,7 +212,7 @@ describe('volatility regime', () => {
       }))
 
       const highVolCandles: OHLCV[] = Array.from({ length: 30 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 92000,
         low: 88000,
@@ -228,7 +228,7 @@ describe('volatility regime', () => {
 
     it('handles negative prices gracefully', () => {
       const candles: OHLCV[] = Array.from({ length: 30 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: -100,
         high: -90,
         low: -110,
@@ -244,7 +244,7 @@ describe('volatility regime', () => {
 
     it('returns percentage-based volatility', () => {
       const candles: OHLCV[] = Array.from({ length: 30 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 91500,
         low: 88500,
@@ -258,12 +258,97 @@ describe('volatility regime', () => {
       expect(result).toBeGreaterThan(0)
       expect(result).toBeLessThan(100)
     })
+
+    it('auto-detects 5m interval from timestamps', () => {
+      const candles: OHLCV[] = Array.from({ length: 30 }, (_, i) => ({
+        timestamp: 1000 + i * 300000, // 5m gaps
+        open: 90000,
+        high: 91000,
+        low: 89000,
+        close: 90000 + (i % 2 === 0 ? 500 : -500),
+        volume: 1000,
+      }))
+
+      const autoResult = calculateHistoricalVolatility(candles, 20)
+      const explicitResult = calculateHistoricalVolatility(candles, 20, 5)
+
+      // Auto-detection should match explicit 5m parameter
+      expect(autoResult).toBeCloseTo(explicitResult, 5)
+    })
+
+    it('returns ~3.5x lower volatility for 1h candles vs 5m assumption', () => {
+      // Same price data, but with 1h timestamps
+      const basePrices = Array.from({ length: 30 }, (_, i) => 90000 + (i % 3 - 1) * 200)
+      const candles5m: OHLCV[] = basePrices.map((close, i) => ({
+        timestamp: 1000 + i * 300000,   // 5m gaps
+        open: 90000, high: 91000, low: 89000, close, volume: 1000,
+      }))
+      const candles1h: OHLCV[] = basePrices.map((close, i) => ({
+        timestamp: 1000 + i * 3600000,  // 1h gaps
+        open: 90000, high: 91000, low: 89000, close, volume: 1000,
+      }))
+
+      const vol5m = calculateHistoricalVolatility(candles5m, 20)
+      const vol1h = calculateHistoricalVolatility(candles1h, 20)
+
+      // 1h should be ~3.5x lower than 5m (sqrt(288/24) ≈ 3.46)
+      const ratio = vol5m / vol1h
+      expect(ratio).toBeGreaterThan(3.0)
+      expect(ratio).toBeLessThan(4.0)
+    })
+
+    it('accepts explicit intervalMinutes parameter', () => {
+      const candles: OHLCV[] = Array.from({ length: 30 }, (_, i) => ({
+        timestamp: 1000 + i * 300000,
+        open: 90000,
+        high: 91000,
+        low: 89000,
+        close: 90000 + (i % 2 === 0 ? 500 : -500),
+        volume: 1000,
+      }))
+
+      const vol5m = calculateHistoricalVolatility(candles, 20, 5)
+      const vol1h = calculateHistoricalVolatility(candles, 20, 60)
+
+      // Same price data, different scaling: 1h should be lower
+      expect(vol1h).toBeLessThan(vol5m)
+      const ratio = vol5m / vol1h
+      expect(ratio).toBeCloseTo(Math.sqrt(12), 1) // sqrt(60/5) = sqrt(12)
+    })
+
+    it('handles single candle with fallback to default 5m', () => {
+      const candles: OHLCV[] = [
+        { timestamp: 1000, open: 90000, high: 91000, low: 89000, close: 90000, volume: 1000 },
+      ]
+
+      const result = calculateHistoricalVolatility(candles, 20)
+
+      // Single candle → insufficient data → returns 0
+      expect(result).toBe(0)
+    })
+
+    it('handles mixed intervals using median gap', () => {
+      const candles: OHLCV[] = Array.from({ length: 30 }, (_, i) => ({
+        timestamp: 1000 + i * (i % 2 === 0 ? 300000 : 600000), // alternating 5m/10m
+        open: 90000,
+        high: 91000,
+        low: 89000,
+        close: 90000 + (i % 2 === 0 ? 500 : -500),
+        volume: 1000,
+      }))
+
+      const result = calculateHistoricalVolatility(candles, 20)
+
+      // Should use median gap (450000ms = 7.5m) and produce a result
+      expect(result).toBeGreaterThan(0)
+      expect(result).toBeLessThan(100)
+    })
   })
 
   describe('calculateVolatilityPercentile', () => {
     it('returns 50 for insufficient historical data', () => {
       const candles: OHLCV[] = Array.from({ length: 30 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 91000,
         low: 89000,
@@ -278,7 +363,7 @@ describe('volatility regime', () => {
 
     it('calculates percentile rank of current volatility', () => {
       const candles: OHLCV[] = Array.from({ length: 100 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 91000,
         low: 89000,
@@ -295,7 +380,7 @@ describe('volatility regime', () => {
     it('returns high percentile for high current volatility', () => {
       // Create candles with varying volatility
       const candles: OHLCV[] = Array.from({ length: 100 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 90000 + (i < 80 ? 500 : 3000),
         low: 90000 - (i < 80 ? 500 : 3000),
@@ -312,7 +397,7 @@ describe('volatility regime', () => {
     it('returns low percentile for low current volatility', () => {
       // Create candles with varying volatility - first 80 high vol, then 20 low vol
       const candles: OHLCV[] = Array.from({ length: 100 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 90000 + (i < 80 ? 3000 : 500),
         low: 90000 - (i < 80 ? 3000 : 500),
@@ -329,7 +414,7 @@ describe('volatility regime', () => {
 
     it('respects custom lookback period', () => {
       const candles: OHLCV[] = Array.from({ length: 100 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 91000 + (i % 2 === 0 ? 500 : 0), // Varying volatility
         low: 89000 - (i % 2 === 0 ? 500 : 0),
@@ -348,7 +433,7 @@ describe('volatility regime', () => {
   describe('classifyVolatilityRegime', () => {
     it('returns STAY_OUT with insufficient data warning', () => {
       const candles: OHLCV[] = Array.from({ length: 30 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 91000,
         low: 89000,
@@ -369,7 +454,7 @@ describe('volatility regime', () => {
 
     it('classifies EXTREME regime when historical percentile > 85', () => {
       const candles: OHLCV[] = Array.from({ length: 100 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 90000 + (i < 90 ? 1000 : 5000),
         low: 90000 - (i < 90 ? 1000 : 5000),
@@ -388,7 +473,7 @@ describe('volatility regime', () => {
 
     it('classifies EXTREME regime when ATR% > 5%', () => {
       const candles: OHLCV[] = Array.from({ length: 100 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 97000, // 7.7% ATR
         low: 83000,
@@ -409,7 +494,7 @@ describe('volatility regime', () => {
       // We'll test the actual classification with real market-like data.
 
       const candles: OHLCV[] = Array.from({ length: 100 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 91800, // ~4% ATR
         low: 88200,
@@ -428,7 +513,7 @@ describe('volatility regime', () => {
 
     it('classifies HIGH regime when ATR% is 3-5%', () => {
       const candles: OHLCV[] = Array.from({ length: 100 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 91800, // ~4% ATR (3600 range)
         low: 88200,
@@ -448,7 +533,7 @@ describe('volatility regime', () => {
     it('classifies MEDIUM regime when percentile is 30-60', () => {
       // NOTE: Relies on historical volatility percentile - may vary
       const candles: OHLCV[] = Array.from({ length: 100 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 90990, // ~2.2% ATR
         low: 89010,
@@ -466,7 +551,7 @@ describe('volatility regime', () => {
 
     it('classifies MEDIUM regime when ATR% is 1.5-3%', () => {
       const candles: OHLCV[] = Array.from({ length: 100 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 90990, // ~2.2% ATR (1980 range)
         low: 89010,
@@ -483,7 +568,7 @@ describe('volatility regime', () => {
     it('classifies LOW regime when percentile < 30', () => {
       // NOTE: Relies on historical volatility percentile - may vary
       const candles: OHLCV[] = Array.from({ length: 100 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 90450, // ~1% ATR
         low: 89550,
@@ -500,7 +585,7 @@ describe('volatility regime', () => {
 
     it('classifies LOW regime when ATR% < 1.5%', () => {
       const candles: OHLCV[] = Array.from({ length: 100 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 90450, // ~1% ATR (900 range)
         low: 89550,
@@ -517,7 +602,7 @@ describe('volatility regime', () => {
 
     it('includes appropriate warnings for EXTREME regime', () => {
       const candles: OHLCV[] = Array.from({ length: 100 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 97000,
         low: 83000,
@@ -537,7 +622,7 @@ describe('volatility regime', () => {
 
     it('includes appropriate warnings for HIGH regime', () => {
       const candles: OHLCV[] = Array.from({ length: 100 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 91800, // ~4% ATR
         low: 88200,
@@ -568,7 +653,7 @@ describe('volatility regime', () => {
 
     it('includes appropriate warnings for LOW regime', () => {
       const candles: OHLCV[] = Array.from({ length: 100 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 90450, // ~1% ATR
         low: 89550,
@@ -598,7 +683,7 @@ describe('volatility regime', () => {
 
     it('has no warnings for MEDIUM regime', () => {
       const candles: OHLCV[] = Array.from({ length: 100 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 90990, // ~2.2% ATR
         low: 89010,
@@ -619,7 +704,7 @@ describe('volatility regime', () => {
 
     it('returns complete VolatilityRegime object', () => {
       const candles: OHLCV[] = Array.from({ length: 100 }, (_, i) => ({
-        timestamp: 1000 + i * 1000,
+        timestamp: 1000 + i * 300000,
         open: 90000,
         high: 92250,
         low: 87750,

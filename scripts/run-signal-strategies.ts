@@ -88,7 +88,8 @@ async function runStrategyBacktest(
   symbol: string,
   interval: string,
   startTime: number,
-  endTime: number
+  endTime: number,
+  strategyParams: Record<string, unknown> = {}
 ): Promise<{ metrics: BacktestMetrics; bars: number } | null> {
   const config: BacktestConfig = {
     symbol,
@@ -96,7 +97,7 @@ async function runStrategyBacktest(
     startTime,
     endTime,
     strategyId,
-    strategyParams: {},
+    strategyParams,
     initialCapital: 10000,
     seed: SEED,
     fillModel: { ...DEFAULT_FILL_MODEL },
@@ -164,6 +165,84 @@ async function main() {
         console.log(`    Test:  WR=${testWR.toFixed(1)}%, PF=${testPF.toFixed(2)}, trades=${result.test?.totalTrades ?? 0} ${passes ? 'PASS' : 'FAIL'}`)
 
         results.push(result)
+      }
+    }
+  }
+
+  // ─── Phase C: BTC Threshold Tuning ──────────────────────────────
+  console.log('\n--- Phase C: signal-oi-divergence BTC threshold tuning ---')
+  const TUNED_THRESHOLDS = [
+    { label: 'pcm010_oicm03', params: { priceChangeMin: 0.01, oiChangeMin: 0.03, oiDeclineMin: 0.03 } },
+    { label: 'pcm015_oicm04', params: { priceChangeMin: 0.015, oiChangeMin: 0.04, oiDeclineMin: 0.03 } },
+    { label: 'pcm010_oicm05', params: { priceChangeMin: 0.01, oiChangeMin: 0.05, oiDeclineMin: 0.03 } },
+  ]
+
+  for (const tune of TUNED_THRESHOLDS) {
+    for (const symbol of SYMBOLS) {  // Test on ALL symbols, not just BTC
+      for (const interval of OI_INTERVALS) {
+        const bounds = await getOIBounds(symbol, interval)
+        if (!bounds) continue
+
+        const { minTs, maxTs } = bounds
+        const split = splitTrainTest({ startTime: minTs, endTime: maxTs, trainRatio: TRAIN_RATIO })
+
+        const trainResult = await runStrategyBacktest(
+          'signal-oi-divergence', symbol, interval,
+          split.train.startTime, split.train.endTime,
+          tune.params
+        )
+        const testResult = await runStrategyBacktest(
+          'signal-oi-divergence', symbol, interval,
+          split.test.startTime, split.test.endTime,
+          tune.params
+        )
+
+        const result: StrategyResult = {
+          strategy: `signal-oi-divergence-${tune.label}`,
+          symbol,
+          interval,
+          train: trainResult?.metrics ?? null,
+          test: testResult?.metrics ?? null,
+          trainBars: trainResult?.bars ?? 0,
+          testBars: testResult?.bars ?? 0,
+        }
+
+        const testWR = result.test?.winRate ?? 0
+        const testPF = result.test?.profitFactor ?? 0
+        const passes = testWR >= 55 && testPF >= 1.5
+
+        if (passes) passCount++
+        else failCount++
+
+        console.log(`  ${tune.label}/${symbol}/${interval}: Test WR=${testWR.toFixed(1)}%, PF=${testPF.toFixed(2)}, trades=${result.test?.totalTrades ?? 0} ${passes ? 'PASS' : 'FAIL'}`)
+
+        results.push(result)
+      }
+    }
+  }
+
+  // ─── Anti-Overfitting Check ─────────────────────────────────────
+  console.log('\n--- Anti-Overfitting Check ---')
+  const defaultResults = results.filter(r => r.strategy === 'signal-oi-divergence')
+  for (const tune of TUNED_THRESHOLDS) {
+    const tunedId = `signal-oi-divergence-${tune.label}`
+    for (const symbol of SYMBOLS) {
+      for (const interval of OI_INTERVALS) {
+        const defResult = defaultResults.find(r => r.symbol === symbol && r.interval === interval)
+        const tunedResult = results.find(r => r.strategy === tunedId && r.symbol === symbol && r.interval === interval)
+        if (!defResult || !tunedResult) continue
+
+        const defTrainWR = defResult.train?.winRate ?? 0
+        const tunedTrainWR = tunedResult.train?.winRate ?? 0
+        const defTestWR = defResult.test?.winRate ?? 0
+        const tunedTestWR = tunedResult.test?.winRate ?? 0
+
+        const trainDelta = tunedTrainWR - defTrainWR
+        const testDelta = tunedTestWR - defTestWR
+
+        if (trainDelta > 5 && testDelta < -3) {
+          console.log(`  ⚠️  OVERFITTING: ${tune.label}/${symbol}/${interval} — train Δ${trainDelta >= 0 ? '+' : ''}${trainDelta.toFixed(1)}pp but test Δ${testDelta >= 0 ? '+' : ''}${testDelta.toFixed(1)}pp`)
+        }
       }
     }
   }

@@ -10,7 +10,7 @@
 import { getDuckDBClient, closeDuckDB } from '@/lib/db/client'
 import { dbAll } from '@/lib/db/query'
 import { barsToOHLCV, barsToOIPoints } from '@/lib/backtest/feature-adapter'
-import { calculateOIDivergence } from '@/lib/features/oi-divergence'
+import { calculateOIDivergence, type DivergenceThresholds, DEFAULT_DIVERGENCE_THRESHOLDS } from '@/lib/features/oi-divergence'
 import { analyzeOIMomentum, type OISignal } from '@/lib/features/oi-momentum'
 import { classifyVolatilityRegime } from '@/lib/features/volatility-regime'
 import type { Bar } from '@/lib/backtest/types/strategy'
@@ -26,6 +26,10 @@ const OI_INTERVALS = ['15m', '1h', '4h']   // For OI-dependent signals
 const VOL_INTERVALS = ['1h', '4h']           // For volatility regime (uses full window)
 const FORWARD_HORIZONS = [5, 10, 20]         // Bars ahead
 const LOOKBACK = 20                           // Min bars for feature calculation
+
+// Grid search for OI Divergence thresholds (Phase C)
+const PRICE_CHANGE_GRID = [0.005, 0.01, 0.015, 0.02]  // 0.5%, 1%, 1.5%, 2%
+const OI_CHANGE_GRID = [0.03, 0.05]                     // 3%, 5%
 
 // ─── Types ──────────────────────────────────────────────────────────
 
@@ -131,7 +135,7 @@ async function getOIBounds(symbol: string, interval: string): Promise<{ minTs: n
 
 // ─── Signal Analysis ────────────────────────────────────────────────
 
-function analyzeOIDivergence(bars: Bar[], symbol: string, interval: string): SignalObservation[] {
+function analyzeOIDivergence(bars: Bar[], symbol: string, interval: string, thresholds?: DivergenceThresholds, thresholdLabel?: string): SignalObservation[] {
   const observations: SignalObservation[] = []
   const ohlcv = barsToOHLCV(bars)
   const oiPoints = barsToOIPoints(bars, symbol)
@@ -148,7 +152,7 @@ function analyzeOIDivergence(bars: Bar[], symbol: string, interval: string): Sig
   const matchedOi = barsToOIPoints(matchedBars, symbol)
 
   // Calculate signals on the full matched dataset
-  const signals = calculateOIDivergence(matchedOhlcv, matchedOi, LOOKBACK)
+  const signals = calculateOIDivergence(matchedOhlcv, matchedOi, LOOKBACK, thresholds ?? DEFAULT_DIVERGENCE_THRESHOLDS)
 
   // Build index for forward return lookup
   const tsIndex = new Map<number, number>()
@@ -182,7 +186,7 @@ function analyzeOIDivergence(bars: Bar[], symbol: string, interval: string): Sig
 
     observations.push({
       timestamp: sig.timestamp,
-      signalType: sig.type,
+      signalType: thresholdLabel ? `${sig.type}_${thresholdLabel}` : sig.type,
       predictedDirection,
       strength: sig.strength,
       forwardReturns,
@@ -279,14 +283,14 @@ function analyzeVolatilityRegimeSignal(bars: Bar[], symbol: string, interval: st
   if (bars.length < 100) return observations
 
   const ohlcv = barsToOHLCV(bars)
-  const LOOKBACK = 100       // Fixed rolling window for regime classification
-  const SAMPLE_EVERY = 20    // Sample every 20 bars to reduce autocorrelation
+  const REGIME_WINDOW = 100    // Fixed rolling window for regime classification
+  const SAMPLE_EVERY = 20     // Sample every 20 bars to reduce autocorrelation
 
   let lastMode: string | null = null
 
   // Walk through data with fixed rolling window, sampling every N bars
-  for (let i = LOOKBACK; i < bars.length; i += SAMPLE_EVERY) {
-    const window = ohlcv.slice(i - LOOKBACK, i)
+  for (let i = REGIME_WINDOW; i < bars.length; i += SAMPLE_EVERY) {
+    const window = ohlcv.slice(i - REGIME_WINDOW, i)
     const regime = classifyVolatilityRegime(window)
 
     // Record all regime readings (not just changes) for broader validation
@@ -346,7 +350,7 @@ function analyzeVolatilityRegimeSignal(bars: Bar[], symbol: string, interval: st
 
 // ─── Statistics ─────────────────────────────────────────────────────
 
-function calculateStats(observations: SignalObservation[], groupKey: string): SignalStats[] {
+function calculateStats(observations: SignalObservation[]): SignalStats[] {
   // Group by signalType
   const groups = new Map<string, SignalObservation[]>()
   for (const obs of observations) {
@@ -387,8 +391,6 @@ function calculateStats(observations: SignalObservation[], groupKey: string): Si
     // Hit rate: % of observations where forward return was in predicted direction
     const h10Returns = obs.map(o => o.forwardReturns[10]).filter((r): r is number => r !== undefined)
     const hits = h10Returns.filter((r, i) => {
-      const dir = obs.find(o => o.forwardReturns[10] !== undefined)
-      // Re-check direction from the observation
       return obs[i]?.predictedDirection === 'LONG' ? r > 0 : r < 0
     })
 
@@ -436,7 +438,7 @@ async function main() {
   const allVolObs: SignalObservation[] = []
 
   // ─── OI Divergence ──────────────────────────────────────────────
-  console.log('--- OI Divergence ---')
+  console.log('--- OI Divergence (default thresholds) ---')
   for (const symbol of SYMBOLS) {
     for (const interval of OI_INTERVALS) {
       const oiBounds = await getOIBounds(symbol, interval)
@@ -457,6 +459,36 @@ async function main() {
       const obs = analyzeOIDivergence(bars, symbol, interval)
       console.log(`    Signals: ${obs.length}`)
       allDivObs.push(...obs)
+    }
+  }
+
+  // ─── OI Divergence Grid Search (Phase C) ────────────────────────
+  console.log('\n--- OI Divergence Grid Search ---')
+  for (const pcm of PRICE_CHANGE_GRID) {
+    for (const oicm of OI_CHANGE_GRID) {
+      // Skip the default combo (already run above)
+      if (pcm === 0.02 && oicm === 0.05) continue
+
+      const label = `pcm${Math.round(pcm * 1000)}_oicm${Math.round(oicm * 100)}`
+      console.log(`  Grid: priceChangeMin=${(pcm * 100).toFixed(1)}%, oiChangeMin=${(oicm * 100).toFixed(0)}%`)
+
+      for (const symbol of SYMBOLS) {
+        for (const interval of OI_INTERVALS) {
+          const oiBounds = await getOIBounds(symbol, interval)
+          if (!oiBounds) continue
+
+          const bars = await loadDataRange(symbol, interval, oiBounds.minTs, oiBounds.maxTs)
+          const oiCount = bars.filter(b => b.openInterest !== undefined).length
+          if (oiCount < LOOKBACK) continue
+
+          const thresholds = { priceChangeMin: pcm, oiChangeMin: oicm, oiDeclineMin: 0.03 }
+          const obs = analyzeOIDivergence(bars, symbol, interval, thresholds, label)
+          if (obs.length > 0) {
+            console.log(`    ${symbol}/${interval}: ${obs.length} signals (${label})`)
+          }
+          allDivObs.push(...obs)
+        }
+      }
     }
   }
 
@@ -497,9 +529,9 @@ async function main() {
   }
 
   // ─── Calculate Stats ────────────────────────────────────────────
-  report.signals.oiDivergence = calculateStats(allDivObs, 'signalType')
-  report.signals.oiMomentum = calculateStats(allMomObs, 'signalType')
-  report.signals.volatilityRegime = calculateStats(allVolObs, 'signalType')
+  report.signals.oiDivergence = calculateStats(allDivObs)
+  report.signals.oiMomentum = calculateStats(allMomObs)
+  report.signals.volatilityRegime = calculateStats(allVolObs)
 
   // ─── Gate Check ─────────────────────────────────────────────────
   console.log('\n=== Gate Check (hitRate ≥ 52% at horizon 10, positive mean return) ===\n')
@@ -536,6 +568,34 @@ async function main() {
   console.log(`Volatility Regime observations: ${allVolObs.length}`)
   console.log(`Gate passed: ${report.gateCheck.passed.length}`)
   console.log(`Gate failed: ${report.gateCheck.failed.length}`)
+
+  // ─── Phase C: Threshold Comparison ──────────────────────────────
+  console.log('\n=== Phase C: Grid Search Comparison ===')
+  const divStats = report.signals.oiDivergence
+  // Find default vs grid results for same signal/symbol/interval
+  const defaultResults = divStats.filter(s => !s.signalType.includes('_pcm'))
+  const gridResults = divStats.filter(s => s.signalType.includes('_pcm'))
+
+  if (gridResults.length > 0) {
+    // Group by base signal type + symbol + interval
+    for (const defStat of defaultResults) {
+      const baseSignal = defStat.signalType
+      const key = `${baseSignal}|${defStat.symbol}|${defStat.interval}`
+      const defaultHitRate = defStat.hitRate
+
+      // Find matching grid results
+      const matching = gridResults.filter(g =>
+        g.signalType.startsWith(baseSignal + '_') && g.symbol === defStat.symbol && g.interval === defStat.interval
+      )
+
+      for (const gridStat of matching) {
+        const delta = gridStat.hitRate - defaultHitRate
+        const label = `${gridStat.signalType}/${gridStat.symbol}/${gridStat.interval}`
+        const flag = delta > 5 ? ' ↑↑' : delta > 0 ? ' ↑' : delta < -5 ? ' ↓↓' : delta < 0 ? ' ↓' : ''
+        console.log(`  ${label}: hitRate=${gridStat.hitRate.toFixed(1)}% (Δ${delta >= 0 ? '+' : ''}${delta.toFixed(1)}pp vs default ${defaultHitRate.toFixed(1)}%) n=${gridStat.count}${flag}`)
+      }
+    }
+  }
 
   if (report.gateCheck.passed.length === 0) {
     console.log('\n⚠️  No signals passed the B.1 gate. Documenting failure reasons:')
