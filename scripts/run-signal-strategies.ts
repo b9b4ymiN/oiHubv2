@@ -29,6 +29,7 @@ const SEED = 42
 const OI_STRATEGIES = [
   'signal-oi-divergence',
   'signal-oi-momentum',
+  'signal-oi-momentum-vol',
 ]
 
 const VOL_STRATEGIES = [

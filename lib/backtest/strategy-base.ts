@@ -16,7 +16,12 @@ export abstract class BaseStrategy<S> implements Strategy<S> {
   protected calculatePositionSize(ctx: StrategyContext, riskPercent: number, stopDistance: number): number {
     if (stopDistance <= 0) return 0
     const riskAmount = ctx.account.equity * (riskPercent / 100)
-    return Math.floor(riskAmount / stopDistance)
+    const size = riskAmount / stopDistance
+    // Minimum notional check: reject dust trades (< $10 notional)
+    // TODO: Move to fill model when contract-value normalization is implemented
+    const price = ctx.bars[ctx.currentBarIndex]?.close ?? 0
+    if (size * price < 10) return 0
+    return size
   }
 
   /**

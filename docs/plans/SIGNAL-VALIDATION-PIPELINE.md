@@ -1,6 +1,6 @@
 # Signal Validation Pipeline — Full Plan & Status
 
-> Generated: 2026-04-18 | Last updated: 2026-04-18
+> Generated: 2026-04-18 | Last updated: 2026-04-19
 
 ---
 
@@ -208,6 +208,80 @@
 2. Consider alternative BTC strategy parameters (not just threshold loosening)
 3. Increase OI data window beyond 30 days (alternative data source)
 4. Explore combination strategies (OI Momentum + Volatility Regime filter)
+
+---
+
+## Phase D: BTC Signal-to-Trade Gap Fix + Combination Strategy — COMPLETE
+
+**Commit:** Pending
+
+### What Was Done
+
+| Task | Status | Details |
+|------|--------|---------|
+| US-301: Fix fractional position sizing | PASSED | Removed `Math.floor` from `calculatePositionSize`, added $10 min notional |
+| US-302: Build OI Momentum + Vol Regime combo | PASSED | `signal-oi-momentum-vol` strategy with ATR%-based regime filter |
+| US-303: Re-validate pipeline | PASSED | BTC now generates trades on divergence/momentum; combo strategy active |
+| US-304: Update docs, verify builds | PASSED | Type-check, tests, build all clean |
+
+### D.1 Root Cause: `Math.floor` in Position Sizing
+
+**Bug:** `calculatePositionSize` in `strategy-base.ts` used `Math.floor(riskAmount / stopDistance)`, truncating fractional sizes to 0 for high-priced assets.
+
+**Impact by symbol:**
+| Symbol | Pre-fix size | Post-fix size | Trades before | Trades after |
+|--------|-------------|--------------|---------------|--------------|
+| BTC ($87k) | Math.floor(0.089) = 0 | 0.089 | 0 | 14 (momentum) |
+| ETH ($1.6k) | Math.floor(2.67) = 2 | 2.67 | Working | Working |
+| SOL ($130) | Math.floor(26.67) = 26 | 26.67 | Working | Working |
+
+**Fix:** Removed `Math.floor`, added $10 minimum notional check to reject dust trades.
+
+### D.2 Combination Strategy: OI Momentum + Volatility Regime
+
+**Architecture:** Composition pattern — OI momentum signals filtered by ATR%-based volatility regime:
+- EXTREME (ATR% > 3%): skip all signals
+- HIGH (ATR% 1.5-3%): only TREND_CONTINUATION + ACCUMULATION at 0.7x size
+- MEDIUM (ATR% 0.5-1.5%): all entry signals at 1.0x size
+- LOW (ATR% < 0.5%): all entry signals at 0.8x size
+
+**Note:** Uses direct ATR% thresholds (same as `signal-volatility-regime.ts`) instead of `classifyVolatilityRegime()` which over-classifies as EXTREME due to percentile inflation with short data windows.
+
+### D.3 Validation Results
+
+| Strategy | Symbol | Interval | Train Trades | Test Trades | Test WR | Test PF |
+|----------|--------|----------|-------------|-------------|---------|---------|
+| signal-oi-divergence | BTCUSDT | 4h | 3 | 1 | 0% | 0 |
+| signal-oi-momentum | BTCUSDT | 1h | 4 | 0 | — | — |
+| signal-oi-momentum | BTCUSDT | 4h | 12 | 2 | 50% | 4.19 |
+| signal-oi-momentum-vol | BTCUSDT | 1h | 4 | 0 | — | — |
+| signal-oi-momentum-vol | BTCUSDT | 4h | 10 | 0 | — | — |
+| signal-oi-momentum | ETHUSDT | 1h | 30 | 7 | 57.1% | 6.21 |
+| signal-oi-momentum | SOLUSDT | 1h | 40 | 8 | 62.5% | 9.86 |
+| signal-oi-momentum-vol | ETHUSDT | 1h | 30 | 7 | 57.1% | 6.21 |
+| signal-oi-momentum-vol | SOLUSDT | 1h | 40 | 8 | 62.5% | 9.86 |
+| signal-oi-momentum-vol | SOLUSDT | 4h | 9 | 0 | — | — |
+
+**Summary:** 13 PASS / 29 FAIL against WR≥55% & PF≥1.5 targets. BTC now generates trades (was 0). Combo strategy mirrors momentum results for ETH/SOL (regime filter doesn't block entries where momentum works best).
+
+### Files Changed in Phase D
+
+| File | Change |
+|------|--------|
+| `lib/backtest/strategy-base.ts` | MODIFIED — Removed `Math.floor`, added $10 min notional check |
+| `__tests__/backtest/strategy-base.test.ts` | **NEW** — 6 fractional sizing tests |
+| `lib/strategies/signal-oi-momentum-vol.ts` | **NEW** — OI Momentum + Vol Regime combo strategy |
+| `__tests__/strategies/signal-oi-momentum-vol.test.ts` | **NEW** — 7 combo strategy tests |
+| `lib/strategies/index.ts` | MODIFIED — register + export SignalOIMomentumVol |
+| `scripts/run-signal-strategies.ts` | MODIFIED — added signal-oi-momentum-vol to OI_STRATEGIES |
+| `data/validation-report.json` | UPDATED — Phase D results |
+
+### Key Learnings
+
+1. **`Math.floor` was the BTC killer** — One line prevented all BTC trades across all strategies. Fractional position sizing is essential for crypto perpetuals.
+2. **WR and PF are size-invariant** — Removing `Math.floor` doesn't change win rate or profit factor; it only affects dollar-denominated metrics (totalPnl, maxDrawdown).
+3. **`classifyVolatilityRegime` is too aggressive** — The historicalPercentile > 85 threshold classifies ALL symbols as EXTREME with 30-day data windows. ATR%-based thresholds are more reliable.
+4. **Combo strategy doesn't degrade ETH/SOL** — Where momentum works (ETH/1h, SOL/1h), the regime filter correctly allows trades, confirming the filter is not over-restrictive for moderate-volatility regimes.
 
 ---
 
