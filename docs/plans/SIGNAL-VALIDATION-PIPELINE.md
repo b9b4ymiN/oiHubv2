@@ -283,17 +283,58 @@
 3. **`classifyVolatilityRegime` is too aggressive** — The historicalPercentile > 85 threshold classifies ALL symbols as EXTREME with 30-day data windows. ATR%-based thresholds are more reliable.
 4. **Combo strategy doesn't degrade ETH/SOL** — Where momentum works (ETH/1h, SOL/1h), the regime filter correctly allows trades, confirming the filter is not over-restrictive for moderate-volatility regimes.
 
----
+## Phase E: Walk-Forward Validation — IN PROGRESS
 
-## Test & Build Status
+**Commit:** Pending
 
-| Check | Status |
-|-------|--------|
-| npm test | 949/949 pass |
-| npm run type-check | 0 errors |
-| npm run lint | 0 errors (warnings only) |
-| DuckDB data loaded | 301,380 rows |
-| Git status | Clean (pending commit) |
+### What Was Done
+
+| Task | Status | Details |
+|------|--------|---------|
+| US-501: WalkForward types + window generator | PASSED | Types in config.ts, generator in utils/walk-forward-windows.ts |
+| US-502: Walk-forward executor | PASSED | runWalkForward() with regime distribution + degradation metrics |
+| US-503: Validation script + run | IN PROGRESS | scripts/run-walk-forward.ts created, running |
+| US-504: Docs + build verification | IN PROGRESS | Phase E docs added |
+
+### E.1 Architecture
+
+Walk-forward validation replaces the static 80/20 train/test split with rolling out-of-sample windows:
+
+- **Rolling mode** (anchorStart=false): Fixed-length IS window slides forward by stepDuration
+- **Anchored mode** (anchorStart=true): IS always starts at data start, grows each step
+- **Pre-validation**: Requires >= 2 windows, returns empty with reason otherwise
+- **Regime distribution**: Per OOS window, computed via ATR% thresholds (EXTREME > 3%, HIGH > 1.5%, MEDIUM > 0.5%, LOW otherwise)
+
+### E.2 Configuration
+
+| Parameter | Value | Rationale |
+|-----------|-------|-----------|
+| In-sample duration | 60 days | Sufficient bars for strategy warmup |
+| Out-of-sample duration | 20 days | Meaningful test period |
+| Step duration | 20 days | OOS windows adjacent (no gaps) |
+| Mode | Rolling | Standard walk-forward, not expanding window |
+| Strategy | signal-volatility-regime only | 180-day OHLCV data supports 6 windows |
+| OI strategies | DEFERRED | 30-day data insufficient (need 90+ days) |
+
+### E.3 Degradation Interpretation
+
+| Degradation % | Label | Meaning |
+|---------------|-------|---------|
+| 0-5% | NOISE | Minimal overfitting |
+| 5-15% | MILD | Some overfitting detected |
+| 15%+ | SIGNIFICANT | Substantial overfitting |
+
+### E.4 Files Changed in Phase E
+
+| File | Change |
+|------|--------|
+| `lib/backtest/types/config.ts` | MODIFIED — Added WalkForwardWindow, WalkForwardAggregate, WalkForwardReport |
+| `lib/backtest/utils/walk-forward-windows.ts` | NEW — Window generator with rolling/anchored modes |
+| `lib/backtest/walk-forward.ts` | NEW — Walk-forward executor with regime distribution |
+| `scripts/run-walk-forward.ts` | NEW — Validation script for signal-volatility-regime |
+| `__tests__/backtest/walk-forward-windows.test.ts` | NEW — 8 window generator tests |
+| `__tests__/backtest/walk-forward.test.ts` | NEW — 4 executor integration tests |
+| `data/validation-report.json` | UPDATED — walkForward section added |
 
 ---
 

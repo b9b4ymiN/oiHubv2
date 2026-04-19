@@ -10800,5 +10800,115 @@
       "signal-volatility-regime/SOLUSDT/1h",
       "signal-volatility-regime/SOLUSDT/4h"
     ]
+  },
+  "walkForward": {
+    "date": "2026-04-19T04:53:54.890Z",
+    "config": {
+      "inSampleDays": 60,
+      "outOfSampleDays": 20,
+      "stepDays": 20,
+      "anchorStart": false
+    },
+    "strategy": "signal-volatility-regime",
+    "deferredStrategies": [
+      {
+        "strategy": "signal-oi-divergence",
+        "reason": "30-day OI data insufficient for walk-forward (need 90+ days)"
+      },
+      {
+        "strategy": "signal-oi-momentum",
+        "reason": "30-day OI data insufficient for walk-forward (need 90+ days)"
+      },
+      {
+        "strategy": "signal-oi-momentum-vol",
+        "reason": "30-day OI data insufficient for walk-forward (need 90+ days)"
+      }
+    ],
+    "results": [
+      {
+        "strategy": "signal-volatility-regime",
+        "symbol": "BTCUSDT",
+        "interval": "1h",
+        "windows": 5,
+        "meanOOS_WR": 33.58145363408521,
+        "meanOOS_PF": 0.3591326240158793,
+        "meanOOS_Sharpe": 19.6323740862561,
+        "degradation_WR": 0.3222660416675689,
+        "degradation_PF": 0.6682487742854024,
+        "consistentWindows": 0,
+        "skippedWindows": 0,
+        "note": "Results based on 5 windows — treat as baseline check, not definitive validation. Recommend 10+ windows for robust confidence intervals."
+      },
+      {
+        "strategy": "signal-volatility-regime",
+        "symbol": "BTCUSDT",
+        "interval": "4h",
+        "windows": 5,
+        "meanOOS_WR": 36.04366647844908,
+        "meanOOS_PF": 0.5412803770794443,
+        "meanOOS_Sharpe": 35.44401624865121,
+        "degradation_WR": -0.005101497626959054,
+        "degradation_PF": 0.3053068471431093,
+        "consistentWindows": 0,
+        "skippedWindows": 0,
+        "note": "Results based on 5 windows — treat as baseline check, not definitive validation. Recommend 10+ windows for robust confidence intervals."
+      },
+      {
+        "strategy": "signal-volatility-regime",
+        "symbol": "ETHUSDT",
+        "interval": "1h",
+        "windows": 5,
+        "meanOOS_WR": 41.79089026915114,
+        "meanOOS_PF": 0.4561511614437954,
+        "meanOOS_Sharpe": 36.60329503406116,
+        "degradation_WR": 0.016026324684333362,
+        "degradation_PF": -0.02642547740247029,
+        "consistentWindows": 0,
+        "skippedWindows": 0,
+        "note": "Results based on 5 windows — treat as baseline check, not definitive validation. Recommend 10+ windows for robust confidence intervals."
+      },
+      {
+        "strategy": "signal-volatility-regime",
+        "symbol": "ETHUSDT",
+        "interval": "4h",
+        "windows": 5,
+        "meanOOS_WR": 48.22140578719526,
+        "meanOOS_PF": 1.140026044305103,
+        "meanOOS_Sharpe": 39.5940647476567,
+        "degradation_WR": -0.04870377674800837,
+        "degradation_PF": -0.3120956233577782,
+        "consistentWindows": 1,
+        "skippedWindows": 0,
+        "note": "Results based on 5 windows — treat as baseline check, not definitive validation. Recommend 10+ windows for robust confidence intervals."
+      },
+      {
+        "strategy": "signal-volatility-regime",
+        "symbol": "SOLUSDT",
+        "interval": "1h",
+        "windows": 5,
+        "meanOOS_WR": 48.15742173279942,
+        "meanOOS_PF": 2.0518617452161356,
+        "meanOOS_Sharpe": 40.437396613493895,
+        "degradation_WR": -0.03636415650937676,
+        "degradation_PF": -0.03769924259792743,
+        "consistentWindows": 0,
+        "skippedWindows": 0,
+        "note": "Results based on 5 windows — treat as baseline check, not definitive validation. Recommend 10+ windows for robust confidence intervals."
+      },
+      {
+        "strategy": "signal-volatility-regime",
+        "symbol": "SOLUSDT",
+        "interval": "4h",
+        "windows": 5,
+        "meanOOS_WR": 52.54549417020812,
+        "meanOOS_PF": 1.4532578553979938,
+        "meanOOS_Sharpe": 39.033592363844726,
+        "degradation_WR": -0.1536166275220286,
+        "degradation_PF": -0.009831499231240722,
+        "consistentWindows": 1,
+        "skippedWindows": 0,
+        "note": "Results based on 5 windows — treat as baseline check, not definitive validation. Recommend 10+ windows for robust confidence intervals."
+      }
+    ]
   }
 }

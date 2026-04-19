@@ -29,6 +29,43 @@ export interface WalkForwardConfig {
   anchorStart: boolean        // true = start inSample from startTime
 }
 
+export interface WalkForwardWindow {
+  windowIndex: number
+  inSample: { startTime: number; endTime: number }
+  outOfSample: { startTime: number; endTime: number }
+  inSampleMetrics: import('../event-loop').BacktestMetrics | null
+  outOfSampleMetrics: import('../event-loop').BacktestMetrics | null
+  skipped: boolean
+  skipReason?: string
+  regimeDistribution: {
+    EXTREME: number
+    HIGH: number
+    MEDIUM: number
+    LOW: number
+  } | null
+}
+
+export interface WalkForwardAggregate {
+  meanOOS_WR: number
+  meanOOS_PF: number
+  meanOOS_Sharpe: number
+  degradation_WR: number
+  degradation_PF: number
+  consistentWindows: number
+  totalWindows: number
+  skippedWindows: number
+}
+
+export interface WalkForwardReport {
+  strategyId: string
+  symbol: string
+  interval: string
+  config: WalkForwardConfig
+  windows: WalkForwardWindow[]
+  aggregate: WalkForwardAggregate
+  note: string
+}
+
 export const DEFAULT_FILL_MODEL: FillModelConfig = {
   slippageModel: 'percentage',
   slippageValue: 0.01,       // 0.01% = 1 basis point
