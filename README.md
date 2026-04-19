@@ -197,6 +197,7 @@ npm run test:e2e    # Playwright
 ### Product docs
 
 - [docs/cards/](docs/cards/) — per-card documentation
+- [docs/manual/README.md](docs/manual/README.md) — คู่มือการใช้งานแบบแยกรายหน้า
 - [docs/cards/core-trading/oi-divergence.md](docs/cards/core-trading/oi-divergence.md) — divergence reference
 - [docs/cards/charts/volume-profile.md](docs/cards/charts/volume-profile.md) — volume profile reference
 - [docs/cards/intelligence/decision-dashboard.md](docs/cards/intelligence/decision-dashboard.md) — intelligence layer reference

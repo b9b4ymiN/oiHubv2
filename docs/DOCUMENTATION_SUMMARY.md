@@ -8,6 +8,9 @@ This document provides a comprehensive overview of all OI Trader Hub documentati
 
 ```
 docs/
+├── manual/
+│   ├── README.md                   # Route-by-route operator handbook
+│   └── pages/                      # One manual folder per user-facing page
 ├── cards/
 │   ├── README.md                    # Complete card overview
 │   ├── integration-guide.md          # How to combine cards

@@ -93,6 +93,16 @@ This is the **#1 priority feature** of the platform. Three guides available:
 
 ---
 
+
+## 🗺️ Page-by-Page Manuals
+
+ถ้าต้องการคู่มือระดับหน้าแทนเอกสารระดับฟีเจอร์ ให้เริ่มที่นี่:
+
+- **[ดัชนีคู่มือรายหน้า](./manual/README.md)** - คู่มือการใช้งานแบบแยกรายหน้า ครบทุก route
+- มีคู่มือแยกสำหรับ dashboard, alerts, backtest, paper trading, heatmap, intelligence, options และ orderbook
+
+---
+
 ## 📖 Other Documentation
 
 ### Technical Documentation:
