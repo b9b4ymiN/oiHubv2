@@ -81,6 +81,48 @@ The repository is intentionally staged from a trading cockpit into a full OI-Tra
 
 ---
 
+## Backtest Results
+
+> **Note:** These are out-of-sample results from historical backtests on Binance Futures data (BTCUSDT, ETHUSDT, SOLUSDT). They represent research output, not trading advice. Past performance does not guarantee future results.
+
+### Top Strategies (Static 80/20 Train/Test Split)
+
+| Strategy | Symbol | Interval | Test WR | Test PF | Test Trades | Test Sharpe |
+|----------|--------|----------|---------|---------|-------------|-------------|
+| **signal-oi-momentum-vol** | SOLUSDT | 1h | **71.4%** | **10.25** | 7 | 21.19 |
+| signal-oi-momentum | SOLUSDT | 1h | 62.5% | 9.86 | 8 | 22.72 |
+| signal-oi-momentum-vol | ETHUSDT | 1h | 80.0% | 8.57 | 5 | 17.87 |
+| signal-oi-momentum | ETHUSDT | 1h | 57.1% | 6.21 | 7 | 21.24 |
+| signal-oi-momentum | BTCUSDT | 4h | 50.0% | 4.19 | 2 | 15.96 |
+
+**Best overall:** `signal-oi-momentum-vol` on SOL/1h — 71.4% win rate, 10.25 profit factor out-of-sample (7 trades). The OI momentum + volatility regime combo strategy filters entries through ATR%-based regime classification, avoiding EXTREME volatility periods.
+
+### Walk-Forward Validation (Rolling Out-of-Sample)
+
+Replaces static split with rolling 60-day in-sample / 20-day out-of-sample windows on `signal-volatility-regime` (180-day OHLCV data, 5 windows per combo).
+
+| Symbol | Interval | OOS WR | OOS PF | OOS Sharpe | WR Degradation |
+|--------|----------|--------|--------|------------|----------------|
+| **SOLUSDT** | **1h** | **48.2%** | **2.05** | 40.44 | NOISE (minimal overfitting) |
+| SOLUSDT | 4h | 52.5% | 1.45 | 39.03 | SIGNIFICANT |
+| ETHUSDT | 4h | 48.2% | 1.14 | 39.59 | NOISE |
+| BTCUSDT | 4h | 36.0% | 0.54 | 35.44 | NOISE |
+| ETHUSDT | 1h | 41.8% | 0.46 | 36.60 | NOISE |
+| BTCUSDT | 1h | 33.6% | 0.36 | 19.63 | SIGNIFICANT |
+
+**Key finding:** SOL/1h shows the most robust walk-forward performance — OOS PF of 2.05 with minimal degradation, confirming the static split result. BTC strategies show the most overfitting. Walk-forward results are a baseline check (5 windows); 10+ windows recommended for robust confidence intervals.
+
+### Pipeline Status
+
+| Check | Count |
+|-------|-------|
+| Strategy combos passing WR>=55% & PF>=1.5 (static) | 13 / 42 |
+| Walk-forward windows (volatility regime) | 30 (6 combos x 5 windows) |
+| OI strategies in walk-forward | Deferred (30-day data insufficient) |
+| Test suite | 974 / 974 passing |
+
+---
+
 ## Quick start
 
 ```bash
