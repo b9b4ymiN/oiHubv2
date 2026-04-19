@@ -11,6 +11,7 @@ import { persistToDisk, loadAllFromDisk, persistAll } from '@/lib/paper-trading/
 import { getStrategyRegistry } from '@/lib/backtest/registry'
 import { buildSignalPayload, buildDailySummaryPayload } from './alert-builder'
 import { SignalDedup } from './signal-dedup'
+import { postDiscordWebhook } from './discord-webhook'
 import type { RunnerConfig, RunnerCombo } from './types'
 import { comboKey } from './types'
 import { BinanceClient } from '@/lib/api/binance-client'
@@ -326,11 +327,7 @@ export class SignalRunner {
     const payload = buildSignalPayload(session, intent, bar, metrics)
 
     try {
-      await fetch(this.config.webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
+      await postDiscordWebhook(this.config.webhookUrl, payload)
       logger.info({ comboKey, intent: intent.kind, price: bar.close }, 'Alert sent')
     } catch (err) {
       logger.warn({ error: err instanceof Error ? err.message : String(err) }, 'Discord delivery failed')
@@ -350,11 +347,7 @@ export class SignalRunner {
     const payload = buildDailySummaryPayload(sessions, today)
 
     try {
-      await fetch(this.config.webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
+      await postDiscordWebhook(this.config.webhookUrl, payload)
       this.lastSummaryDate = today
       logger.info({ date: today }, 'Daily summary sent')
     } catch (err) {
